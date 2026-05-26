@@ -1,0 +1,6 @@
+{
+  "name": "CogniStyle",
+  "description": "在线认知风格测评系统，了解你的思维、学习和工作风格，获取个性化职业建议。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
