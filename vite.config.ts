@@ -5,6 +5,8 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
+    //  👇 关键：添加这一行，告诉 Vite 使用相对路径加载资源
+    base: './',
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {

@@ -38,19 +38,9 @@ export default function QuestionCard({
   const progressPercent = ((currentIndex + 1) / totalQuestions) * 100;
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-4 py-2 font-mono">
-      {/* Upper Context Header */}
-      <div className="flex justify-between items-center mb-5">
-        <span className="text-[13px] font-pixel tracking-wider text-[#00f0ff] bg-black border-2 border-[#00f0ff]/80 px-2.5 py-1.5 shadow-[2px_2px_0px_rgba(255,0,127,0.5)]">
-          DIMENSION: {question.dimension.toUpperCase()}
-        </span>
-        <span className="text-[13px] font-pixel text-[#00f0ff] glow-cyan">
-          [ <strong className="text-[#ff007f] text-[13px] font-pixel glow-magenta">{currentIndex + 1}</strong> / {totalQuestions} ]
-        </span>
-      </div>
-
+    <div className="w-full max-w-2xl mx-auto px-2 sm:px-4 py-2 font-mono">
       {/* Progress Bar Container */}
-      <div className="w-full h-4 bg-black border-2 border-[#00f0ff]/80 p-0.5 mb-8 overflow-hidden shadow-[2px_2px_0px_rgba(255,0,127,0.5)]">
+      <div className="w-full h-3 sm:h-4 bg-black border-2 border-[#00f0ff]/80 p-0.5 mb-4 sm:mb-8 overflow-hidden shadow-[2px_2px_0px_rgba(255,0,127,0.5)]">
         <motion.div
           className="h-full bg-gradient-to-r from-[#00f0ff] via-fuchsia-500 to-[#ff007f]"
           initial={{ width: 0 }}
@@ -67,27 +57,27 @@ export default function QuestionCard({
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -20 }}
           transition={{ duration: 0.35, ease: 'easeInOut' }}
-          className="bg-[#070b19] border-2 border-[#00f0ff]/80 p-6 md:p-8 shadow-[6px_6px_0px_0px_rgba(255,0,127,0.6)] relative select-none"
+          className="bg-[#070b19] border-2 border-[#00f0ff]/80 p-4 sm:p-6 md:p-8 shadow-[6px_6px_0px_0px_rgba(255,0,127,0.6)] relative select-none"
         >
           {/* Subtle neon accents in corner */}
-          <div className="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-[#ff007f]" />
-          <div className="absolute bottom-0 left-0 w-8 h-8 border-l-4 border-b-4 border-[#ffe600]" />
+          <div className="absolute top-0 right-0 w-6 sm:w-8 h-6 sm:h-8 border-r-4 border-t-4 border-[#ff007f]" />
+          <div className="absolute bottom-0 left-0 w-6 sm:w-8 h-6 sm:h-8 border-l-4 border-b-4 border-[#ffe600]" />
 
           {/* Question Text */}
-          <h2 className="text-lg md:text-xl font-mono font-bold leading-relaxed text-white mb-6 select-none">
+          <h2 className="text-base sm:text-lg md:text-xl font-mono font-bold leading-relaxed text-white mb-4 sm:mb-6 select-none">
             {question.text}
           </h2>
 
           {/* Humorous Tip Box */}
-          <div className="flex gap-3 items-start p-4 bg-black border-2 border-[#ff007f]/70 mb-10 shadow-[2.5px_2.5px_0px_rgba(0,240,255,0.6)]">
-            <Quote className="w-4 h-4 text-[#ff007f] shrink-0 mt-0.5" />
-            <p className="text-[13px] text-[#00f0ff] italic font-sans leading-relaxed select-none">
+          <div className="flex gap-2 sm:gap-3 items-start p-3 sm:p-4 bg-black border-2 border-[#ff007f]/70 mb-6 sm:mb-10 shadow-[2.5px_2.5px_0px_rgba(0,240,255,0.6)]">
+            <Quote className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#ff007f] shrink-0 mt-0.5" />
+            <p className="text-xs sm:text-[13px] text-[#00f0ff] italic font-sans leading-relaxed select-none">
               {question.humorTip}
             </p>
           </div>
 
           {/* Likert Selection Nodes - Horizontal on desktop, Vertical/Adaptive on Mobile */}
-          <div className="mb-10">
+          <div className="mb-6 sm:mb-10">
             {/* Desktop Horizontal Likert Layout */}
             <div className="hidden sm:flex justify-between items-center relative py-6">
               {/* Horizontal Connecting Guide Line */}
@@ -123,21 +113,21 @@ export default function QuestionCard({
             </div>
 
             {/* Mobile Vertical List Layout */}
-            <div className="flex sm:hidden flex-col gap-3">
+            <div className="flex sm:hidden flex-col gap-2.5">
               {options.map((option) => {
                 const isSelected = selectedAnswer === option.value;
                 return (
                   <button
                     key={option.value}
                     onClick={() => onSelectAnswer(option.value)}
-                    className={`w-full p-4 rounded-none border-2 flex items-center justify-between text-left transition-all duration-150 select-none
+                    className={`w-full p-4 rounded-none border-2 flex items-center justify-between text-left transition-all duration-150 select-none min-h-[50px]
                       ${isSelected
                         ? 'bg-[#121b33] border-[#00f0ff] shadow-[4px_4px_0px_#ff007f]'
                         : 'bg-black border-slate-800 hover:border-[#00f0ff] hover:shadow-[2px_2px_0px_#00f0ff]'
                       }`}
                   >
                     <div className="flex items-center gap-3">
-                      <span className={`w-8 h-8 rounded-none border-2 flex items-center justify-center font-pixel text-[13px]
+                      <span className={`w-10 h-10 rounded-none border-2 flex items-center justify-center font-pixel text-[13px] shrink-0
                         ${isSelected
                           ? 'bg-[#ffe600] text-black border-white'
                           : 'bg-black border-slate-800 text-slate-400'
@@ -150,7 +140,7 @@ export default function QuestionCard({
                       </span>
                     </div>
                     {isSelected && (
-                      <div className="w-3.5 h-3.5 bg-[#ff007f] animate-pulse border border-white" />
+                      <div className="w-3.5 h-3.5 bg-[#ff007f] animate-pulse border border-white shrink-0" />
                     )}
                   </button>
                 );
@@ -159,31 +149,31 @@ export default function QuestionCard({
           </div>
 
           {/* Navigation Lower Controls */}
-          <div className="flex justify-between items-center pt-4 border-t-2 border-slate-900">
+          <div className="flex justify-between items-center pt-3 sm:pt-4 border-t-2 border-slate-900">
             <button
                onClick={onPrev}
                disabled={currentIndex === 0}
-               className={`flex items-center gap-2 px-4 py-2.5 rounded-none text-sm font-pixel uppercase transition-all select-none border-2 pixel-btn-active
+               className={`flex items-center gap-1.5 sm:gap-2 px-4 py-3 sm:py-2.5 rounded-none text-xs sm:text-sm font-pixel uppercase transition-all select-none border-2 pixel-btn-active min-h-[44px] sm:min-h-0
                  ${currentIndex === 0 
                    ? 'border-slate-800 text-slate-700 cursor-not-allowed opacity-30 shadow-none' 
                    : 'border-[#ff007f]/70 text-[#ff007f] hover:bg-[#ff007f]/10 shadow-[2px_2px_0px_rgba(255,0,127,0.3)] hover:text-white'
                  }`}
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               PREV
             </button>
 
             <button
               onClick={onNext}
               disabled={selectedAnswer === undefined}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-none text-sm font-pixel uppercase transition-all select-none border-2 pixel-btn-active
+              className={`flex items-center gap-1.5 sm:gap-2 px-4 sm:px-5 py-3 sm:py-2.5 rounded-none text-xs sm:text-sm font-pixel uppercase transition-all select-none border-2 pixel-btn-active min-h-[44px] sm:min-h-0
                 ${selectedAnswer === undefined
-                  ? 'border-slate-800 text-slate-705 cursor-not-allowed opacity-30 shadow-none'
+                  ? 'border-slate-800 text-slate-700 cursor-not-allowed opacity-30 shadow-none'
                   : 'border-[#00f0ff]/70 text-[#00f0ff] hover:bg-[#00f0ff]/10 hover:text-white shadow-[2px_2px_0px_rgba(0,240,255,0.3)]'
                 }`}
             >
               NEXT
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
           </div>
         </motion.div>

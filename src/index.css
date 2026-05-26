@@ -71,6 +71,13 @@ body {
   box-shadow: 1px 1px 0px 0px currentColor;
 }
 
+/* Mobile: remove CRT scanlines for performance and visual clarity */
+@media (max-width: 639px) {
+  .scanlines {
+    display: none;
+  }
+}
+
 /* Prevent text selection on questionnaire buttons */
 .select-none {
   user-select: none;

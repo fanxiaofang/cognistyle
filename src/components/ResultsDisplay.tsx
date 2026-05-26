@@ -91,6 +91,15 @@ export default function ResultsDisplay({
   const activeProfile = showOtherMode && otherProfile ? otherProfile : profile;
   const activeProfileId = showOtherMode && otherProfile ? otherProfileKey : profileKey;
 
+  const guildEssenceMap: Record<string, { essence: string; name: string; color: string; borderColor: string }> = {
+    'C-W': { essence: '聚合 × 整体：用标准方案搭建宏观骨架', name: '筑基者', color: 'text-[#00f0ff]', borderColor: 'border-l-[#00f0ff]' },
+    'C-A': { essence: '聚合 × 分析：用标准规范守护微观精度', name: '守门人', color: 'text-[#ffe600]', borderColor: 'border-l-[#ffe600]' },
+    'D-W': { essence: '发散 × 整体：用创新探索突破宏观边界', name: '探路者', color: 'text-[#39ff14]', borderColor: 'border-l-[#39ff14]' },
+    'D-A': { essence: '发散 × 分析：用创新突破微观极限', name: '炼金师', color: 'text-[#ff007f]', borderColor: 'border-l-[#ff007f]' },
+  };
+  const guildKey = `${d2}-${d3}`;
+  const guildInfo = guildEssenceMap[guildKey];
+
   const svgToImg = (svg: SVGSVGElement): Promise<HTMLImageElement> => {
     return new Promise((resolve, reject) => {
       const clone = svg.cloneNode(true) as SVGSVGElement;
@@ -270,54 +279,51 @@ export default function ResultsDisplay({
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 py-8">
+    <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 py-4 sm:py-8">
       {/* Save Area Wrapper */}
-      <div id="cognistyle-share-card" className="bg-black border-2 border-[#00f0ff]/80 p-6 md:p-10 shadow-[6px_6px_0px_rgba(255,0,127,0.6)] relative overflow-hidden font-mono">
+      <div id="cognistyle-share-card" className="bg-black border-2 border-[#00f0ff]/80 p-3 sm:p-6 md:p-10 shadow-[6px_6px_0px_rgba(255,0,127,0.6)] relative overflow-hidden font-mono min-w-0">
         {/* Abstract futuristic grid background layout for screenshot elegance - pixel laser bar */}
         <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-[#00f0ff] via-[#ff007f] to-[#ffe600]" />
         <div className="absolute -top-[400px] -right-[200px] w-[600px] h-[600px] bg-[#00f0ff]/5 rounded-none pointer-events-none" />
         <div className="absolute -bottom-[400px] -left-[200px] w-[600px] h-[600px] bg-[#ff007f]/5 rounded-none pointer-events-none" />
 
         {/* Upper Part: Bento Grid Layout */}
-        <div className="mb-8">
+        <div className="mb-4 sm:mb-8">
           
           {/* Persona Descriptions */}
-          <div className="bg-black p-6 md:p-8 border-2 border-[#00f0ff]/70 shadow-[4px_4px_0px_rgba(255,0,127,0.5)] flex flex-col justify-center relative select-none">
-            <div className="flex items-center gap-6 mb-8 z-10">
-              <div className="w-32 h-32 rounded-none bg-black flex items-center justify-center shadow-md border-4 border-[#ff007f] shadow-[5px_5px_0px_rgba(0,240,255,0.5)] p-1.5">
-                <PixelAvatar id={activeProfileId} size={104} />
+          <div className="bg-black p-4 sm:p-6 md:p-8 border-2 border-[#00f0ff]/70 shadow-[4px_4px_0px_rgba(255,0,127,0.5)] flex flex-col justify-center relative select-none">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 mb-4 sm:mb-8 z-10">
+              <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-none bg-black flex items-center justify-center shadow-md border-4 border-[#ff007f] shadow-[5px_5px_0px_rgba(0,240,255,0.5)] p-1.5 shrink-0">
+                <PixelAvatar id={activeProfileId} size={80} />
               </div>
-              <div className="z-10">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-[13px] font-pixel px-2 py-0.5 bg-black text-[#ffe600] border border-[#ffe600] uppercase">
-                    {category === 'programmer' ? '🖥️ CODING SYS' : '💼 LIFE WORK'}
-                  </span>
-                  <span className="text-[13px] font-pixel text-[#00f0ff] glow-cyan">    
-                    IDX: {activeProfileId}
+              <div className="z-10 text-center sm:text-left">
+                <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-start">
+                  <span className="text-xs sm:text-[13px] font-pixel text-[#00f0ff] glow-cyan">    
+                    {activeProfileId}
                   </span>
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-black tracking-widest text-[#00f0ff] mt-2 font-display uppercase glow-cyan">
+                <h2 className="text-xl sm:text-3xl font-black tracking-widest text-[#00f0ff] mt-2 font-display uppercase glow-cyan break-words">
                   {activeProfile.displayName}
                 </h2>
                 {activeProfile.callSign && (
-                  <span className="text-[13px] font-pixel text-[#ffe600] bg-black border border-[#ffe600] px-2 py-0.5 ml-2">
+                  <span className="text-xs sm:text-[13px] font-pixel text-[#ffe600] bg-black border border-[#ffe600] px-2 py-0.5 mt-1 inline-block">
                     {activeProfile.callSign}
                   </span>
                 )}
               </div>
             </div>
 
-            <p className="text-sm font-bold text-[#ff007f] tracking-wide italic mb-4 leading-none select-none z-10 font-mono glow-magenta">
+            <p className="text-xs sm:text-sm font-bold text-[#ff007f] tracking-wide italic mb-4 leading-snug select-none z-10 font-mono glow-magenta">
               「 {activeProfile.flavorText} 」
             </p>
 
             {otherProfile && (
               <button
                 onClick={() => setShowOtherMode(!showOtherMode)}
-                className="mb-4 flex items-center gap-2 px-3 py-1.5 border-2 border-[#ffe600] bg-black text-[#ffe600] font-pixel text-[13px] hover:bg-[#ffe600]/10 transition-colors cursor-pointer z-10"
+                className="mb-4 flex items-center gap-2 px-3 py-2 sm:py-1.5 border-2 border-[#ffe600] bg-black text-[#ffe600] font-pixel text-xs sm:text-[13px] hover:bg-[#ffe600]/10 transition-colors cursor-pointer z-10 min-h-[44px] sm:min-h-0"
               >
-                <ArrowLeftRight className="w-3 h-3" />
-                <span>
+                <ArrowLeftRight className="w-3 h-3 shrink-0" />
+                <span className="text-left leading-tight">
                   {showOtherMode
                     ? `返回匹配模式：${profile.displayName}`
                     : `切换视角：${otherProfile.displayName}`}
@@ -325,36 +331,47 @@ export default function ResultsDisplay({
               </button>
             )}
 
-            <p className="text-[13px] leading-relaxed text-slate-300 bg-[#070b19] p-5 border-2 border-dashed border-[#ff007f]/45 z-10 font-sans shadow-inner">
+            {guildInfo && (
+              <div className={`mb-4 bg-black border-l-4 ${guildInfo.borderColor} px-3 sm:px-4 py-2.5 sm:py-3 z-10`}>
+                <span className="text-[11px] sm:text-[13px] font-pixel text-slate-500 uppercase tracking-widest block mb-0.5 sm:mb-1">
+                  认知底层基因 · {guildInfo.name}
+                </span>
+                <p className={`text-xs sm:text-[13px] font-bold ${guildInfo.color} tracking-wide`}>
+                  {guildInfo.essence}
+                </p>
+              </div>
+            )}
+
+            <p className="text-xs sm:text-[13px] leading-relaxed text-slate-300 bg-[#070b19] p-3 sm:p-5 border-2 border-dashed border-[#ff007f]/45 z-10 font-sans shadow-inner break-words">
               {activeProfile.essence}
             </p>
           </div>
         </div>
 
         {/* Middle Part: Bento Grid Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-6 mb-4 sm:mb-8 min-w-0">
           
-          {/* Bento Card: Dimensional Details List (col-span-12 lg:col-span-5) */}
-          <div className="lg:col-span-12 xl:col-span-5 bg-black p-6 border-2 border-[#00f0ff]/70 shadow-[4px_4px_0px_rgba(255,0,127,0.5)] flex flex-col justify-between select-none">
+          {/* Bento Card: Dimensional Details List */}
+          <div className="lg:col-span-12 xl:col-span-5 bg-black p-4 sm:p-6 border-2 border-[#00f0ff]/70 shadow-[4px_4px_0px_rgba(255,0,127,0.5)] flex flex-col justify-between select-none min-w-0">
             <div>
-              <h3 className="text-[13px] font-pixel text-[#00f0ff] tracking-widest uppercase mb-6 flex items-center gap-2 glow-cyan">
-                <Sparkles className="w-4 h-4 text-[#00f0ff]" />
+              <h3 className="text-[13px] font-pixel text-[#00f0ff] tracking-widest uppercase mb-4 sm:mb-6 flex items-center gap-2 glow-cyan">
+                <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-[#00f0ff]" />
                 维度平衡指数
               </h3>
-              <div className="space-y-5">
+              <div className="space-y-3 sm:space-y-5">
                 {scores.map((score, idx) => {
                   const barColors = ['bg-[#00f0ff]', 'bg-[#ff007f]', 'bg-[#39ff14]', 'bg-[#ffe600]'];
                   const percentVal = Math.round(Math.max(score.percentage, 100 - score.percentage));
                   const activeLabel = score.percentage >= 50 ? score.label.split('vs')[1].trim() : score.label.split('vs')[0].trim();
                   return (
-                    <div key={score.id} className="flex flex-col gap-2">
+                    <div key={score.id} className="flex flex-col gap-1.5 sm:gap-2">
                       <div className="flex justify-between items-baseline text-[13px]">   
-                        <span className="text-[#00f0ff] font-bold font-mono text-[13px] uppercase tracking-wide">{score.label}</span>
-                        <span className="text-[13px] font-pixel font-bold text-slate-400">
-                          {activeLabel} <span className="text-[#00f0ff] font-pixel text-[13px] glow-cyan">{percentVal}%</span>    
+                        <span className="text-[#00f0ff] font-bold font-mono text-xs sm:text-[13px] uppercase tracking-wide break-words">{score.label}</span>
+                        <span className="text-xs sm:text-[13px] font-pixel font-bold text-slate-400 shrink-0 ml-1">
+                          {activeLabel} <span className="text-[#00f0ff] font-pixel text-xs sm:text-[13px] glow-cyan">{percentVal}%</span>    
                         </span>
                       </div>
-                      <div className="h-4 w-full bg-black border border-[#00f0ff] p-0.5 shadow-[1.5px_1.5px_0px_#ff007f]">
+                      <div className="h-3 sm:h-4 w-full bg-black border border-[#00f0ff] p-0.5 shadow-[1.5px_1.5px_0px_#ff007f]">
                         <div 
                           className={`h-full ${barColors[idx % barColors.length]} transition-all duration-1000 ease-out`}
                           style={{ width: `${percentVal}%` }}
@@ -367,20 +384,20 @@ export default function ResultsDisplay({
             </div>
           </div>
 
-          {/* Bento Card: Strengths & Weaknesses (col-span-12 lg:col-span-7) */}
-          <div className="lg:col-span-12 xl:col-span-7 bg-black p-6 md:p-8 border-2 border-[#ff007f]/70 shadow-[4px_4px_0px_rgba(0,240,255,0.5)] select-none">
-            <div className="flex flex-col gap-6">
+          {/* Bento Card: Strengths & Weaknesses */}
+          <div className="lg:col-span-12 xl:col-span-7 bg-black p-4 sm:p-6 md:p-8 border-2 border-[#ff007f]/70 shadow-[4px_4px_0px_rgba(0,240,255,0.5)] select-none min-w-0">
+            <div className="flex flex-col gap-4 sm:gap-6">
               {/* Added Section: Cognitive Pattern [认知模式] */}
               {activeProfile.cognitivePattern && (
-                <div className="border-b border-dashed border-[#ff007f]/30 pb-6">
-                  <h3 className="text-base font-black text-[#00f0ff] flex items-center gap-2 mb-4 font-display uppercase tracking-widest glow-cyan">
-                    <Sparkles className="w-4 h-4 text-[#00f0ff]" />
+                <div className="border-b border-dashed border-[#ff007f]/30 pb-4 sm:pb-6">
+                  <h3 className="text-sm sm:text-base font-black text-[#00f0ff] flex items-center gap-2 mb-3 sm:mb-4 font-display uppercase tracking-widest glow-cyan">
+                    <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-[#00f0ff]" />
                     认知模式
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                     {activeProfile.cognitivePattern.map((trait, tIdx) => (
-                      <div key={tIdx} className="bg-[#ff007f]/5 border border-[#ff007f]/20 p-3 h-full flex flex-col justify-between">
-                        <p className="text-[13px] leading-relaxed text-slate-300 font-medium">
+                      <div key={tIdx} className="bg-[#ff007f]/5 border border-[#ff007f]/20 p-2.5 sm:p-3 h-full flex flex-col justify-between">
+                        <p className="text-xs sm:text-[13px] leading-relaxed text-slate-300 font-medium">
                           {trait}
                         </p>
                       </div>
@@ -389,17 +406,17 @@ export default function ResultsDisplay({
                 </div>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-transparent">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 bg-transparent">
                 {/* Strengths Column */}
                 <div>
-                  <h3 className="text-base font-black text-[#39ff14] flex items-center gap-2 mb-4 font-display uppercase tracking-widest glow-green">
-                    <CheckCircle2 className="w-4 h-4 text-[#39ff14]" />
+                  <h3 className="text-sm sm:text-base font-black text-[#39ff14] flex items-center gap-2 mb-3 sm:mb-4 font-display uppercase tracking-widest glow-green">
+                    <CheckCircle2 className="w-3 h-3 sm:w-4 sm:h-4 text-[#39ff14]" />
                     思维优势
                   </h3>
-                  <ul className="space-y-3 font-sans">
+                  <ul className="space-y-2 sm:space-y-3 font-sans">
                     {activeProfile.workplaceEdge.filter(e => e.startsWith('优势：')).map((str, sIdx) => (
-                      <li key={sIdx} className="text-[13px] leading-relaxed text-slate-300 flex items-start gap-2.5">
-                        <CornerDownRight className="w-3.5 h-3.5 text-[#00f0ff] shrink-0 mt-0.5" />
+                      <li key={sIdx} className="text-xs sm:text-[13px] leading-relaxed text-slate-300 flex items-start gap-2 sm:gap-2.5">
+                        <CornerDownRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#00f0ff] shrink-0 mt-0.5" />
                         <span>{str.replace(/^优势：/, '')}</span>
                       </li>
                     ))}
@@ -408,14 +425,14 @@ export default function ResultsDisplay({
 
                 {/* Weaknesses Column */}
                 <div>
-                  <h3 className="text-base font-black text-[#ffe600] flex items-center gap-2 mb-4 font-display uppercase tracking-widest glow-yellow">
-                    <AlertCircle className="w-4 h-4 text-[#ffe600]" />
+                  <h3 className="text-sm sm:text-base font-black text-[#ffe600] flex items-center gap-2 mb-3 sm:mb-4 font-display uppercase tracking-widest glow-yellow">
+                    <AlertCircle className="w-3 h-3 sm:w-4 sm:h-4 text-[#ffe600]" />
                     潜在盲区
                   </h3>
-                  <ul className="space-y-3 font-sans">
+                  <ul className="space-y-2 sm:space-y-3 font-sans">
                     {activeProfile.workplaceEdge.filter(e => e.startsWith('边界：')).map((weak, wIdx) => (
-                      <li key={wIdx} className="text-[13px] leading-relaxed text-slate-300 flex items-start gap-2.5"> 
-                        <CornerDownRight className="w-3.5 h-3.5 text-[#ff007f] shrink-0 mt-0.5" />
+                      <li key={wIdx} className="text-xs sm:text-[13px] leading-relaxed text-slate-300 flex items-start gap-2 sm:gap-2.5"> 
+                        <CornerDownRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#ff007f] shrink-0 mt-0.5" />
                         <span>{weak.replace(/^边界：/, '')}</span>
                       </li>
                     ))}
@@ -424,23 +441,23 @@ export default function ResultsDisplay({
               </div>
 
               {/* Collaboration Style */}
-              <div className="border-t border-dashed border-[#00f0ff]/30 pt-4">
-                <h3 className="text-base font-black text-[#ffe600] flex items-center gap-2 mb-3 font-display uppercase tracking-widest glow-yellow">
-                  <CornerDownRight className="w-4 h-4 text-[#ffe600]" />
+              <div className="border-t border-dashed border-[#00f0ff]/30 pt-3 sm:pt-4">
+                <h3 className="text-sm sm:text-base font-black text-[#ffe600] flex items-center gap-2 mb-2 sm:mb-3 font-display uppercase tracking-widest glow-yellow">
+                  <CornerDownRight className="w-3 h-3 sm:w-4 sm:h-4 text-[#ffe600]" />
                   协作风格
                 </h3>
-                <p className="text-[13px] leading-relaxed text-slate-300 bg-[#070b19] p-4 border border-dashed border-[#ffe600]/30 font-sans">
+                <p className="text-xs sm:text-[13px] leading-relaxed text-slate-300 bg-[#070b19] p-3 sm:p-4 border border-dashed border-[#ffe600]/30 font-sans break-words">
                   {activeProfile.collaboration}
                 </p>
               </div>
 
               {/* Growth Tip */}
-              <div className="border-t border-dashed border-[#ff007f]/30 pt-4">
-                <h3 className="text-base font-black text-[#39ff14] flex items-center gap-2 mb-3 font-display uppercase tracking-widest glow-green">
-                  <CornerDownRight className="w-4 h-4 text-[#39ff14]" />
+              <div className="border-t border-dashed border-[#ff007f]/30 pt-3 sm:pt-4">
+                <h3 className="text-sm sm:text-base font-black text-[#39ff14] flex items-center gap-2 mb-2 sm:mb-3 font-display uppercase tracking-widest glow-green">
+                  <CornerDownRight className="w-3 h-3 sm:w-4 sm:h-4 text-[#39ff14]" />
                   成长建议
                 </h3>
-                <p className="text-[13px] leading-relaxed text-slate-300 bg-[#070b19] p-4 border border-dashed border-[#39ff14]/30 font-sans">  
+                <p className="text-xs sm:text-[13px] leading-relaxed text-slate-300 bg-[#070b19] p-3 sm:p-4 border border-dashed border-[#39ff14]/30 font-sans break-words">  
                   {activeProfile.growthTip}
                 </p>
               </div>
@@ -452,20 +469,20 @@ export default function ResultsDisplay({
       </div>
 
       {/* Sharing and Action controls - OUTSIDE screenshot capture container */}
-      <div className="flex flex-col items-center gap-4 mt-12 pt-4 relative z-20 font-mono select-none">
+      <div className="flex flex-col items-center gap-3 sm:gap-4 mt-6 sm:mt-12 pt-2 sm:pt-4 relative z-20 font-mono select-none">
         {captureError && (
-          <p className="text-[10px] font-pixel text-[#ff007f] bg-black border border-[#ff007f] px-4 py-2 glow-magenta">
+          <p className="text-[11px] sm:text-xs font-pixel text-[#ff007f] bg-black border border-[#ff007f] px-3 sm:px-4 py-2 glow-magenta text-center">
             [ SAVE ERROR ] 图片生成失败，请尝试滚动到页面顶部后重新保存
           </p>
         )}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
 
 
           <button
             onClick={onReset}
-            className="w-full sm:w-auto px-7 py-4 rounded-none bg-black border-4 border-[#ff007f] text-[#ff007f] font-pixel text-[13px] flex items-center justify-center gap-2 shadow-[5px_5px_0px_#050814] hover:shadow-[7px_7px_0px_#00f0ff] active:translate-x-1 active:translate-y-1 transition-all duration-100 select-none cursor-pointer tracking-wider font-bold"   
+            className="w-full sm:w-auto px-6 sm:px-7 py-3.5 sm:py-4 rounded-none bg-black border-4 border-[#ff007f] text-[#ff007f] font-pixel text-xs sm:text-[13px] flex items-center justify-center gap-2 shadow-[5px_5px_0px_#050814] hover:shadow-[7px_7px_0px_#00f0ff] active:translate-x-1 active:translate-y-1 transition-all duration-100 select-none cursor-pointer tracking-wider font-bold min-h-[48px] sm:min-h-0"   
           >
-            <RefreshCw className="w-4 h-4" />
+            <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span>重新测量</span>
           </button>
         </div>

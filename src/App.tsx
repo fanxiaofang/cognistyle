@@ -226,16 +226,16 @@ export default function App() {
       </div>
 
       {/* Header section - 第七区世界观 */}
-      <header className="w-full max-w-5xl mx-auto px-6 py-6 flex items-center justify-between select-none relative z-10 gap-4">
-        <div className="flex items-center gap-4">
-          <div className="w-9 h-9 bg-[#ff007f] border-2 border-white flex items-center justify-center font-bold text-white text-sm shadow-[3px_3px_0px_#00f0ff] font-pixel animate-pulse">
+      <header className="w-full max-w-5xl mx-auto px-3 sm:px-6 py-4 sm:py-6 flex items-center justify-between select-none relative z-10 gap-3 sm:gap-4">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div className="w-8 h-8 sm:w-9 sm:h-9 bg-[#ff007f] border-2 border-white flex items-center justify-center font-bold text-white text-xs sm:text-sm shadow-[3px_3px_0px_#00f0ff] font-pixel animate-pulse shrink-0">
             7
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-black tracking-widest text-[#00f0ff] glow-cyan font-display uppercase leading-none">
+            <span className="text-xl sm:text-3xl font-black tracking-widest text-[#00f0ff] glow-cyan font-display uppercase leading-none">
               SECTOR 7
             </span>
-            <span className="text-[10px] font-pixel text-[#ff007f] tracking-widest hidden sm:inline">
+            <span className="text-xs sm:text-xs font-pixel text-[#ff007f] tracking-widest hidden sm:inline">
               COGNITIVE PLACEMENT
             </span>
           </div>
@@ -243,16 +243,16 @@ export default function App() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setShowHandbook(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 border-2 border-[#39ff14] bg-black text-[#39ff14] font-pixel text-[10px] hover:bg-[#39ff14]/15 focus:outline-none transition-all cursor-pointer shadow-[2.5px_2.5px_0px_#00f0ff] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0px_#00f0ff]"
+            className="flex items-center gap-1.5 px-3 py-2 sm:py-1.5 border-2 border-[#39ff14] bg-black text-[#39ff14] font-pixel text-xs sm:text-xs hover:bg-[#39ff14]/15 focus:outline-none transition-all cursor-pointer shadow-[2.5px_2.5px_0px_#00f0ff] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0px_#00f0ff] min-h-[40px] sm:min-h-0"
           >
-            <BookOpen className="w-3.5 h-3.5" />
+            <BookOpen className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             <span>职业图鉴</span>
           </button>
         </div>
       </header>
 
       {/* Main Orchestrator Canvas */}
-      <main className="flex-grow flex items-center justify-center p-4 relative z-10">
+      <main className="flex-grow flex items-center justify-center p-2 sm:p-4 relative z-10">
         <AnimatePresence mode="wait">
           
           {/* 1. HOME VIEW - 单卡片居中 */}
@@ -266,19 +266,19 @@ export default function App() {
               className="w-full max-w-lg mx-auto text-center"
             >
               {/* 世界观标签 */}
-              <div className="mb-6 inline-flex items-center gap-2 bg-black/85 border-2 border-[#ff007f] px-4 py-1.5 text-[10px] sm:text-xs font-pixel font-bold text-[#ff007f] uppercase select-none shadow-[3px_3px_0px_#00f0ff]">
+              <div className="mb-4 sm:mb-6 inline-flex items-center gap-2 bg-black/85 border-2 border-[#ff007f] px-3 sm:px-4 py-1.5 text-xs sm:text-xs font-pixel font-bold text-[#ff007f] uppercase select-none shadow-[3px_3px_0px_#00f0ff]">
                 <span className="inline-block w-2 h-2 bg-[#39ff14] animate-pulse" />
                 2147 · 后企业时代 · 认知适配协议
               </div>
               
-              <h1 className="text-4xl sm:text-5xl font-black tracking-widest text-white mb-4 font-display uppercase leading-none">
+              <h1 className="text-3xl sm:text-5xl font-black tracking-widest text-white mb-3 sm:mb-4 font-display uppercase leading-none">
                 接入{' '}
                 <span className="text-[#00f0ff] glow-cyan animate-pulse">
                   职业分配系统
                 </span>
               </h1>
               
-              <p className="text-slate-400 text-xs sm:text-sm font-sans max-w-md mx-auto mb-12 leading-relaxed select-none">
+              <p className="text-slate-400 text-[13px] sm:text-sm font-sans max-w-md mx-auto mb-8 sm:mb-12 leading-relaxed select-none">
                 第七区需要每一位公民找到最适合自己的位置。通过认知适配协议，我们将为你匹配最契合的职能身份——从应急局的抢险前线，到生科所的微观深渊。
               </p>
 
@@ -286,10 +286,10 @@ export default function App() {
               <div className="max-w-md mx-auto">
                 <button
                   onClick={handleStartTest}
-                  className="group w-full bg-[#070b19]/90 hover:bg-[#0c1229] border-4 border-[#ff007f] p-6 md:p-8 shadow-[6px_6px_0px_0px_#00f0ff] active:translate-x-1 active:translate-y-1 active:shadow-[2px_2px_0px_0px_#00f0ff] hover:shadow-[8px_8px_0px_0px_#00f0ff] transition-all duration-150 flex flex-col justify-between text-left relative select-none cursor-pointer"
+                  className="group w-full bg-[#070b19]/90 hover:bg-[#0c1229] border-4 border-[#ff007f] p-4 sm:p-6 md:p-8 shadow-[6px_6px_0px_0px_#00f0ff] active:translate-x-1 active:translate-y-1 active:shadow-[2px_2px_0px_0px_#00f0ff] hover:shadow-[8px_8px_0px_0px_#00f0ff] transition-all duration-150 flex flex-col justify-between text-left relative select-none cursor-pointer"
                 >
                   <div className="absolute top-0 right-0 p-3">
-                    <span className="text-[8px] font-pixel px-2 py-0.5 bg-black border border-[#39ff14] text-[#39ff14] uppercase glow-green">
+                    <span className="text-[11px] font-pixel px-2 py-0.5 bg-black border border-[#39ff14] text-[#39ff14] uppercase glow-green">
                       标准局备案
                     </span>
                   </div>
@@ -298,15 +298,15 @@ export default function App() {
                     <div className="w-12 h-12 bg-black flex items-center justify-center border-2 border-[#ff007f] mb-6 shadow-[3px_3px_0px_#00f0ff] group-hover:scale-105 transition-transform">
                       <GraduationCap className="w-6 h-6 text-[#ff007f]" />
                     </div>
-                    <h3 className="text-2xl font-black text-white mb-2 group-hover:text-[#ff007f] transition-colors font-display tracking-widest uppercase">
+                    <h3 className="text-xl sm:text-2xl font-black text-white mb-2 group-hover:text-[#ff007f] transition-colors font-display tracking-widest uppercase">
                       通用认知适配
                     </h3>
-                    <p className="text-slate-400 text-xs leading-relaxed mb-4 font-sans">
+                    <p className="text-slate-400 text-xs sm:text-xs leading-relaxed mb-3 sm:mb-4 font-sans">
                       基于日常生活场景——旅行规划、购物决策、学习新技能——测绘你的原生态思维底色。适配结果将关联第七区八大职能部门的职业定位。
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-2 text-[10px] font-pixel text-[#ff007f] mt-2 group-hover:translate-x-1 transition-transform">
+                  <div className="flex items-center gap-2 text-xs font-pixel text-[#ff007f] mt-2 group-hover:translate-x-1 transition-transform">
                     [ 启动适配协议 ]
                     <ChevronRight className="w-4 h-4" />
                   </div>
@@ -314,7 +314,7 @@ export default function App() {
               </div>
               
               {/* 底部安全声明 - 世界观化 */}
-              <div className="mt-14 text-[9px] font-pixel text-[#00f0ff]/60 tracking-widest uppercase flex items-center justify-center gap-2 bg-[#0c1229]/60 border border-[#00f0ff]/20 max-w-md mx-auto py-2.5 px-4 select-none">
+              <div className="mt-8 sm:mt-14 text-[11px] sm:text-xs font-pixel text-[#00f0ff]/60 tracking-widest uppercase flex items-center justify-center gap-2 bg-[#0c1229]/60 border border-[#00f0ff]/20 max-w-md mx-auto py-2.5 px-3 sm:px-4 select-none">
                 <span className="w-2 h-2 bg-[#39ff14] rounded-none animate-ping" />
                 <span>SECTOR 7 SECURE / NO TELEMETRY TO CORPORATE OVERLORDS</span>
               </div>
@@ -371,7 +371,7 @@ export default function App() {
       </AnimatePresence>
 
       {/* Footer section - 世界观化 */}
-      <footer className="w-full text-center py-6 text-[10px] font-mono text-stone-600 select-none">
+      <footer className="w-full text-center py-4 sm:py-6 text-xs sm:text-xs font-mono text-stone-600 select-none px-2">
         SECTOR 7 COGNITIVE PLACEMENT BUREAU · EST. 2147 · NO CORPORATE AFFILIATION
       </footer>
     </div>
