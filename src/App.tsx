@@ -104,32 +104,34 @@ export default function App() {
   // 3. Selection mapping handlers
   const handleSelectAnswer = (value: number) => {
     const currentQuestion = questions[currentQuestionIdx];
-    const updatedAnswers = {
-      ...answers,
+    setAnswers(prev => ({
+      ...prev,
       [currentQuestion.id]: value,
-    };
-    setAnswers(updatedAnswers);
+    }));
 
-    // Auto Advance after 300ms for a tactile ripple animation experience
-    setTimeout(() => {
-      if (currentQuestionIdx < questions.length - 1) {
+    if (currentQuestionIdx < questions.length - 1) {
+      setTimeout(() => {
         setCurrentQuestionIdx(prev => prev + 1);
-      } else {
-        // Formulate completed results
-        setView('result');
-        
-        // Push answers states directly into URL coordinates for sharing
-        const serialized = Object.entries(updatedAnswers)
-          .map(([qid, val]) => `${qid}:${val}`)
-          .join(',');
-        window.history.pushState(
-          null,
-          '',
-          `?category=general&answers=${serialized}`
-        );
-      }
-    }, 280);
+      }, 280);
+    }
   };
+
+  useEffect(() => {
+    if (view !== 'test') return;
+    if (questions.length === 0) return;
+    const lastId = questions[questions.length - 1].id;
+    if (answers[lastId] === undefined) return;
+
+    const timer = setTimeout(() => {
+      const serialized = Object.entries(answers)
+        .map(([qid, val]) => `${qid}:${val}`)
+        .join(',');
+      window.history.pushState(null, '', `?category=general&answers=${serialized}`);
+      setView('result');
+    }, 280);
+
+    return () => clearTimeout(timer);
+  }, [answers, view, questions]);
 
   const handlePrev = () => {
     if (currentQuestionIdx > 0) {
