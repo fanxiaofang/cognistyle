@@ -1,18 +1,103 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
+    <!-- 移动端基础：允许缩放，保无障碍 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Google AI Studio App</title>
+    
+    <title>第七区 · 认知适配协议 | Sector 7</title>
+    <meta name="description" content="2147年后企业时代，通过认知适配协议匹配你的职能身份..." />
+    <meta name="theme-color" content="#050814" />
+    
+    <!-- 社交分享 -->
+    <meta property="og:title" content="第七区 · 认知适配协议" />
+    <meta property="og:description" content="你的思维底色，决定了你在赛博城市的归属。" />
+    
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Share+Tech+Mono&family=Inter:wght@400;500;700;900&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Share+Tech+Mono&family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet" />
+    
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    
+    <!-- 优化加载性能与兼容性 -->
+    <style>
+      /* 1. 防止首屏加载时的白屏闪烁 */
+      html, body {
+        background-color: #050814;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow-x: hidden;
+      }
+      
+      /* 2. GPU 硬件加速的加载动画，防止低端/老旧移动端卡顿 */
+      @keyframes load {
+        0% { transform: translateX(0); }
+        50% { transform: translateX(233.33%); } /* 70% / 30% = 233.33% */
+        100% { transform: translateX(0); }
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- 启动屏：采用高兼容性的定位布局，完美适配 iOS/Android/Windows 各种浏览器 -->
+      <div style="
+        position: fixed; 
+        top: 0; 
+        left: 0; 
+        right: 0; 
+        bottom: 0; 
+        background: #050814; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        flex-direction: column; 
+        gap: 16px; 
+        z-index: 9999;
+      ">
+        <div style="
+          font-family: 'Press Start 2P', monospace; 
+          color: #00f0ff; 
+          font-size: clamp(10px, 3vw, 14px); 
+          text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+          text-align: center; 
+          padding: 0 20px;
+        ">
+          SECTOR 7
+        </div>
+        
+        <!-- 进度条容器 -->
+        <div style="
+          width: min(120px, 40vw); 
+          height: 4px; 
+          background: #1e293b; 
+          position: relative;
+          overflow: hidden;
+        ">
+          <!-- 动画子元素 -->
+          <div style="
+            position: absolute; 
+            top: 0; 
+            bottom: 0; 
+            left: 0; 
+            width: 30%;
+            background: #ff007f; 
+            animation: load 1.5s ease-in-out infinite;
+          "></div>
+        </div>
+        
+        <div style="
+          font-family: 'Share Tech Mono', monospace; 
+          color: #64748b; 
+          font-size: clamp(8px, 2.5vw, 10px); 
+          letter-spacing: 2px;
+        ">
+          INITIALIZING...
+        </div>
+      </div>
+    </div>
+    
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

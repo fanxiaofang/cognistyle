@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Background -->
+  <rect width="32" height="32" rx="6" fill="#050814" />
+  <!-- Neon cyan grid lines -->
+  <path d="M 0 8 H 32 M 0 16 H 32 M 0 24 H 32 M 8 0 V 32 M 16 0 V 32 M 24 0 V 32" stroke="#00f0ff" stroke-width="0.5" opacity="0.2" />
+  <!-- Cyberpunk glowing 7 -->
+  <path d="M 8 8 H 24 L 14 26" stroke="#ff007f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.5" filter="blur(1px)" />
+  <path d="M 8 8 H 24 L 14 26" stroke="#00f0ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="14" cy="26" r="1.5" fill="#ff007f" />
+</svg>
