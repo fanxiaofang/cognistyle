@@ -16,6 +16,27 @@ const RATE_LIMIT_KEY_PREFIX = 'rate-limit:results:';
 
 export async function onRequest(context) {
   const { request, env } = context;
+  let stage = 'init';
+
+  // === 调试：先看 env 里有没有 KV ===
+  const envKeys = Object.keys(env);
+  const kvCandidate = env.RESULT_SNAPSHOT_KV || env.MY_KV;
+  
+  if (!kvCandidate) {
+    return json(
+      { 
+        error: '结果存储未配置，请先绑定 KV。', 
+        code: 'INTERNAL_ERROR',
+        debug: {
+          envKeys,
+          hasResultSnapshotKv: !!env.RESULT_SNAPSHOT_KV,
+          hasMyKv: !!env.MY_KV,
+          kvType: typeof kvCandidate
+        }
+      },
+      { status: 500 }
+    );
+  }
 
   if (request.method === 'OPTIONS') {
     return new Response(null, { status: 204, headers: COMMON_HEADERS });
@@ -37,6 +58,7 @@ export async function onRequest(context) {
   }
 
   try {
+    stage = 'rate-limit';
     const clientIp =
       request.headers.get('x-forwarded-for') ||
       request.headers.get('X-Forwarded-For') ||
@@ -51,18 +73,46 @@ export async function onRequest(context) {
       );
     }
 
-    const payload = await request.json();
-    const validationError = validateSnapshotPayload(payload);
-    if (validationError) {
+    stage = 'parse-json';
+    let payload;
+    try {
+      payload = await request.json();
+    } catch (parseErr) {
       return json(
-        { error: validationError, code: 'BAD_REQUEST' },
+        { 
+          error: '请求体 JSON 解析失败', 
+          code: 'BAD_REQUEST',
+          detail: parseErr.message 
+        },
         { status: 400 }
       );
     }
 
+    stage = 'validate';
+    const validationError = validateSnapshotPayload(payload);
+    if (validationError) {
+      return json(
+        { 
+          error: validationError, 
+          code: 'BAD_REQUEST',
+          received: {
+            questionVersion: payload?.questionVersion,
+            snapshotVersion: payload?.snapshotVersion,
+            category: payload?.category
+          }
+        },
+        { status: 400 }
+      );
+    }
+
+    stage = 'generate-tokens';
     const friendId = generateUrlSafeToken(9);
     const deleteToken = generateUrlSafeToken(24);
+    
+    stage = 'sha256';
     const deleteTokenHash = await sha256Hex(deleteToken);
+    
+    stage = 'prepare-record';
     const now = Date.now();
     const expiresAt = now + SNAPSHOT_TTL_SECONDS * 1000;
 
@@ -74,6 +124,7 @@ export async function onRequest(context) {
       expiresAt,
     };
 
+    stage = 'kv-put';
     await kv.put(`${RESULT_KEY_PREFIX}${friendId}`, JSON.stringify(record), {
       expirationTtl: SNAPSHOT_TTL_SECONDS,
     });
@@ -84,10 +135,14 @@ export async function onRequest(context) {
       expiresAt,
     });
   } catch (error) {
+    // === 增强诊断：返回具体阶段和错误详情 ===
     return json(
       {
         error: error instanceof Error ? error.message : '服务器内部错误',
         code: 'INTERNAL_ERROR',
+        stage: stage,
+        stack: error instanceof Error ? error.stack : undefined,
+        errorType: error?.constructor?.name,
       },
       { status: 500 }
     );
