@@ -10,10 +10,43 @@ import { questionsGeneral, dimensionMeta } from './data/questions';
 import QuestionCard from './components/QuestionCard';
 import ResultsDisplay from './components/ResultsDisplay';
 import CognitiveHandbook from './components/CognitiveHandbook';
+import DualReportPage from './pages/DualReportPage';
+import PublicSharePage from './pages/PublicSharePage';
 import { GraduationCap, ChevronRight, BookOpen } from 'lucide-react';
+
+type AppRoute =
+  | { kind: 'main' }
+  | { kind: 'dual'; targetFriendId: string | null }
+  | { kind: 'share'; token: string | null };
+
+function getCurrentRoute(): AppRoute {
+  if (typeof window === 'undefined') {
+    return { kind: 'main' };
+  }
+
+  const pathname = window.location.pathname.replace(/\/+$/, '') || '/';
+  const params = new URLSearchParams(window.location.search);
+
+  if (pathname === '/dual') {
+    return {
+      kind: 'dual',
+      targetFriendId: params.get('friend'),
+    };
+  }
+
+  if (pathname.startsWith('/share/')) {
+    return {
+      kind: 'share',
+      token: pathname.split('/').filter(Boolean)[1] || null,
+    };
+  }
+
+  return { kind: 'main' };
+}
 
 export default function App() {
   const [view, setView] = useState<'home' | 'test' | 'result'>('home');
+  const [route, setRoute] = useState<AppRoute>(() => getCurrentRoute());
   const [category, setCategory] = useState<Category | null>(null);
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState<number>(0);
   const [answers, setAnswers] = useState<UserAnswers>({});
@@ -24,6 +57,9 @@ export default function App() {
 
   // 1. Initial mounting check for shared URLs and state restore
   useEffect(() => {
+    const syncRoute = () => setRoute(getCurrentRoute());
+    window.addEventListener('popstate', syncRoute);
+
     try {
       const params = new URLSearchParams(window.location.search);
       const urlCategory = params.get('category') as Category | null;
@@ -73,10 +109,16 @@ export default function App() {
     } catch (err) {
       console.error('Session state recovery failed:', err);
     }
+
+    return () => {
+      window.removeEventListener('popstate', syncRoute);
+    };
   }, []);
 
   // Write status backups to sessionStorage on change
   useEffect(() => {
+    if (route.kind !== 'main') return;
+
     if (view === 'home') {
       sessionStorage.removeItem('cognistyle_category');
       sessionStorage.removeItem('cognistyle_answers');
@@ -88,7 +130,7 @@ export default function App() {
       sessionStorage.setItem('cognistyle_index', currentQuestionIdx.toString());
       sessionStorage.setItem('cognistyle_view', view);
     }
-  }, [view, answers, currentQuestionIdx]);
+  }, [route.kind, view, answers, currentQuestionIdx]);
 
   // Questions set selector - 固定为通用版
   const questions = questionsGeneral;
@@ -153,6 +195,34 @@ export default function App() {
     setCategory(null);
     setCurrentQuestionIdx(0);
     setView('home');
+  };
+
+  const buildResultUrl = () => {
+    const serialized = Object.entries(answers)
+      .map(([qid, val]) => `${qid}:${val}`)
+      .join(',');
+
+    return serialized ? `/?category=general&answers=${serialized}` : '/';
+  };
+
+  const handleOpenDualReport = (targetFriendId: string) => {
+    const nextUrl = `/dual?friend=${encodeURIComponent(targetFriendId)}`;
+    window.history.pushState(null, '', nextUrl);
+    setRoute({
+      kind: 'dual',
+      targetFriendId,
+    });
+  };
+
+  const handleBackFromDual = () => {
+    const fallbackUrl = buildResultUrl();
+    window.history.pushState(null, '', fallbackUrl);
+    setRoute({ kind: 'main' });
+  };
+
+  const handleBackFromShare = () => {
+    window.history.pushState(null, '', '/');
+    setRoute({ kind: 'main' });
   };
 
   // 4. Score Math calculations
@@ -287,8 +357,37 @@ export default function App() {
       <main className="flex-grow flex items-center justify-center p-2 sm:p-4 relative z-10">
         <AnimatePresence mode="wait">
           
+          {route.kind === 'dual' && (
+            <motion.div
+              key="dual"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.35 }}
+              className="w-full"
+            >
+              <DualReportPage
+                targetFriendId={route.targetFriendId}
+                onBack={handleBackFromDual}
+              />
+            </motion.div>
+          )}
+
+          {route.kind === 'share' && (
+            <motion.div
+              key="share"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.35 }}
+              className="w-full"
+            >
+              <PublicSharePage token={route.token} onBack={handleBackFromShare} />
+            </motion.div>
+          )}
+
           {/* 1. HOME VIEW - 单卡片居中 */}
-          {view === 'home' && (
+          {route.kind === 'main' && view === 'home' && (
             <motion.div
               key="home"
               initial={{ opacity: 0, y: 15 }}
@@ -354,7 +453,7 @@ export default function App() {
           )}
 
           {/* 2. TESTING/QUESTIONS VIEW */}
-          {view === 'test' && (
+          {route.kind === 'main' && view === 'test' && (
             <motion.div
               key="test"
               initial={{ opacity: 0 }}
@@ -375,7 +474,7 @@ export default function App() {
           )}
 
           {/* 3. FINAL RESULTS VIEW */}
-          {view === 'result' && (
+          {route.kind === 'main' && view === 'result' && (
             <motion.div
               key="result"
               initial={{ opacity: 0, scale: 0.98 }}
@@ -391,6 +490,7 @@ export default function App() {
                 primaryArchetype={primaryArchetype}
                 secondaryArchetype={secondaryArchetype}
                 onReset={handleReset}
+                onOpenDualReport={handleOpenDualReport}
               />
             </motion.div>
           )}

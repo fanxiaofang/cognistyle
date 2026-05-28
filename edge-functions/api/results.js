@@ -1,0 +1,241 @@
+const COMMON_HEADERS = {
+  'Content-Type': 'application/json',
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'X-Content-Type-Options': 'nosniff',
+};
+
+const QUESTION_VERSION = 'questions-general-2026-05';
+const SNAPSHOT_VERSION = 'snapshot-v1';
+const SNAPSHOT_TTL_SECONDS = 90 * 24 * 60 * 60;
+const RATE_LIMIT_MAX = 10;
+const RATE_LIMIT_WINDOW_SECONDS = 60;
+const RESULT_KEY_PREFIX = 'result:';
+const RATE_LIMIT_KEY_PREFIX = 'rate-limit:results:';
+
+export async function onRequest(context) {
+  const { request, env } = context;
+
+  if (request.method === 'OPTIONS') {
+    return new Response(null, { status: 204, headers: COMMON_HEADERS });
+  }
+
+  if (request.method !== 'POST') {
+    return json(
+      { error: 'Method Not Allowed', code: 'BAD_REQUEST' },
+      { status: 405 }
+    );
+  }
+
+  const kv = getSnapshotKv(env);
+  if (!kv) {
+    return json(
+      { error: '结果存储未配置，请先绑定 KV。', code: 'INTERNAL_ERROR' },
+      { status: 500 }
+    );
+  }
+
+  try {
+    const clientIp =
+      request.headers.get('x-forwarded-for') ||
+      request.headers.get('X-Forwarded-For') ||
+      request.headers.get('cf-connecting-ip') ||
+      'unknown';
+
+    const limited = await hitRateLimit(kv, clientIp);
+    if (limited) {
+      return json(
+        { error: '请求过于频繁，请稍后重试。', code: 'RATE_LIMITED' },
+        { status: 429 }
+      );
+    }
+
+    const payload = await request.json();
+    const validationError = validateSnapshotPayload(payload);
+    if (validationError) {
+      return json(
+        { error: validationError, code: 'BAD_REQUEST' },
+        { status: 400 }
+      );
+    }
+
+    const friendId = generateUrlSafeToken(9);
+    const deleteToken = generateUrlSafeToken(24);
+    const deleteTokenHash = await sha256Hex(deleteToken);
+    const now = Date.now();
+    const expiresAt = now + SNAPSHOT_TTL_SECONDS * 1000;
+
+    const record = {
+      ...payload,
+      friendId,
+      deleteTokenHash,
+      createdAt: now,
+      expiresAt,
+    };
+
+    await kv.put(`${RESULT_KEY_PREFIX}${friendId}`, JSON.stringify(record), {
+      expirationTtl: SNAPSHOT_TTL_SECONDS,
+    });
+
+    return json({
+      friendId,
+      deleteToken,
+      expiresAt,
+    });
+  } catch (error) {
+    return json(
+      {
+        error: error instanceof Error ? error.message : '服务器内部错误',
+        code: 'INTERNAL_ERROR',
+      },
+      { status: 500 }
+    );
+  }
+}
+
+function getSnapshotKv(env) {
+  return env.RESULT_SNAPSHOT_KV || env.MY_KV || null;
+}
+
+async function hitRateLimit(kv, clientIp) {
+  const minuteBucket = Math.floor(Date.now() / (RATE_LIMIT_WINDOW_SECONDS * 1000));
+  const key = `${RATE_LIMIT_KEY_PREFIX}${clientIp}:${minuteBucket}`;
+  const current = parseInt((await kv.get(key)) || '0', 10);
+
+  if (current >= RATE_LIMIT_MAX) {
+    return true;
+  }
+
+  await kv.put(key, String(current + 1), {
+    expirationTtl: RATE_LIMIT_WINDOW_SECONDS,
+  });
+
+  return false;
+}
+
+function validateSnapshotPayload(payload) {
+  if (!payload || typeof payload !== 'object') {
+    return '请求体必须为 JSON 对象。';
+  }
+
+  if (payload.category !== 'general') {
+    return '当前仅支持 general 分类。';
+  }
+
+  if (payload.questionVersion !== QUESTION_VERSION) {
+    return 'questionVersion 不匹配。';
+  }
+
+  if (payload.snapshotVersion !== SNAPSHOT_VERSION) {
+    return 'snapshotVersion 不匹配。';
+  }
+
+  if (typeof payload.profileId !== 'string' || payload.profileId.length > 20) {
+    return 'profileId 非法。';
+  }
+
+  const archetypes = ['primaryArchetype', 'secondaryArchetype'];
+  for (const field of archetypes) {
+    const value = payload[field];
+    if (!value || typeof value !== 'object') {
+      return `${field} 缺失。`;
+    }
+    if (typeof value.key !== 'string' || value.key.length > 12) {
+      return `${field}.key 非法。`;
+    }
+    if (
+      typeof value.matchScore !== 'number' ||
+      Number.isNaN(value.matchScore) ||
+      value.matchScore < 0 ||
+      value.matchScore > 100
+    ) {
+      return `${field}.matchScore 必须为 0-100 的数字。`;
+    }
+  }
+
+  const scores = payload.normalizedScores;
+  if (!scores || typeof scores !== 'object') {
+    return 'normalizedScores 缺失。';
+  }
+
+  const requiredScoreKeys = [
+    'impulsiveReflective',
+    'convergentDivergent',
+    'wholisticAnalytic',
+    'soloTeam',
+  ];
+
+  for (const key of requiredScoreKeys) {
+    const value = scores[key];
+    if (typeof value !== 'number' || Number.isNaN(value) || value < 0 || value > 1) {
+      return `normalizedScores.${key} 必须为 0 到 1 之间的数字。`;
+    }
+  }
+
+  if (
+    scores.verbalImagery !== undefined &&
+    (typeof scores.verbalImagery !== 'number' ||
+      Number.isNaN(scores.verbalImagery) ||
+      scores.verbalImagery < 0 ||
+      scores.verbalImagery > 1)
+  ) {
+    return 'normalizedScores.verbalImagery 必须为 0 到 1 之间的数字。';
+  }
+
+  const display = payload.display;
+  if (!display || typeof display !== 'object') {
+    return 'display 缺失。';
+  }
+
+  const displayRules = {
+    displayName: 50,
+    callSign: 50,
+    department: 50,
+    rank: 50,
+    avatar: 10,
+  };
+
+  for (const [field, maxLength] of Object.entries(displayRules)) {
+    if (typeof display[field] !== 'string' || display[field].length === 0) {
+      return `display.${field} 缺失。`;
+    }
+    if (display[field].length > maxLength) {
+      return `display.${field} 长度超出限制。`;
+    }
+  }
+
+  return null;
+}
+
+function generateUrlSafeToken(byteLength) {
+  const bytes = new Uint8Array(byteLength);
+  crypto.getRandomValues(bytes);
+  return toBase64Url(bytes);
+}
+
+function toBase64Url(bytes) {
+  let binary = '';
+  bytes.forEach((byte) => {
+    binary += String.fromCharCode(byte);
+  });
+
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
+
+async function sha256Hex(input) {
+  const buffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input));
+  return Array.from(new Uint8Array(buffer))
+    .map((byte) => byte.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+function json(body, init = {}) {
+  return new Response(JSON.stringify(body), {
+    ...init,
+    headers: {
+      ...COMMON_HEADERS,
+      ...(init.headers || {}),
+    },
+  });
+}

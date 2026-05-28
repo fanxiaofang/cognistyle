@@ -7,9 +7,9 @@ import React, { useState } from 'react';
 import { DimensionScore, Category, CognitiveProfile } from '../types';
 import { cognitiveProfiles, buildProfileId } from '../data/suggestions';
 import PixelAvatar from './PixelAvatar';
+import SingleReportActions from './SingleReportActions';
 import html2canvas from 'html2canvas';
 import { 
-  Download, 
   Sparkles, 
   AlertCircle, 
   CheckCircle2, 
@@ -17,6 +17,7 @@ import {
   RefreshCw,
   Repeat
 } from 'lucide-react';
+import { buildResultSnapshot, resolvePrimaryProfile } from '../utils/buildResultSnapshot';
 
 interface DisplayDimensionScore extends DimensionScore {
   percentage: number;
@@ -29,6 +30,7 @@ interface ResultsDisplayProps {
   primaryArchetype: { key: string; matchScore: number };
   secondaryArchetype: { key: string; matchScore: number };
   onReset: () => void;
+  onOpenDualReport: (targetFriendId: string) => void;
 }
 
 export default function ResultsDisplay({
@@ -38,55 +40,25 @@ export default function ResultsDisplay({
   primaryArchetype,
   secondaryArchetype,
   onReset,
+  onOpenDualReport,
 }: ResultsDisplayProps) {
   const [capturing, setCapturing] = useState(false);
   const [captureError, setCaptureError] = useState(false);
   const [showOtherMode, setShowOtherMode] = useState(false);
 
-  // 1. Identify User's Profile Key
-  // Based on score map of 4 dimensions: score < 12.5 means Left, score >= 12.5 means Right
-  const d4 = (scoreMap['solo_team'] ?? 12.5) >= 12.5 ? 'T' : 'S';
-  
-  const profileKey = `${primaryArchetype.key}-${d4}`;
-  const matchedMode = d4 as 'S' | 'T';
+  const { matchedMode, profileId: profileKey, profile } = resolvePrimaryProfile({
+    scoreMap,
+    primaryArchetype,
+  });
   const otherProfileKey = buildProfileId(secondaryArchetype.key as any, matchedMode);
-  
-  const fallbackProfile: CognitiveProfile = {
-    id: profileKey as any,
-    archetype: profileKey.split('-').slice(0, 3).join('-') as any,
-    mode: matchedMode,
-    displayName: '多维综合思考型',
-    callSign: '均衡',
-    department: 'emergency' as any,
-    rank: '综合特勤',
-    avatar: '🧩',
-    visual: {
-      pose: '',
-      background: '',
-      lighting: '',
-      atmosphere: '',
-      colorTone: 'slate-900',
-      accent: 'neutral'
-    },
-    essence: '你的测试结果展现了极具平衡的认知张力。你并没有极端地倒向任意一极，而是能在具体的业务决策、日常生活中根据情境自如切换模式。你是个出色的多面思考者。',
-    cognitivePattern: [
-      '兼修动静、思维如流水般善于变化与适应，极具兼容并蓄的认知包容力',
-      '兼备宏观俯瞰的高度与微观点状的精度，在各类极端视角的冲突中自如中和调停',
-      '内源秩序与外部共振交织平衡，无成规执念，纯以客观务实的理智度量全局'
-    ],
-    collaboration: '你的平衡型认知让你成为团队中的天然粘合剂，能理解不同风格成员的诉求，但也需注意避免在两种极端之间反复摇摆消耗决策时间。',
-    workplaceEdge: [
-      '优势：高灵活度，能根据环境难易调整个人风格',
-      '优势：善于化解技术纷争，充当组织缓冲阀',
-      '边界：在核心极偏门路线上可能少了一些标志性的爆发力',
-      '边界：对极致完美的边界追求不够决断'
-    ],
-    growthTip: '尝试在关键时刻明确表达自己的立场——保持中立是美德，但有时鲜明的观点更能推动团队前进。',
-    flavorText: '你是团队中的"万能接口"——适配所有人，但别忘记定义自己的协议。'
-  };
-  
-  const profile: CognitiveProfile = cognitiveProfiles[profileKey] || fallbackProfile;
   const otherProfile: CognitiveProfile | undefined = cognitiveProfiles[otherProfileKey];
+  const snapshotRequest = buildResultSnapshot({
+    category: 'general',
+    scoreMap,
+    scores,
+    primaryArchetype,
+    secondaryArchetype,
+  });
 
   const activeProfile = showOtherMode && otherProfile ? otherProfile : profile;
   const activeProfileId = showOtherMode && otherProfile ? otherProfileKey : profileKey;
@@ -474,6 +446,11 @@ export default function ResultsDisplay({
 
       {/* Sharing and Action controls - OUTSIDE screenshot capture container */}
       <div className="flex flex-col items-center gap-4 sm:gap-8 mt-4 sm:mt-8 relative z-20 font-mono select-none">
+        <SingleReportActions
+          snapshotRequest={snapshotRequest}
+          onOpenDualReport={onOpenDualReport}
+        />
+
         {/* 第二身份切换 */}
         {otherProfile && (
           <button
