@@ -443,7 +443,91 @@ export const questionsGeneral: Question[] = [
     reverse: true,
     text: "在商场、车站这类大型场所找位置，我更容易记住显眼实景地标，不太依靠区域编号这类文字标识。",
     humorTip: "随机掉入迷宫。"
-  }
+  } 
+    // === 认知节奏：impulsive_reflective 补充题 ===
+  // {
+  //   id: 20,
+  //   dimension: 'impulsive_reflective',
+  //   direction: 'impulsive',
+  //   text: '在餐厅点单时，我通常快速决定，很少纠结菜单。',
+  //   humorTip: '服务员："需要推荐吗？" 你："不用，就第一个。"',
+  // },
+  // {
+  //   id: 21,
+  //   dimension: 'impulsive_reflective',
+  //   direction: 'reflective',
+  //   text: '即使是很小的决定，我也倾向于列出利弊再行动。',
+  //   humorTip: '买瓶可乐都要做 SWOT 分析的人，说的就是你。',
+  // },
+  // {
+  //   id: 22,
+  //   dimension: 'impulsive_reflective',
+  //   direction: 'reflective',
+  //   text: '我经常在事后想"如果当时再想想就好了"。',
+  //   humorTip: '凌晨三点：啊，那件事我应该那样说的！',
+  // },
+  
+  // // === 信息策略：convergent_divergent 补充题 ===
+  // {
+  //   id: 23,
+  //   dimension: 'convergent_divergent',
+  //   direction: 'divergent',
+  //   text: '我喜欢同时推进多个项目，而不是专注完成一个。',
+  //   humorTip: '电脑里有 47 个打开的标签页，都是"待会儿看"。',
+  // },
+  // {
+  //   id: 24,
+  //   dimension: 'convergent_divergent',
+  //   direction: 'convergent',
+  //   text: '我认为最好的方法是先确定一个可行方案，而不是探索所有可能。',
+  //   humorTip: 'A 计划很好，B 计划多余，C 计划不存在。',
+  // },
+  
+  // // === 视野焦点：wholistic_analytic 补充题 ===
+  // {
+  //   id: 25,
+  //   dimension: 'wholistic_analytic',
+  //   direction: 'wholistic',
+  //   text: '我更容易记住事情的整体氛围，而非具体细节。',
+  //   humorTip: '记得那部电影"很治愈"，但主角名字？忘了。',
+  // },
+  // {
+  //   id: 26,
+  //   dimension: 'wholistic_analytic',
+  //   direction: 'analytic',
+  //   text: '我倾向于把大问题拆解成小块，逐一解决。',
+  //   humorTip: '把人生拆解成甘特图，虽然从来没准时过。',
+  // },
+  
+  // // === 协作维度：直接出题 ===
+  // {
+  //   id: 27,
+  //   dimension: 'solo_team',
+  //   direction: 'solo',
+  //   text: '在团队中，我常常觉得独自完成会更高效。',
+  //   humorTip: '"我们来分工合作" "不用了，我今晚加班搞定。"',
+  // },
+  // {
+  //   id: 28,
+  //   dimension: 'solo_team',
+  //   direction: 'team',
+  //   text: '遇到困难时，我的第一反应是找人讨论。',
+  //   humorTip: '问题还没想清楚，群聊已经拉好了。',
+  // },
+  // {
+  //   id: 29,
+  //   dimension: 'solo_team',
+  //   direction: 'team',
+  //   text: '我认为好的想法通常诞生于多人碰撞，而非独自苦想。',
+  //   humorTip: '头脑风暴 2 小时，产出 50 个想法，0 个可用，但过程很开心。',
+  // },
+  // {
+  //   id: 30,
+  //   dimension: 'solo_team',
+  //   direction: 'solo',
+  //   text: '我需要大量独处时间才能恢复精力。',
+  //   humorTip: '周末社交电量：0%。勿扰模式：ON。',
+  // }
 ];
 
 /*

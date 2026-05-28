@@ -15,7 +15,7 @@ import {
   CheckCircle2, 
   CornerDownRight, 
   RefreshCw,
-  ArrowLeftRight
+  Repeat
 } from 'lucide-react';
 
 interface DisplayDimensionScore extends DimensionScore {
@@ -26,6 +26,8 @@ interface ResultsDisplayProps {
   scoreMap: Record<string, number>;
   scores: DisplayDimensionScore[];
   category: Category;
+  primaryArchetype: { key: string; matchScore: number };
+  secondaryArchetype: { key: string; matchScore: number };
   onReset: () => void;
 }
 
@@ -33,6 +35,8 @@ export default function ResultsDisplay({
   scoreMap,
   scores,
   category,
+  primaryArchetype,
+  secondaryArchetype,
   onReset,
 }: ResultsDisplayProps) {
   const [capturing, setCapturing] = useState(false);
@@ -41,15 +45,11 @@ export default function ResultsDisplay({
 
   // 1. Identify User's Profile Key
   // Based on score map of 4 dimensions: score < 12.5 means Left, score >= 12.5 means Right
-  const d1 = (scoreMap['impulsive_reflective'] ?? 12.5) >= 12.5 ? 'R' : 'I';
-  const d2 = (scoreMap['convergent_divergent'] ?? 12.5) >= 12.5 ? 'D' : 'C';
-  const d3 = (scoreMap['wholistic_analytic'] ?? 12.5) >= 12.5 ? 'A' : 'W';
   const d4 = (scoreMap['solo_team'] ?? 12.5) >= 12.5 ? 'T' : 'S';
   
-  const profileKey = `${d1}-${d2}-${d3}-${d4}`;
+  const profileKey = `${primaryArchetype.key}-${d4}`;
   const matchedMode = d4 as 'S' | 'T';
-  const otherMode = matchedMode === 'S' ? 'T' : 'S';
-  const otherProfileKey = buildProfileId(profileKey.split('-').slice(0, 3).join('-') as any, otherMode);
+  const otherProfileKey = buildProfileId(secondaryArchetype.key as any, matchedMode);
   
   const fallbackProfile: CognitiveProfile = {
     id: profileKey as any,
@@ -90,6 +90,7 @@ export default function ResultsDisplay({
 
   const activeProfile = showOtherMode && otherProfile ? otherProfile : profile;
   const activeProfileId = showOtherMode && otherProfile ? otherProfileKey : profileKey;
+  const activeMatchScore = showOtherMode && otherProfile ? secondaryArchetype.matchScore : primaryArchetype.matchScore;
 
   const guildEssenceMap: Record<string, { essence: string; name: string; color: string; borderColor: string }> = {
     'C-W': { essence: '聚合 × 整体：用标准方案搭建宏观骨架', name: '筑基者', color: 'text-[#00f0ff]', borderColor: 'border-l-[#00f0ff]' },
@@ -97,7 +98,9 @@ export default function ResultsDisplay({
     'D-W': { essence: '发散 × 整体：用创新探索突破宏观边界', name: '探路者', color: 'text-[#39ff14]', borderColor: 'border-l-[#39ff14]' },
     'D-A': { essence: '发散 × 分析：用创新突破微观极限', name: '炼金师', color: 'text-[#ff007f]', borderColor: 'border-l-[#ff007f]' },
   };
-  const guildKey = `${d2}-${d3}`;
+  const activeArchetypeKey = showOtherMode && otherProfile ? secondaryArchetype.key : primaryArchetype.key;
+  const activeArchetypeParts = activeArchetypeKey.split('-');
+  const guildKey = `${activeArchetypeParts[1]}-${activeArchetypeParts[2]}`;
   const guildInfo = guildEssenceMap[guildKey];
 
   const svgToImg = (svg: SVGSVGElement): Promise<HTMLImageElement> => {
@@ -293,23 +296,32 @@ export default function ResultsDisplay({
           {/* Persona Descriptions */}
           <div className="bg-black p-4 sm:p-6 md:p-8 border-2 border-[#00f0ff]/70 shadow-[4px_4px_0px_rgba(255,0,127,0.5)] flex flex-col justify-center relative select-none">
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 mb-4 sm:mb-8 z-10">
-              <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-none bg-black flex items-center justify-center shadow-md border-4 border-[#ff007f] shadow-[5px_5px_0px_rgba(0,240,255,0.5)] p-1.5 shrink-0">
-                <PixelAvatar id={activeProfileId} size={80} />
+              <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 shrink-0">
+                {/* 主头像：正常 */}
+                <div className="relative w-24 h-24 sm:w-32 sm:h-32 border-4 border-[#ff007f] shadow-[5px_5px_0px_rgba(0,240,255,0.5)] bg-black flex items-center justify-center shrink-0">
+                  <PixelAvatar id={activeProfileId} size={100} />
+                </div>
               </div>
               <div className="z-10 text-center sm:text-left">
-                <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-start">
+                <div className="flex items-center gap-3 flex-wrap justify-center sm:justify-start">
                   <span className="text-xs sm:text-[13px] font-pixel text-[#00f0ff] glow-cyan">    
                     {activeProfileId}
+                  </span>
+                  <span className="text-[10px] text-[#00f0ff]/60 border-l border-[#00f0ff]/30 pl-3 tracking-widest flex items-center gap-1.5">
+                    <span className="opacity-50">SYNC</span>
+                    <span className="font-bold text-[#00f0ff]/80">同步率 {activeMatchScore}%</span>
                   </span>
                 </div>
                 <h2 className="text-xl sm:text-3xl font-black tracking-widest text-[#00f0ff] mt-2 font-display uppercase glow-cyan break-words">
                   {activeProfile.displayName}
                 </h2>
-                {activeProfile.callSign && (
-                  <span className="text-xs sm:text-[13px] font-pixel text-[#ffe600] bg-black border border-[#ffe600] px-2 py-0.5 mt-1 inline-block">
-                    {activeProfile.callSign}
-                  </span>
-                )}
+                <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-start mt-1">
+                  {activeProfile.callSign && (
+                    <span className="text-xs sm:text-[13px] font-pixel text-[#ffe600] bg-black border border-[#ffe600] px-2 py-0.5 inline-block">
+                      {activeProfile.callSign}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -317,36 +329,27 @@ export default function ResultsDisplay({
               「 {activeProfile.flavorText} 」
             </p>
 
-            {otherProfile && (
-              <button
-                onClick={() => setShowOtherMode(!showOtherMode)}
-                className="mb-4 flex items-center gap-2 px-3 py-2 sm:py-1.5 border-2 border-[#ffe600] bg-black text-[#ffe600] font-pixel text-xs sm:text-[13px] hover:bg-[#ffe600]/10 transition-colors cursor-pointer z-10 min-h-[44px] sm:min-h-0"
-              >
-                <ArrowLeftRight className="w-3 h-3 shrink-0" />
-                <span className="text-left leading-tight">
-                  {showOtherMode
-                    ? `返回匹配模式：${profile.displayName}`
-                    : `切换视角：${otherProfile.displayName}`}
-                </span>
-              </button>
-            )}
-
-            {guildInfo && (
-              <div className={`mb-4 bg-black border-l-4 ${guildInfo.borderColor} px-3 sm:px-4 py-2.5 sm:py-3 z-10`}>
-                <span className="text-[11px] sm:text-[13px] font-pixel text-slate-500 uppercase tracking-widest block mb-0.5 sm:mb-1">
-                  认知底层基因 · {guildInfo.name}
-                </span>
-                <p className={`text-xs sm:text-[13px] font-bold ${guildInfo.color} tracking-wide`}>
-                  {guildInfo.essence}
-                </p>
+            <div className="flex flex-col gap-3 mt-4">
+              {/* <div className="text-xs sm:text-[13px] leading-relaxed text-slate-300 bg-[#070b19] p-3 sm:p-5 border-2 border-dashed border-[#ff007f]/45 z-10 font-sans shadow-inner break-words relative">
+                经系统深度扫描，你的核心形态为【<span className="text-[#00f0ff] font-bold glow-cyan">{profile.displayName}</span>】（{primaryArchetype.matchScore}% 共振）。你的副形态为【<span className="text-[#ff007f] font-bold glow-magenta">{otherProfile?.displayName || secondaryArchetype.key}</span>】（{secondaryArchetype.matchScore}% 共振）。
+              </div> */}
+              <div className="text-xs sm:text-[13px] leading-relaxed text-slate-300 bg-[#070b19] p-3 sm:p-5 border-2 border-dashed border-[#ff007f]/45 z-10 font-sans shadow-inner break-words relative">
+                {activeProfile.essence}
               </div>
-            )}
-
-            <p className="text-xs sm:text-[13px] leading-relaxed text-slate-300 bg-[#070b19] p-3 sm:p-5 border-2 border-dashed border-[#ff007f]/45 z-10 font-sans shadow-inner break-words">
-              {activeProfile.essence}
-            </p>
+            </div>
           </div>
         </div>
+
+        {guildInfo && (
+        <div className={`mb-4 bg-black border-l-4 ${guildInfo.borderColor} px-3 sm:px-4 py-2.5 sm:py-3 z-10`}>
+          <span className="text-[11px] sm:text-[13px] font-pixel text-slate-500 uppercase tracking-widest block mb-0.5 sm:mb-1">
+            认知底层基因 · {guildInfo.name}
+          </span>
+          <p className={`text-xs sm:text-[13px] font-bold ${guildInfo.color} tracking-wide`}>
+            {guildInfo.essence}
+          </p>
+        </div>
+      )}
 
         {/* Middle Part: Bento Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-6 mb-4 sm:mb-8 min-w-0">
@@ -463,13 +466,31 @@ export default function ResultsDisplay({
               </div>
 
             </div>
+
           </div>
 
         </div>
       </div>
 
       {/* Sharing and Action controls - OUTSIDE screenshot capture container */}
-      <div className="flex flex-col items-center gap-3 sm:gap-4 mt-6 sm:mt-12 pt-2 sm:pt-4 relative z-20 font-mono select-none">
+      <div className="flex flex-col items-center gap-4 sm:gap-8 mt-4 sm:mt-8 relative z-20 font-mono select-none">
+        {/* 第二身份切换 */}
+        {otherProfile && (
+          <button
+            onClick={() => setShowOtherMode(!showOtherMode)}
+            className="group relative w-full max-w-md px-5 py-4 rounded-none bg-gradient-to-r from-black via-[#0a0f1f] to-black border-2 border-[#ffe600]/80 text-[#ffe600] font-pixel text-sm flex items-center justify-center gap-3 shadow-[0_0_15px_rgba(255,230,0,0.2)] hover:shadow-[0_0_25px_rgba(255,230,0,0.4)] hover:border-[#ffe600] active:scale-[0.98] transition-all duration-300 cursor-pointer min-h-[52px] sm:min-h-0 overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#ffe600]/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+            <Repeat className="w-4 h-4 shrink-0" />
+            <span className="text-left leading-tight tracking-wider">
+              {showOtherMode
+                ? <>返回主身份<span className="text-[#ff007f] font-bold">【{profile.displayName}】</span></>
+                : <>发现你的第二身份<span className="text-[#00f0ff] font-bold">【{otherProfile.displayName}】</span></>}
+            </span>
+          </button>
+        )}
+
+
         {captureError && (
           <p className="text-[11px] sm:text-xs font-pixel text-[#ff007f] bg-black border border-[#ff007f] px-3 sm:px-4 py-2 glow-magenta text-center">
             [ SAVE ERROR ] 图片生成失败，请尝试滚动到页面顶部后重新保存

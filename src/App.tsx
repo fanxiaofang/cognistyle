@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Category, UserAnswers, DimensionScore, AllDimensionId, AllPolarityKey } from './types';
+import { Category, UserAnswers, DimensionScore, AllDimensionId, AllPolarityKey, ARCHETYPE_KEYS } from './types';
 import { questionsGeneral, dimensionMeta } from './data/questions';
 import QuestionCard from './components/QuestionCard';
 import ResultsDisplay from './components/ResultsDisplay';
@@ -157,7 +157,7 @@ export default function App() {
 
   // 4. Score Math calculations
   // Dimensions order maps questions exactly
-  const getResultsData = (): { scoreMap: Record<string, number>; scores: (DimensionScore & { percentage: number })[] } => {
+  const getResultsData = (): { scoreMap: Record<string, number>; scores: (DimensionScore & { percentage: number })[]; primaryArchetype: { key: string; matchScore: number }; secondaryArchetype: { key: string; matchScore: number } } => {
     const scoreMap: Record<string, number> = {};
     const dimQuestionsCount: Record<string, number> = {};
 
@@ -206,10 +206,40 @@ export default function App() {
         };
       });
 
-    return { scoreMap, scores };
+    const archetypeMatches = ARCHETYPE_KEYS.map(key => {
+      const parts = key.split('-');
+      const expectedPolars = [
+        parts[0] === 'I' ? 0 : 100,
+        parts[1] === 'C' ? 0 : 100,
+        parts[2] === 'W' ? 0 : 100,
+      ];
+      
+      const getNormalized = (id: string) => {
+        const s = scores.find(s => s.id === id);
+        return s ? s.normalizedScore : 50;
+      };
+
+      const actualPercents = [
+        getNormalized('impulsive_reflective'),
+        getNormalized('convergent_divergent'),
+        getNormalized('wholistic_analytic'),
+      ];
+      
+      const distance = Math.sqrt(
+        expectedPolars.reduce((sum, target, idx) => sum + Math.pow(target - actualPercents[idx], 2), 0)
+      );
+      
+      const matchScore = Math.max(0, Math.round(100 - (distance / 173.2) * 100));
+      return { key, matchScore };
+    }).sort((a, b) => b.matchScore - a.matchScore);
+
+    const primaryArchetype = archetypeMatches[0] || { key: 'I-C-W', matchScore: 100 };
+    const secondaryArchetype = archetypeMatches[1] || { key: 'I-C-A', matchScore: 80 };
+
+    return { scoreMap, scores, primaryArchetype, secondaryArchetype };
   };
 
-  const { scoreMap, scores } = view === 'result' ? getResultsData() : { scoreMap: {}, scores: [] };
+  const { scoreMap, scores, primaryArchetype, secondaryArchetype } = view === 'result' ? getResultsData() : { scoreMap: {}, scores: [], primaryArchetype: {key:'', matchScore:0}, secondaryArchetype: {key:'', matchScore:0} };
 
   return (
     <div className="min-h-screen bg-[#050814] grid-overlay text-slate-100 flex flex-col justify-between relative overflow-hidden">
@@ -358,6 +388,8 @@ export default function App() {
                 scoreMap={scoreMap}
                 scores={scores}
                 category="general"
+                primaryArchetype={primaryArchetype}
+                secondaryArchetype={secondaryArchetype}
                 onReset={handleReset}
               />
             </motion.div>
