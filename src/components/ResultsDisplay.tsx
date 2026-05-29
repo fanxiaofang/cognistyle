@@ -437,21 +437,7 @@ export default function ResultsDisplay({
                 </p>
               </div>
 
-            </div>
-
-          </div>
-
-        </div>
-      </div>
-
-      {/* Sharing and Action controls - OUTSIDE screenshot capture container */}
-      <div className="flex flex-col items-center gap-4 sm:gap-8 mt-4 sm:mt-8 relative z-20 font-mono select-none">
-        <SingleReportActions
-          snapshotRequest={snapshotRequest}
-          onOpenDualReport={onOpenDualReport}
-        />
-
-        {/* 第二身份切换 */}
+                      {/* 第二身份切换 */}
         {otherProfile && (
           <button
             onClick={() => setShowOtherMode(!showOtherMode)}
@@ -466,6 +452,22 @@ export default function ResultsDisplay({
             </span>
           </button>
         )}
+
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      {/* Sharing and Action controls - OUTSIDE screenshot capture container */}
+      <div className="flex flex-col items-center gap-4 sm:gap-8 mt-4 sm:mt-8 relative z-20 font-mono select-none">
+        <SingleReportActions
+          snapshotRequest={snapshotRequest}
+          onOpenDualReport={onOpenDualReport}
+        />
+
+
 
 
         {captureError && (

@@ -1,39 +1,39 @@
-const COMMON_HEADERS = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-  'X-Content-Type-Options': 'nosniff',
-};
-
-const QUESTION_VERSION = 'questions-general-2026-05';
-const SNAPSHOT_VERSION = 'snapshot-v1';
-const SNAPSHOT_TTL_SECONDS = 90 * 24 * 60 * 60;
-const RATE_LIMIT_MAX = 10;
-const RATE_LIMIT_WINDOW_SECONDS = 60;
-const RESULT_KEY_PREFIX = 'result:';
-const RATE_LIMIT_KEY_PREFIX = 'rate-limit:results:';
+import {
+  API_VERSIONS,
+  KV_KEY_PREFIXES,
+  DEFAULT_RATE_LIMIT,
+  TTL,
+  COMMON_HEADERS,
+} from './shared/api-constants.js';
+import {
+  getSnapshotKv,
+  hitRateLimit,
+  extractClientIp,
+  generateUrlSafeToken,
+  sha256Hex,
+  json,
+} from './shared/api-utils.js';
 
 export async function onRequest(context) {
   const { request, env } = context;
   let stage = 'init';
 
-  // === 调试：先看 env 里有没有 KV ===
   const envKeys = Object.keys(env);
   const kvCandidate = env.RESULT_SNAPSHOT_KV || env.MY_KV;
-  
+
   if (!kvCandidate) {
     return json(
-      { 
-        error: '结果存储未配置，请先绑定 KV。', 
+      {
+        error: '结果存储未配置，请先绑定 KV。',
         code: 'INTERNAL_ERROR',
         debug: {
           envKeys,
           hasResultSnapshotKv: !!env.RESULT_SNAPSHOT_KV,
           hasMyKv: !!env.MY_KV,
-          kvType: typeof kvCandidate
-        }
+          kvType: typeof kvCandidate,
+        },
       },
+      COMMON_HEADERS,
       { status: 500 }
     );
   }
@@ -45,6 +45,7 @@ export async function onRequest(context) {
   if (request.method !== 'POST') {
     return json(
       { error: 'Method Not Allowed', code: 'BAD_REQUEST' },
+      COMMON_HEADERS,
       { status: 405 }
     );
   }
@@ -53,22 +54,24 @@ export async function onRequest(context) {
   if (!kv) {
     return json(
       { error: '结果存储未配置，请先绑定 KV。', code: 'INTERNAL_ERROR' },
+      COMMON_HEADERS,
       { status: 500 }
     );
   }
 
   try {
     stage = 'rate-limit';
-    const clientIp =
-      request.headers.get('x-forwarded-for') ||
-      request.headers.get('X-Forwarded-For') ||
-      request.headers.get('cf-connecting-ip') ||
-      'unknown';
-
-    const limited = await hitRateLimit(kv, clientIp);
+    const clientIp = extractClientIp(request);
+    const limited = await hitRateLimit(
+      kv,
+      clientIp,
+      KV_KEY_PREFIXES.RATE_LIMIT.RESULTS,
+      DEFAULT_RATE_LIMIT.RESULTS_MAX
+    );
     if (limited) {
       return json(
         { error: '请求过于频繁，请稍后重试。', code: 'RATE_LIMITED' },
+        COMMON_HEADERS,
         { status: 429 }
       );
     }
@@ -79,11 +82,12 @@ export async function onRequest(context) {
       payload = await request.json();
     } catch (parseErr) {
       return json(
-        { 
-          error: '请求体 JSON 解析失败', 
+        {
+          error: '请求体 JSON 解析失败',
           code: 'BAD_REQUEST',
-          detail: parseErr.message 
+          detail: parseErr.message,
         },
+        COMMON_HEADERS,
         { status: 400 }
       );
     }
@@ -92,15 +96,16 @@ export async function onRequest(context) {
     const validationError = validateSnapshotPayload(payload);
     if (validationError) {
       return json(
-        { 
-          error: validationError, 
+        {
+          error: validationError,
           code: 'BAD_REQUEST',
           received: {
             questionVersion: payload?.questionVersion,
             snapshotVersion: payload?.snapshotVersion,
-            category: payload?.category
-          }
+            category: payload?.category,
+          },
         },
+        COMMON_HEADERS,
         { status: 400 }
       );
     }
@@ -108,13 +113,13 @@ export async function onRequest(context) {
     stage = 'generate-tokens';
     const friendId = generateUrlSafeToken(9);
     const deleteToken = generateUrlSafeToken(24);
-    
+
     stage = 'sha256';
     const deleteTokenHash = await sha256Hex(deleteToken);
-    
+
     stage = 'prepare-record';
     const now = Date.now();
-    const expiresAt = now + SNAPSHOT_TTL_SECONDS * 1000;
+    const expiresAt = now + TTL.SNAPSHOT_SECONDS * 1000;
 
     const record = {
       ...payload,
@@ -125,17 +130,19 @@ export async function onRequest(context) {
     };
 
     stage = 'kv-put';
-    await kv.put(`${RESULT_KEY_PREFIX}${friendId}`, JSON.stringify(record), {
-      expirationTtl: SNAPSHOT_TTL_SECONDS,
+    await kv.put(`${KV_KEY_PREFIXES.RESULT}${friendId}`, JSON.stringify(record), {
+      expirationTtl: TTL.SNAPSHOT_SECONDS,
     });
 
-    return json({
-      friendId,
-      deleteToken,
-      expiresAt,
-    });
+    return json(
+      {
+        friendId,
+        deleteToken,
+        expiresAt,
+      },
+      COMMON_HEADERS
+    );
   } catch (error) {
-    // === 增强诊断：返回具体阶段和错误详情 ===
     return json(
       {
         error: error instanceof Error ? error.message : '服务器内部错误',
@@ -144,29 +151,10 @@ export async function onRequest(context) {
         stack: error instanceof Error ? error.stack : undefined,
         errorType: error?.constructor?.name,
       },
+      COMMON_HEADERS,
       { status: 500 }
     );
   }
-}
-
-function getSnapshotKv(env) {
-  return env.RESULT_SNAPSHOT_KV || env.MY_KV || null;
-}
-
-async function hitRateLimit(kv, clientIp) {
-  const minuteBucket = Math.floor(Date.now() / (RATE_LIMIT_WINDOW_SECONDS * 1000));
-  const key = `${RATE_LIMIT_KEY_PREFIX}${clientIp}:${minuteBucket}`;
-  const current = parseInt((await kv.get(key)) || '0', 10);
-
-  if (current >= RATE_LIMIT_MAX) {
-    return true;
-  }
-
-  await kv.put(key, String(current + 1), {
-    expirationTtl: RATE_LIMIT_WINDOW_SECONDS,
-  });
-
-  return false;
 }
 
 function validateSnapshotPayload(payload) {
@@ -178,11 +166,11 @@ function validateSnapshotPayload(payload) {
     return '当前仅支持 general 分类。';
   }
 
-  if (payload.questionVersion !== QUESTION_VERSION) {
+  if (payload.questionVersion !== API_VERSIONS.QUESTION_VERSION) {
     return 'questionVersion 不匹配。';
   }
 
-  if (payload.snapshotVersion !== SNAPSHOT_VERSION) {
+  if (payload.snapshotVersion !== API_VERSIONS.SNAPSHOT_VERSION) {
     return 'snapshotVersion 不匹配。';
   }
 
@@ -261,36 +249,4 @@ function validateSnapshotPayload(payload) {
   }
 
   return null;
-}
-
-function generateUrlSafeToken(byteLength) {
-  const bytes = new Uint8Array(byteLength);
-  crypto.getRandomValues(bytes);
-  return toBase64Url(bytes);
-}
-
-function toBase64Url(bytes) {
-  let binary = '';
-  bytes.forEach((byte) => {
-    binary += String.fromCharCode(byte);
-  });
-
-  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-}
-
-async function sha256Hex(input) {
-  const buffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input));
-  return Array.from(new Uint8Array(buffer))
-    .map((byte) => byte.toString(16).padStart(2, '0'))
-    .join('');
-}
-
-function json(body, init = {}) {
-  return new Response(JSON.stringify(body), {
-    ...init,
-    headers: {
-      ...COMMON_HEADERS,
-      ...(init.headers || {}),
-    },
-  });
 }

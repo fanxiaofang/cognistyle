@@ -1,26 +1,28 @@
-const COMMON_HEADERS = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-  'X-Content-Type-Options': 'nosniff',
-};
+import {
+  KV_KEY_PREFIXES,
+  DEFAULT_RATE_LIMIT,
+  COMMON_HEADERS_GET,
+} from '../shared/api-constants.js';
+import {
+  hitRateLimit,
+  extractClientIp,
+  json,
+} from '../shared/api-utils.js';
+import { getSharedCopy } from '../shared/api-copy.js';
 
-const RATE_LIMIT_MAX = 60;
-const RATE_LIMIT_WINDOW_SECONDS = 60;
-const RATE_LIMIT_KEY_PREFIX = 'rate-limit:share-read:';
-const SHARE_KEY_PREFIX = 'share:';
+const sharedCopy = getSharedCopy();
 
 export async function onRequest(context) {
   const { request, env, params } = context;
 
   if (request.method === 'OPTIONS') {
-    return new Response(null, { status: 204, headers: COMMON_HEADERS });
+    return new Response(null, { status: 204, headers: COMMON_HEADERS_GET });
   }
 
   if (request.method !== 'GET') {
     return json(
-      { error: 'Method Not Allowed', code: 'BAD_REQUEST' },
+      { error: sharedCopy.errors.methodNotAllowed, code: 'BAD_REQUEST' },
+      COMMON_HEADERS_GET,
       { status: 405 }
     );
   }
@@ -28,73 +30,55 @@ export async function onRequest(context) {
   const kv = env.RESULT_SNAPSHOT_KV || env.MY_KV || null;
   if (!kv) {
     return json(
-      { error: '结果存储未配置，请先绑定 KV。', code: 'INTERNAL_ERROR' },
+      { error: sharedCopy.errors.storageMissing, code: 'INTERNAL_ERROR' },
+      COMMON_HEADERS_GET,
       { status: 500 }
     );
   }
 
   try {
-    const clientIp =
-      request.headers.get('x-forwarded-for') ||
-      request.headers.get('X-Forwarded-For') ||
-      request.headers.get('cf-connecting-ip') ||
-      'unknown';
-
-    const limited = await hitRateLimit(kv, clientIp);
+    const clientIp = extractClientIp(request);
+    const limited = await hitRateLimit(
+      kv,
+      clientIp,
+      KV_KEY_PREFIXES.RATE_LIMIT.SHARE_READ,
+      DEFAULT_RATE_LIMIT.SHARE_READ_MAX
+    );
     if (limited) {
       return json(
-        { error: '请求过于频繁，请稍后重试。', code: 'RATE_LIMITED' },
+        { error: sharedCopy.errors.rateLimited, code: 'RATE_LIMITED' },
+        COMMON_HEADERS_GET,
         { status: 429 }
       );
     }
 
     const token = typeof params?.token === 'string' ? params.token : '';
     if (!token || token.length < 8) {
-      return json({ error: '分享 token 非法。', code: 'BAD_REQUEST' }, { status: 400 });
+      return json(
+        { error: sharedCopy.errors.invalidToken, code: 'BAD_REQUEST' },
+        COMMON_HEADERS_GET,
+        { status: 400 }
+      );
     }
 
-    const raw = await kv.get(`${SHARE_KEY_PREFIX}${token}`);
+    const raw = await kv.get(`${KV_KEY_PREFIXES.SHARE}${token}`);
     if (!raw) {
       return json(
-        { error: '公开分享报告不存在或已过期。', code: 'NOT_FOUND' },
+        { error: sharedCopy.errors.shareNotFound, code: 'NOT_FOUND' },
+        COMMON_HEADERS_GET,
         { status: 404 }
       );
     }
 
-    return json(JSON.parse(raw));
+    return json(JSON.parse(raw), COMMON_HEADERS_GET);
   } catch (error) {
     return json(
       {
-        error: error instanceof Error ? error.message : '服务器内部错误',
+        error: error instanceof Error ? error.message : sharedCopy.errors.internalError,
         code: 'INTERNAL_ERROR',
       },
+      COMMON_HEADERS_GET,
       { status: 500 }
     );
   }
-}
-
-async function hitRateLimit(kv, clientIp) {
-  const minuteBucket = Math.floor(Date.now() / (RATE_LIMIT_WINDOW_SECONDS * 1000));
-  const key = `${RATE_LIMIT_KEY_PREFIX}${clientIp}:${minuteBucket}`;
-  const current = parseInt((await kv.get(key)) || '0', 10);
-
-  if (current >= RATE_LIMIT_MAX) {
-    return true;
-  }
-
-  await kv.put(key, String(current + 1), {
-    expirationTtl: RATE_LIMIT_WINDOW_SECONDS,
-  });
-
-  return false;
-}
-
-function json(body, init = {}) {
-  return new Response(JSON.stringify(body), {
-    ...init,
-    headers: {
-      ...COMMON_HEADERS,
-      ...(init.headers || {}),
-    },
-  });
 }

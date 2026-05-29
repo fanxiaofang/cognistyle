@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { AlertCircle, Copy, LoaderCircle, Share2 } from 'lucide-react';
+import PixelAvatar from '../components/PixelAvatar';
 import type { PublicCompatibilityReport } from '../contracts/dualReport';
 import { getPublicCompatibilityReport } from '../services/compatibilityService';
 
@@ -85,12 +86,12 @@ export default function PublicSharePage({ token, onBack }: PublicSharePageProps)
               <p className="text-[11px] sm:text-xs font-pixel tracking-widest text-[#00f0ff] uppercase">
                 公开互补报告
               </p>
-              <h2 className="mt-2 text-2xl sm:text-3xl font-black tracking-widest text-white font-display uppercase">
+              {/* <h2 className="mt-2 text-2xl sm:text-3xl font-black tracking-widest text-white font-display uppercase">
                 Public Share
               </h2>
               <p className="mt-2 text-xs sm:text-[13px] leading-relaxed text-slate-300 font-sans">
-                当前页面为脱敏分享模式，只展示分数、拆解与建议，不展示双方身份卡和好友 ID。
-              </p>
+                该报告由双方共同生成，展示双方身份卡与互补分析结果。
+              </p> */}
             </div>
             <div className="flex w-full sm:w-auto gap-2">
               <button
@@ -136,8 +137,40 @@ export default function PublicSharePage({ token, onBack }: PublicSharePageProps)
 
           {!loading && report && (
             <div className="flex flex-col gap-4 sm:gap-6">
-              <div className="border-2 border-[#ff007f]/60 bg-[#070b19] p-4 sm:p-5">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              {/* 双方身份卡 */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                <div className="lg:col-span-8 border-2 border-[#00f0ff]/60 bg-[#070b19] p-4 sm:p-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {report.pair ? [report.pair.userA, report.pair.userB].map((user, index) => (
+                      <div
+                        key={user.friendId}
+                        className="border border-dashed border-[#00f0ff]/30 bg-black/60 px-4 py-4"
+                      >
+                        <p className="text-[11px] sm:text-xs font-pixel tracking-widest text-slate-500 uppercase">
+                          {index === 0 ? '用户 A' : '用户 B'}
+                        </p>
+                        <div className="mt-3 flex items-center gap-3">
+                          <div className="w-12 h-12 border-2 border-[#ff007f] bg-black flex items-center justify-center shrink-0">
+                            <PixelAvatar id={user.profileId} size={46} />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-base sm:text-lg text-[#00f0ff] font-black break-words">
+                              {user.displayName}
+                            </p>
+                            <p className="text-[11px] sm:text-xs text-[#ffe600] font-pixel">
+                              {user.callSign} / {user.profileId}
+                            </p>
+                            <p className="mt-1 text-[11px] sm:text-xs text-slate-400 font-sans">
+                              {user.department} · {user.rank}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )): null}
+                  </div>
+                </div>
+
+                <div className="lg:col-span-4 border-2 border-[#ff007f]/60 bg-[#070b19] p-4 sm:p-5 flex flex-col justify-between">
                   <div>
                     <p className="text-[11px] sm:text-xs font-pixel tracking-widest text-[#ff007f] uppercase">
                       总互补度
@@ -155,17 +188,38 @@ export default function PublicSharePage({ token, onBack }: PublicSharePageProps)
                       {report.overall.summary}
                     </p>
                   </div>
-                  <div className="border border-dashed border-[#00f0ff]/30 bg-black/50 px-4 py-3">
+                  <div className="mt-5 border-t border-dashed border-[#ff007f]/30 pt-4">
+                    <div className="grid grid-cols-2 gap-3 text-xs sm:text-[13px]">
+                      <div>
+                        <p className="text-slate-500">认知互补</p>
+                        <p className="text-[#00f0ff] font-bold">{report.breakdown.cognitiveComplementarity}</p>
+                      </div>
+                      <div>
+                        <p className="text-slate-500">协作兼容</p>
+                        <p className="text-[#00f0ff] font-bold">{report.breakdown.collaborationCompatibility}</p>
+                      </div>
+                      <div>
+                        <p className="text-slate-500">盲区覆盖</p>
+                        <p className="text-[#39ff14] font-bold">{report.breakdown.blindSpotCoverage}</p>
+                      </div>
+                      <div>
+                        <p className="text-slate-500">摩擦风险</p>
+                        <p className="text-[#ff007f] font-bold">{report.breakdown.frictionRisk}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-4 border-t border-dashed border-[#00f0ff]/30 pt-3">
                     <p className="text-[11px] sm:text-xs font-pixel tracking-widest text-[#00f0ff] uppercase">
                       分享有效期
                     </p>
-                    <p className="mt-2 text-sm text-white font-mono">
+                    <p className="mt-1 text-sm text-white font-mono">
                       {formatExpiry(report.expiresAt) || '7 天内有效'}
                     </p>
                   </div>
                 </div>
               </div>
 
+              {/* 四维拆解 */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
                 <div className="lg:col-span-7 border-2 border-[#00f0ff]/60 bg-[#070b19] p-4 sm:p-5">
                   <div className="flex items-center gap-2">
@@ -235,6 +289,7 @@ export default function PublicSharePage({ token, onBack }: PublicSharePageProps)
                 </div>
               </div>
 
+              {/* 任务推荐 */}
               <div className="border-2 border-[#ffe600]/60 bg-[#070b19] p-4 sm:p-5">
                 <p className="text-[11px] sm:text-xs font-pixel tracking-widest text-[#ffe600] uppercase">
                   第七区任务推荐

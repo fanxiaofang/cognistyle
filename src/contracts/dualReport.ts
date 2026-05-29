@@ -28,6 +28,13 @@ export type CompatibilityDimensionKey =
   | 'vision'
   | 'collaboration';
 
+export type CompatibilityDimensionPattern =
+  | 'similar'
+  | 'opposite'
+  | 'complementary'
+  | 'moderate'
+  | 'friction';
+
 export const NORMALIZED_SCORE_SEMANTICS = {
   impulsiveReflective: {
     zero: 'impulsive',
@@ -132,6 +139,7 @@ export interface CompatibilityDimensionResult {
   score: number;
   delta: number;
   interpretation: string;
+  pattern: CompatibilityDimensionPattern;
 }
 
 export interface MissionSuggestion {
@@ -191,6 +199,10 @@ export interface PublicCompatibilityReport {
   createdAt: number;
   expiresAt: number;
   reportVersion: typeof DUAL_REPORT_VERSIONS.publicShareVersion;
+  pair: {
+    userA: CompatibilityPairIdentity;
+    userB: CompatibilityPairIdentity;
+  };
   overall: CompatibilityReport['overall'];
   breakdown: CompatibilityBreakdown;
   dimensions: CompatibilityReport['dimensions'];

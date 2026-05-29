@@ -1,15 +1,19 @@
-const COMMON_HEADERS = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-  'X-Content-Type-Options': 'nosniff',
-};
+import {
+  KV_KEY_PREFIXES,
+  DEFAULT_RATE_LIMIT,
+  COMMON_HEADERS,
+} from '../shared/api-constants.js';
+import {
+  getSnapshotKv,
+  hitRateLimit,
+  extractClientIp,
+  sha256Hex,
+  json,
+  safeParseJson,
+} from '../shared/api-utils.js';
+import { getSharedCopy } from '../shared/api-copy.js';
 
-const RATE_LIMIT_MAX = 5;
-const RATE_LIMIT_WINDOW_SECONDS = 60;
-const RATE_LIMIT_KEY_PREFIX = 'rate-limit:results-delete:';
-const RESULT_KEY_PREFIX = 'result:';
+const sharedCopy = getSharedCopy();
 
 export async function onRequest(context) {
   const { request, env } = context;
@@ -20,7 +24,8 @@ export async function onRequest(context) {
 
   if (request.method !== 'POST') {
     return json(
-      { error: 'Method Not Allowed', code: 'BAD_REQUEST' },
+      { error: sharedCopy.errors.methodNotAllowed, code: 'BAD_REQUEST' },
+      COMMON_HEADERS,
       { status: 405 }
     );
   }
@@ -28,86 +33,93 @@ export async function onRequest(context) {
   const kv = getSnapshotKv(env);
   if (!kv) {
     return json(
-      { error: '结果存储未配置，请先绑定 KV。', code: 'INTERNAL_ERROR' },
+      { error: sharedCopy.errors.storageMissing, code: 'INTERNAL_ERROR' },
+      COMMON_HEADERS,
       { status: 500 }
     );
   }
 
   try {
-    const clientIp =
-      request.headers.get('x-forwarded-for') ||
-      request.headers.get('X-Forwarded-For') ||
-      request.headers.get('cf-connecting-ip') ||
-      'unknown';
-
-    const limited = await hitRateLimit(kv, clientIp);
+    const clientIp = extractClientIp(request);
+    const limited = await hitRateLimit(
+      kv,
+      clientIp,
+      KV_KEY_PREFIXES.RATE_LIMIT.RESULTS_DELETE,
+      DEFAULT_RATE_LIMIT.RESULTS_DELETE_MAX
+    );
     if (limited) {
       return json(
-        { error: '请求过于频繁，请稍后重试。', code: 'RATE_LIMITED' },
+        { error: sharedCopy.errors.rateLimited, code: 'RATE_LIMITED' },
+        COMMON_HEADERS,
         { status: 429 }
       );
     }
 
-    const payload = await request.json();
-    const validationError = validateDeletePayload(payload);
-    if (validationError) {
-      return json({ error: validationError, code: 'BAD_REQUEST' }, { status: 400 });
+    let payload;
+    try {
+      payload = await request.json();
+    } catch {
+      return json(
+        { error: sharedCopy.errors.jsonParseFailed, code: 'BAD_REQUEST' },
+        COMMON_HEADERS,
+        { status: 400 }
+      );
     }
 
-    const recordKey = `${RESULT_KEY_PREFIX}${payload.friendId}`;
+    const validationError = validateDeletePayload(payload);
+    if (validationError) {
+      return json(
+        { error: validationError, code: 'BAD_REQUEST' },
+        COMMON_HEADERS,
+        { status: 400 }
+      );
+    }
+
+    const recordKey = `${KV_KEY_PREFIXES.RESULT}${payload.friendId}`;
     const raw = await kv.get(recordKey);
     if (!raw) {
       return json(
-        { error: '未找到该结果，可能已过期或已删除。', code: 'NOT_FOUND' },
+        { error: sharedCopy.errors.resultNotFound, code: 'NOT_FOUND' },
+        COMMON_HEADERS,
         { status: 404 }
       );
     }
 
-    const record = JSON.parse(raw);
+    const record = safeParseJson(raw);
+    if (!record) {
+      return json(
+        { error: sharedCopy.errors.resultNotFound, code: 'NOT_FOUND' },
+        COMMON_HEADERS,
+        { status: 404 }
+      );
+    }
+
     const deleteTokenHash = await sha256Hex(payload.deleteToken);
     if (record.deleteTokenHash !== deleteTokenHash) {
       return json(
-        { error: '删除凭证无效，无法删除该结果。', code: 'BAD_REQUEST' },
+        { error: sharedCopy.errors.deleteTokenInvalid, code: 'BAD_REQUEST' },
+        COMMON_HEADERS,
         { status: 400 }
       );
     }
 
     await kv.delete(recordKey);
-    return json({ success: true });
+    return json({ success: true }, COMMON_HEADERS);
   } catch (error) {
     return json(
       {
-        error: error instanceof Error ? error.message : '服务器内部错误',
+        error: error instanceof Error ? error.message : sharedCopy.errors.internalError,
         code: 'INTERNAL_ERROR',
       },
+      COMMON_HEADERS,
       { status: 500 }
     );
   }
 }
 
-function getSnapshotKv(env) {
-  return env.RESULT_SNAPSHOT_KV || env.MY_KV || null;
-}
-
-async function hitRateLimit(kv, clientIp) {
-  const minuteBucket = Math.floor(Date.now() / (RATE_LIMIT_WINDOW_SECONDS * 1000));
-  const key = `${RATE_LIMIT_KEY_PREFIX}${clientIp}:${minuteBucket}`;
-  const current = parseInt((await kv.get(key)) || '0', 10);
-
-  if (current >= RATE_LIMIT_MAX) {
-    return true;
-  }
-
-  await kv.put(key, String(current + 1), {
-    expirationTtl: RATE_LIMIT_WINDOW_SECONDS,
-  });
-
-  return false;
-}
-
 function validateDeletePayload(payload) {
   if (!payload || typeof payload !== 'object') {
-    return '请求体必须为 JSON 对象。';
+    return sharedCopy.errors.requestBodyMustBeObject;
   }
   if (typeof payload.friendId !== 'string' || payload.friendId.length < 6) {
     return 'friendId 非法。';
@@ -116,21 +128,4 @@ function validateDeletePayload(payload) {
     return 'deleteToken 非法。';
   }
   return null;
-}
-
-async function sha256Hex(input) {
-  const buffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input));
-  return Array.from(new Uint8Array(buffer))
-    .map((byte) => byte.toString(16).padStart(2, '0'))
-    .join('');
-}
-
-function json(body, init = {}) {
-  return new Response(JSON.stringify(body), {
-    ...init,
-    headers: {
-      ...COMMON_HEADERS,
-      ...(init.headers || {}),
-    },
-  });
 }

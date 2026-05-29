@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { AlertCircle, Copy, LoaderCircle, Radar, RefreshCw, ShieldAlert, Share2 } from 'lucide-react';
+import PixelAvatar from '../components/PixelAvatar';
 import type { CompatibilityReport } from '../contracts/dualReport';
 import { getLocalResultIdentity } from '../services/resultSnapshotService';
 import { createCompatibilityReport, createPublicShare } from '../services/compatibilityService';
@@ -25,6 +26,12 @@ export default function DualReportPage({ targetFriendId, onBack }: DualReportPag
   const [shareError, setShareError] = useState<string | null>(null);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [shareCopied, setShareCopied] = useState(false);
+
+  const fullShareUrl = shareUrl
+    ? shareUrl.startsWith('/')
+      ? `${window.location.origin}${shareUrl}`
+      : shareUrl
+    : null;
 
   const loadReport = async () => {
     if (!targetFriendId) {
@@ -93,10 +100,10 @@ export default function DualReportPage({ targetFriendId, onBack }: DualReportPag
   };
 
   const handleCopyShareUrl = async () => {
-    if (!shareUrl) return;
+    if (!fullShareUrl) return;
 
     try {
-      await navigator.clipboard.writeText(shareUrl);
+      await navigator.clipboard.writeText(fullShareUrl);
       setShareCopied(true);
     } catch {
       setShareError('复制分享链接失败，请手动复制。');
@@ -179,8 +186,8 @@ export default function DualReportPage({ targetFriendId, onBack }: DualReportPag
                           {index === 0 ? '你的身份卡' : '好友身份卡'}
                         </p>
                         <div className="mt-3 flex items-center gap-3">
-                          <div className="w-12 h-12 border-2 border-[#ff007f] bg-black flex items-center justify-center text-xl">
-                            {user.avatar}
+                          <div className="w-12 h-12 border-2 border-[#ff007f] bg-black flex items-center justify-center shrink-0">
+                            <PixelAvatar id={user.profileId} size={46} />
                           </div>
                           <div className="min-w-0">
                             <p className="text-base sm:text-lg text-[#00f0ff] font-black break-words">
@@ -344,7 +351,7 @@ export default function DualReportPage({ targetFriendId, onBack }: DualReportPag
                       公开分享
                     </p>
                     <p className="mt-2 text-xs sm:text-[13px] leading-relaxed text-slate-300 font-sans">
-                      公开分享模式只保留分数、拆解和建议，不包含双方身份卡、好友 ID 或删除凭证。
+                      公开分享包含双方身份卡、互补得分和任务推荐，分享给任何人查看。
                     </p>
                   </div>
                   <button
@@ -361,13 +368,13 @@ export default function DualReportPage({ targetFriendId, onBack }: DualReportPag
                   </button>
                 </div>
 
-                {shareUrl && (
+                {fullShareUrl && (
                   <div className="mt-4 border border-dashed border-[#ffe600]/35 bg-black/50 px-3 py-3">
                     <p className="text-[11px] sm:text-xs font-pixel tracking-widest text-[#ffe600] uppercase">
                       当前公开链接
                     </p>
                     <p className="mt-2 break-all text-xs sm:text-[13px] text-white font-mono">
-                      {shareUrl}
+                      {fullShareUrl}
                     </p>
                     <button
                       onClick={handleCopyShareUrl}

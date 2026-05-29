@@ -1,27 +1,25 @@
-const COMMON_HEADERS = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-  'X-Content-Type-Options': 'nosniff',
-};
+import {
+  COMPATIBILITY_CONFIG,
+  COMPATIBILITY_COPY,
+  DEFAULT_LOCALE,
+} from './compatibility-report.config.js';
+import {
+  API_VERSIONS,
+  KV_KEY_PREFIXES,
+  DEFAULT_RATE_LIMIT,
+  VALIDATION_RULES,
+  COMMON_HEADERS,
+} from './shared/api-constants.js';
+import {
+  getSnapshotKv,
+  hitRateLimit,
+  extractClientIp,
+  json,
+  safeParseJson,
+  validateFriendIdFormat,
+} from './shared/api-utils.js';
 
-const RATE_LIMIT_MAX = 30;
-const RATE_LIMIT_WINDOW_SECONDS = 60;
-const RATE_LIMIT_KEY_PREFIX = 'rate-limit:compatibility:';
-const RESULT_KEY_PREFIX = 'result:';
-const SNAPSHOT_VERSION = 'snapshot-v1';
-const QUESTION_VERSION = 'questions-general-2026-05';
-const REPORT_VERSION = 'compatibility-v1';
-const PUBLIC_SHARE_VERSION = 'public-share-v1';
-
-const MISSION_WEIGHTS = [
-  { name: '禁区探索', department: '边界署', rhythm: 0.3, strategy: 0.3, vision: 0.25, collaboration: 0.15 },
-  { name: '应急响应', department: '应急局', rhythm: 0.35, strategy: 0.25, vision: 0.15, collaboration: 0.25 },
-  { name: '标准审计', department: '标准局', rhythm: 0.1, strategy: 0.2, vision: 0.3, collaboration: 0.4 },
-  { name: '黑市定制', department: '黑市工坊', rhythm: 0.15, strategy: 0.35, vision: 0.25, collaboration: 0.25 },
-  { name: '遗迹发掘', department: '遗迹司', rhythm: 0.1, strategy: 0.25, vision: 0.35, collaboration: 0.3 },
-];
+const copy = COMPATIBILITY_COPY[DEFAULT_LOCALE];
 
 export async function onRequest(context) {
   const { request, env } = context;
@@ -33,6 +31,7 @@ export async function onRequest(context) {
   if (request.method !== 'POST') {
     return json(
       { error: 'Method Not Allowed', code: 'BAD_REQUEST' },
+      COMMON_HEADERS,
       { status: 405 }
     );
   }
@@ -40,108 +39,131 @@ export async function onRequest(context) {
   const kv = getSnapshotKv(env);
   if (!kv) {
     return json(
-      { error: '结果存储未配置，请先绑定 KV。', code: 'INTERNAL_ERROR' },
+      { error: copy.errors.storageMissing, code: 'INTERNAL_ERROR' },
+      COMMON_HEADERS,
       { status: 500 }
     );
   }
 
   try {
-    const clientIp =
-      request.headers.get('x-forwarded-for') ||
-      request.headers.get('X-Forwarded-For') ||
-      request.headers.get('cf-connecting-ip') ||
-      'unknown';
-
-    const limited = await hitRateLimit(kv, clientIp);
+    const clientIp = extractClientIp(request);
+    const limited = await hitRateLimit(
+      kv,
+      clientIp,
+      KV_KEY_PREFIXES.RATE_LIMIT.COMPATIBILITY,
+      DEFAULT_RATE_LIMIT.COMPATIBILITY_MAX
+    );
     if (limited) {
       return json(
-        { error: '请求过于频繁，请稍后重试。', code: 'RATE_LIMITED' },
+        { error: copy.errors.rateLimited, code: 'RATE_LIMITED' },
+        COMMON_HEADERS,
         { status: 429 }
       );
     }
 
-    const payload = await request.json();
+    let payload;
+    try {
+      payload = await request.json();
+    } catch {
+      return json(
+        { error: '请求体 JSON 解析失败', code: 'BAD_REQUEST' },
+        COMMON_HEADERS,
+        { status: 400 }
+      );
+    }
+
     const validationError = validateRequest(payload);
     if (validationError) {
-      return json({ error: validationError, code: 'BAD_REQUEST' }, { status: 400 });
+      return json(
+        { error: validationError, code: 'BAD_REQUEST' },
+        COMMON_HEADERS,
+        { status: 400 }
+      );
     }
 
     if (payload.myFriendId === payload.targetFriendId) {
       return json(
-        { error: '不能和自己的结果生成互补报告。', code: 'BAD_REQUEST' },
+        { error: copy.errors.selfPair, code: 'BAD_REQUEST' },
+        COMMON_HEADERS,
         { status: 400 }
       );
     }
 
     const [myRaw, targetRaw] = await Promise.all([
-      kv.get(`${RESULT_KEY_PREFIX}${payload.myFriendId}`),
-      kv.get(`${RESULT_KEY_PREFIX}${payload.targetFriendId}`),
+      kv.get(`${KV_KEY_PREFIXES.RESULT}${payload.myFriendId}`),
+      kv.get(`${KV_KEY_PREFIXES.RESULT}${payload.targetFriendId}`),
     ]);
 
     if (!myRaw) {
       return json(
-        { error: '当前设备的结果未找到，请重新保存你的测评结果。', code: 'NOT_FOUND' },
+        { error: copy.errors.currentResultMissing, code: 'NOT_FOUND' },
+        COMMON_HEADERS,
         { status: 404 }
       );
     }
 
     if (!targetRaw) {
       return json(
-        { error: '好友结果未找到，可能已过期，请让好友重新生成 ID。', code: 'NOT_FOUND' },
+        { error: copy.errors.targetResultMissing, code: 'NOT_FOUND' },
+        COMMON_HEADERS,
         { status: 404 }
       );
     }
 
-    const userA = JSON.parse(myRaw);
-    const userB = JSON.parse(targetRaw);
+    const userA = safeParseJson(myRaw);
+    const userB = safeParseJson(targetRaw);
+
+    if (!userA || !userB) {
+      return json(
+        { error: copy.errors.snapshotVersionMismatch, code: 'CONFLICT' },
+        COMMON_HEADERS,
+        { status: 409 }
+      );
+    }
 
     const versionError = validateSnapshotCompatibility(userA, userB);
     if (versionError) {
-      return json({ error: versionError, code: 'CONFLICT' }, { status: 409 });
+      return json(
+        { error: versionError, code: 'CONFLICT' },
+        COMMON_HEADERS,
+        { status: 409 }
+      );
+    }
+
+    const scoresError = validateNormalizedScores(userA.normalizedScores, userB.normalizedScores);
+    if (scoresError) {
+      return json(
+        { error: scoresError, code: 'BAD_REQUEST' },
+        COMMON_HEADERS,
+        { status: 400 }
+      );
     }
 
     const report = buildCompatibilityReport(userA, userB);
-    return json(report);
+    return json(report, COMMON_HEADERS);
   } catch (error) {
     return json(
       {
-        error: error instanceof Error ? error.message : '服务器内部错误',
+        error: error instanceof Error ? error.message : copy.errors.internalError,
         code: 'INTERNAL_ERROR',
       },
+      COMMON_HEADERS,
       { status: 500 }
     );
   }
 }
 
-export function getSnapshotKv(env) {
-  return env.RESULT_SNAPSHOT_KV || env.MY_KV || null;
-}
-
-async function hitRateLimit(kv, clientIp) {
-  const minuteBucket = Math.floor(Date.now() / (RATE_LIMIT_WINDOW_SECONDS * 1000));
-  const key = `${RATE_LIMIT_KEY_PREFIX}${clientIp}:${minuteBucket}`;
-  const current = parseInt((await kv.get(key)) || '0', 10);
-
-  if (current >= RATE_LIMIT_MAX) {
-    return true;
-  }
-
-  await kv.put(key, String(current + 1), {
-    expirationTtl: RATE_LIMIT_WINDOW_SECONDS,
-  });
-
-  return false;
-}
+export { getSnapshotKv, safeParseJson };
 
 function validateRequest(payload) {
   if (!payload || typeof payload !== 'object') {
-    return '请求体必须为 JSON 对象。';
+    return copy.errors.requestBodyMustBeObject;
   }
-  if (typeof payload.myFriendId !== 'string' || payload.myFriendId.length < 6) {
-    return 'myFriendId 非法。';
+  if (!validateFriendIdFormat(payload.myFriendId)) {
+    return copy.errors.invalidMyFriendId;
   }
-  if (typeof payload.targetFriendId !== 'string' || payload.targetFriendId.length < 6) {
-    return 'targetFriendId 非法。';
+  if (!validateFriendIdFormat(payload.targetFriendId)) {
+    return copy.errors.invalidTargetFriendId;
   }
   return null;
 }
@@ -150,14 +172,32 @@ function validateSnapshotCompatibility(userA, userB) {
   const snapshots = [userA, userB];
 
   for (const snapshot of snapshots) {
-    if (snapshot.snapshotVersion !== SNAPSHOT_VERSION) {
-      return '结果快照版本不兼容，请重新保存结果。';
+    if (snapshot.snapshotVersion !== API_VERSIONS.SNAPSHOT_VERSION) {
+      return copy.errors.snapshotVersionMismatch;
     }
-    if (snapshot.questionVersion !== QUESTION_VERSION) {
-      return '题库版本不兼容，请重新测评并保存结果。';
+    if (snapshot.questionVersion !== API_VERSIONS.QUESTION_VERSION) {
+      return copy.errors.questionVersionMismatch;
     }
     if (!snapshot.normalizedScores || typeof snapshot.normalizedScores !== 'object') {
-      return '结果快照缺少归一化分数。';
+      return copy.errors.normalizedScoresMissing;
+    }
+  }
+
+  return null;
+}
+
+function validateNormalizedScores(scoresA, scoresB) {
+  const requiredKeys = ['impulsiveReflective', 'convergentDivergent', 'wholisticAnalytic', 'soloTeam'];
+  const { NORMALIZED_SCORE_MIN, NORMALIZED_SCORE_MAX } = VALIDATION_RULES;
+
+  for (const key of requiredKeys) {
+    const a = scoresA[key];
+    const b = scoresB[key];
+    if (
+      typeof a !== 'number' || Number.isNaN(a) || a < NORMALIZED_SCORE_MIN || a > NORMALIZED_SCORE_MAX ||
+      typeof b !== 'number' || Number.isNaN(b) || b < NORMALIZED_SCORE_MIN || b > NORMALIZED_SCORE_MAX
+    ) {
+      return `normalizedScores.${key} 数据异常，请重新保存结果。`;
     }
   }
 
@@ -170,9 +210,14 @@ function scoreByGap(delta, idealGap, tolerance, floor) {
 }
 
 function coverageScore(delta, oppositeSide, avgStrength) {
-  const gapFactor = Math.max(0, 1 - Math.abs(delta - 0.5) / 0.5);
-  const sideBonus = oppositeSide ? 1 : 0.6;
-  const strengthFactor = 0.4 + avgStrength * 0.6;
+  const coverageConfig = COMPATIBILITY_CONFIG.coverage;
+  const gapFactor = Math.max(
+    0,
+    1 - Math.abs(delta - coverageConfig.idealGap) / coverageConfig.idealGap
+  );
+  const sideBonus = oppositeSide ? 1 : coverageConfig.sameSideBonus;
+  const strengthFactor =
+    coverageConfig.baseStrengthFactor + avgStrength * coverageConfig.strengthWeight;
   return Math.round(100 * gapFactor * sideBonus * strengthFactor);
 }
 
@@ -201,125 +246,225 @@ function getDimensionContext(scoreA, scoreB) {
   };
 }
 
-function buildDimensionResult(label, delta, score) {
-  let interpretation = '';
+function detectPairPattern(dimensions, breakdown) {
+  const patternConfig = COMPATIBILITY_CONFIG.pattern;
+  const avgDelta =
+    patternConfig.cognitiveDimensions.reduce((sum, key) => sum + dimensions[key].delta, 0) /
+    patternConfig.cognitiveDimensions.length;
+  const collaborationDelta = dimensions.collaboration.delta;
+  const collaborationScore = dimensions.collaboration.score;
 
-  if (score >= 75) {
-    interpretation = `${label}形成稳定补位，既有差异也在可协作区间内。`;
-  } else if (score >= 50) {
-    interpretation = `${label}具备一定互补价值，需要在执行中做少量协调。`;
-  } else if (score >= 35) {
-    interpretation = `${label}存在局部补位，但协作效率容易受限。`;
-  } else {
-    interpretation = `${label}差异没有稳定转化为协同收益，容易带来摩擦。`;
+  if (
+    avgDelta < patternConfig.homogeneousMaxAvgDelta &&
+    collaborationDelta < patternConfig.homogeneousMaxCollaborationDelta &&
+    breakdown.blindSpotCoverage < patternConfig.homogeneousMaxBlindSpotCoverage
+  ) {
+    return 'homogeneous';
+  }
+
+  if (
+    breakdown.frictionRisk >= patternConfig.conflictingMinFrictionRisk ||
+    dimensions.rhythm.delta > patternConfig.conflictingRhythmDeltaThreshold ||
+    collaborationDelta > patternConfig.conflictingCollaborationDeltaThreshold ||
+    collaborationScore < patternConfig.conflictingMaxCollaborationScore
+  ) {
+    return 'conflicting';
+  }
+
+  if (
+    breakdown.blindSpotCoverage >= patternConfig.complementaryMinBlindSpotCoverage &&
+    avgDelta >= patternConfig.complementaryMinAvgDelta &&
+    avgDelta <= patternConfig.complementaryMaxAvgDelta &&
+    collaborationScore >= patternConfig.complementaryMinCollaborationScore
+  ) {
+    return 'complementary';
+  }
+
+  return 'asymmetric';
+}
+
+function buildDimensionResult(label, delta, score) {
+  const dimensionResultConfig = COMPATIBILITY_CONFIG.dimensionResult;
+  const deltaFixed = Number(delta.toFixed(2));
+
+  if (deltaFixed < dimensionResultConfig.highlyAlignedMaxDelta) {
+    return {
+      score,
+      delta: deltaFixed,
+      interpretation: copy.dimensionInterpretation.similar(label, deltaFixed),
+      pattern: 'similar',
+    };
+  }
+
+  if (deltaFixed > dimensionResultConfig.oppositeMinDelta) {
+    return {
+      score,
+      delta: deltaFixed,
+      interpretation: copy.dimensionInterpretation.opposite(label, deltaFixed),
+      pattern: 'opposite',
+    };
+  }
+
+  if (score >= dimensionResultConfig.complementaryMinScore) {
+    return {
+      score,
+      delta: deltaFixed,
+      interpretation: copy.dimensionInterpretation.complementary(label),
+      pattern: 'complementary',
+    };
+  }
+
+  if (score >= dimensionResultConfig.moderateMinScore) {
+    return {
+      score,
+      delta: deltaFixed,
+      interpretation: copy.dimensionInterpretation.moderate(label),
+      pattern: 'moderate',
+    };
   }
 
   return {
     score,
-    delta: Number(delta.toFixed(2)),
-    interpretation,
+    delta: deltaFixed,
+    interpretation: copy.dimensionInterpretation.friction(label),
+    pattern: 'friction',
   };
 }
 
 function getRating(score) {
-  if (score >= 80) return '完美协作';
-  if (score >= 65) return '高度协作';
-  if (score >= 50) return '良好协同';
-  if (score >= 35) return '基本互补';
-  return '显著摩擦';
+  return (
+    COMPATIBILITY_CONFIG.rating.find((item) => score >= item.min)?.label ||
+    COMPATIBILITY_CONFIG.rating[COMPATIBILITY_CONFIG.rating.length - 1].label
+  );
 }
 
-function buildSummary(overallScore, breakdown) {
+function buildSummary(overallScore, breakdown, pattern) {
+  if (pattern === 'homogeneous') {
+    return copy.summary.homogeneous;
+  }
+
+  if (pattern === 'conflicting') {
+    return copy.summary.conflicting;
+  }
+
   if (overallScore >= 80) {
-    return '你们既能形成明显补位，又没有被协作成本显著拖累，属于高潜力搭档组合。';
+    return copy.summary.excellent;
   }
   if (overallScore >= 65) {
-    return '你们在关键维度上存在明确互补，只要提前对齐节奏和分工，就能稳定放大彼此长板。';
+    return copy.summary.strong;
   }
   if (overallScore >= 50) {
-    return '这是一组具备协同价值的组合，但需要在合作方式上做主动设计，才能把差异转化为产出。';
+    return copy.summary.workable;
   }
   if (breakdown.frictionRisk >= 60) {
-    return '你们不是没有互补潜力，而是执行摩擦偏高，需要更明确的接口、节奏和角色划分。';
+    return copy.summary.highFriction;
   }
-  return '你们当前的差异尚未形成有效协同，若缺少明确分工，很容易在合作中互相消耗。';
+  return copy.summary.default;
 }
 
-function buildMissionSuggestions(dimensions) {
-  return MISSION_WEIGHTS.map((mission) => {
+function buildMissionSuggestions(dimensions, pattern) {
+  return COMPATIBILITY_CONFIG.missionWeights.map((mission) => {
     const fitScore = roundScore(
-      dimensions.rhythm.score * mission.rhythm +
-        dimensions.strategy.score * mission.strategy +
-        dimensions.vision.score * mission.vision +
-        dimensions.collaboration.score * mission.collaboration
+      Object.entries(mission.weights).reduce(
+        (sum, [key, weight]) => sum + dimensions[key].score * weight,
+        0
+      )
     );
 
-    const strongest = Object.entries({
-      节奏: dimensions.rhythm.score * mission.rhythm,
-      策略: dimensions.strategy.score * mission.strategy,
-      视野: dimensions.vision.score * mission.vision,
-      协作: dimensions.collaboration.score * mission.collaboration,
-    }).sort((a, b) => b[1] - a[1])[0][0];
+    const strongestKey = Object.entries(mission.weights).sort(
+      ([dimensionKeyA, weightA], [dimensionKeyB, weightB]) =>
+        dimensions[dimensionKeyB].score * weightB - dimensions[dimensionKeyA].score * weightA
+    )[0][0];
+    const strongest = COMPATIBILITY_CONFIG.dimensions[strongestKey].shortLabel;
+
+    let reason;
+    if (pattern === 'homogeneous') {
+      reason = copy.missionReason.homogeneous(strongest);
+    } else if (pattern === 'conflicting') {
+      reason = copy.missionReason.conflicting(strongest);
+    } else {
+      reason = copy.missionReason.default(strongest);
+    }
 
     return {
       name: mission.name,
       department: mission.department,
       fitScore,
-      reason: `${strongest}维度最能支撑这类任务，适合把双方差异转化为分工协同。`,
+      reason,
     };
   })
     .sort((a, b) => b.fitScore - a.fitScore)
     .slice(0, 3);
 }
 
-function buildRecommendations(dimensions, breakdown, missionSuggestions) {
+function buildRecommendations(dimensions, breakdown, pattern, missionSuggestions) {
+  const recommendationCopy = copy.recommendations;
   const bestFor = [];
   const shouldAvoid = [];
   const communicationTips = [];
 
-  if (dimensions.strategy.score >= 70 && dimensions.vision.score >= 70) {
-    bestFor.push('一人发散探索，一人负责收敛和落地的复杂任务');
+  if (pattern === 'homogeneous') {
+    bestFor.push(...recommendationCopy.bestFor.homogeneous);
+  } else if (pattern === 'conflicting') {
+    bestFor.push(...recommendationCopy.bestFor.conflicting);
+  } else if (dimensions.strategy.score >= 70 && dimensions.vision.score >= 70) {
+    bestFor.push(recommendationCopy.bestFor.strategyVisionStrong);
   } else if (breakdown.cognitiveComplementarity >= 65) {
-    bestFor.push('需要不同视角共同参与的方案评估与决策');
+    bestFor.push(recommendationCopy.bestFor.highComplementarity);
   } else {
-    bestFor.push('边界清晰、目标明确的小范围协作任务');
+    bestFor.push(recommendationCopy.bestFor.default);
   }
 
   if (dimensions.collaboration.score >= 70) {
-    bestFor.push('需要频繁对齐、需要同步反馈的合作场景');
+    bestFor.push(recommendationCopy.bestFor.highCollaboration);
   } else {
-    bestFor.push('可以拆解模块、采用异步接口对齐的协作方式');
+    bestFor.push(recommendationCopy.bestFor.asyncCollaboration);
   }
 
-  if (breakdown.frictionRisk >= 60) {
-    shouldAvoid.push('没有明确角色与接口人时直接并行推进同一模块');
-  }
-  if (dimensions.rhythm.score < 45) {
-    shouldAvoid.push('高压且需要即时同步决策的密集协作场景');
-  }
-  if (dimensions.collaboration.score < 45) {
-    shouldAvoid.push('高频会议、持续打断式的同步合作方式');
-  }
-  if (shouldAvoid.length === 0) {
-    shouldAvoid.push('避免在目标尚未定义清楚时就同时深入执行细节');
+  if (pattern === 'homogeneous') {
+    shouldAvoid.push(...recommendationCopy.shouldAvoid.homogeneous);
+  } else if (pattern === 'conflicting') {
+    shouldAvoid.push(...recommendationCopy.shouldAvoid.conflicting);
+  } else {
+    if (breakdown.frictionRisk >= 60) {
+      shouldAvoid.push(recommendationCopy.shouldAvoid.highFriction);
+    }
+    if (dimensions.rhythm.score < 45) {
+      shouldAvoid.push(recommendationCopy.shouldAvoid.lowRhythm);
+    }
+    if (dimensions.collaboration.score < 45) {
+      shouldAvoid.push(recommendationCopy.shouldAvoid.lowCollaboration);
+    }
+    if (shouldAvoid.length === 0) {
+      shouldAvoid.push(recommendationCopy.shouldAvoid.default);
+    }
   }
 
-  if (dimensions.rhythm.score < 55) {
-    communicationTips.push('先约定节奏预期：谁先出稿、谁负责收敛、何时做同步决策。');
+  if (pattern === 'homogeneous') {
+    communicationTips.push(...recommendationCopy.communicationTips.homogeneous);
+    if (breakdown.blindSpotCoverage < 15) {
+      communicationTips.push(recommendationCopy.communicationTips.homogeneousBlindSpot);
+    }
+  } else if (pattern === 'conflicting') {
+    communicationTips.push(...recommendationCopy.communicationTips.conflicting);
   } else {
-    communicationTips.push('保持固定节奏的短周期同步，能放大你们的协作效率。');
-  }
+    if (dimensions.rhythm.score < 55) {
+      communicationTips.push(recommendationCopy.communicationTips.lowRhythm);
+    } else {
+      communicationTips.push(recommendationCopy.communicationTips.highRhythm);
+    }
 
-  if (dimensions.collaboration.score < 55) {
-    communicationTips.push('优先使用异步文档和明确接口，减少彼此打断带来的消耗。');
-  } else {
-    communicationTips.push('适当提高高频对齐密度，会让你们更容易形成合拍推进。');
-  }
+    if (dimensions.collaboration.score < 55) {
+      communicationTips.push(recommendationCopy.communicationTips.lowCollaboration);
+    } else {
+      communicationTips.push(recommendationCopy.communicationTips.highCollaboration);
+    }
 
-  if (breakdown.blindSpotCoverage >= 65) {
-    communicationTips.push('在关键节点刻意邀请对方审视你的盲区，比单独推进更能提升质量。');
-  } else {
-    communicationTips.push('先明确各自负责的边界，再逐步建立互补默契。');
+    if (breakdown.blindSpotCoverage >= 65) {
+      communicationTips.push(recommendationCopy.communicationTips.highBlindSpot);
+    } else {
+      communicationTips.push(recommendationCopy.communicationTips.default);
+    }
   }
 
   return {
@@ -330,53 +475,97 @@ function buildRecommendations(dimensions, breakdown, missionSuggestions) {
   };
 }
 
+function safeDisplay(display) {
+  if (!display || typeof display !== 'object') {
+    return {
+      displayName: '',
+      callSign: '',
+      department: '',
+      rank: '',
+      avatar: '',
+    };
+  }
+  return {
+    displayName: typeof display.displayName === 'string' ? display.displayName.slice(0, VALIDATION_RULES.DISPLAY_MAX_LENGTH) : '',
+    callSign: typeof display.callSign === 'string' ? display.callSign.slice(0, VALIDATION_RULES.DISPLAY_MAX_LENGTH) : '',
+    department: typeof display.department === 'string' ? display.department.slice(0, VALIDATION_RULES.DISPLAY_MAX_LENGTH) : '',
+    rank: typeof display.rank === 'string' ? display.rank.slice(0, VALIDATION_RULES.DISPLAY_MAX_LENGTH) : '',
+    avatar: typeof display.avatar === 'string' ? display.avatar.slice(0, VALIDATION_RULES.AVATAR_MAX_LENGTH) : '',
+  };
+}
+
 export function buildCompatibilityReport(userA, userB) {
   const a = userA.normalizedScores;
   const b = userB.normalizedScores;
 
-  const rhythmContext = getDimensionContext(a.impulsiveReflective, b.impulsiveReflective);
-  const strategyContext = getDimensionContext(a.convergentDivergent, b.convergentDivergent);
-  const visionContext = getDimensionContext(a.wholisticAnalytic, b.wholisticAnalytic);
-  const collaborationContext = getDimensionContext(a.soloTeam, b.soloTeam);
-
-  const rhythmScore = scoreByGap(rhythmContext.delta, 0.35, 0.2, 35);
-  const strategyScore = scoreByGap(strategyContext.delta, 0.6, 0.22, 20);
-  const visionScore = scoreByGap(visionContext.delta, 0.55, 0.28, 30);
-  const collaborationScore = scoreByGap(collaborationContext.delta, 0.1, 0.18, 15);
+  const dimensionContexts = Object.fromEntries(
+    Object.entries(COMPATIBILITY_CONFIG.dimensions).map(([key, config]) => [
+      key,
+      getDimensionContext(a[config.sourceKey], b[config.sourceKey]),
+    ])
+  );
+  const dimensionScores = Object.fromEntries(
+    Object.entries(COMPATIBILITY_CONFIG.dimensions).map(([key, config]) => [
+      key,
+      scoreByGap(
+        dimensionContexts[key].delta,
+        config.idealGap,
+        config.tolerance,
+        config.floor
+      ),
+    ])
+  );
 
   const cognitiveComplementarity = roundScore(
-    rhythmScore * 0.3 + strategyScore * 0.35 + visionScore * 0.35
+    Object.entries(COMPATIBILITY_CONFIG.aggregation.cognitiveComplementarity).reduce(
+      (sum, [key, weight]) => sum + dimensionScores[key] * weight,
+      0
+    )
   );
-  const collaborationCompatibility = collaborationScore;
+  const collaborationCompatibility = dimensionScores.collaboration;
   const blindSpotCoverage = roundScore(
     (
-      coverageScore(rhythmContext.delta, rhythmContext.oppositeSide, rhythmContext.avgStrength) +
-      coverageScore(strategyContext.delta, strategyContext.oppositeSide, strategyContext.avgStrength) +
-      coverageScore(visionContext.delta, visionContext.oppositeSide, visionContext.avgStrength)
-    ) / 3
+      COMPATIBILITY_CONFIG.pattern.cognitiveDimensions.reduce(
+        (sum, key) =>
+          sum +
+          coverageScore(
+            dimensionContexts[key].delta,
+            dimensionContexts[key].oppositeSide,
+            dimensionContexts[key].avgStrength
+          ),
+        0
+      )
+    ) / COMPATIBILITY_CONFIG.pattern.cognitiveDimensions.length
   );
   const frictionRisk = roundScore(
-    riskScore(rhythmContext.delta, rhythmContext.avgStrength, 0.6) * 0.45 +
-      riskScore(collaborationContext.delta, collaborationContext.avgStrength, 0.5) * 0.35 +
-      riskScore(strategyContext.delta, strategyContext.avgStrength, 0.85) * 0.1 +
-      riskScore(visionContext.delta, visionContext.avgStrength, 0.9) * 0.1
+    Object.entries(COMPATIBILITY_CONFIG.friction).reduce(
+      (sum, [key, config]) =>
+        sum +
+        riskScore(
+          dimensionContexts[key].delta,
+          dimensionContexts[key].avgStrength,
+          config.dangerStart
+        ) *
+          config.weight,
+      0
+    )
   );
 
   const overallScore = roundScore(
-    cognitiveComplementarity * 0.45 +
-      collaborationCompatibility * 0.2 +
-      blindSpotCoverage * 0.2 +
-      (100 - frictionRisk) * 0.15
+    cognitiveComplementarity * COMPATIBILITY_CONFIG.aggregation.overall.cognitiveComplementarity +
+      collaborationCompatibility *
+        COMPATIBILITY_CONFIG.aggregation.overall.collaborationCompatibility +
+      blindSpotCoverage * COMPATIBILITY_CONFIG.aggregation.overall.blindSpotCoverage +
+      (100 - frictionRisk) * COMPATIBILITY_CONFIG.aggregation.overall.inverseFrictionRisk
   );
 
-  const dimensions = {
-    rhythm: buildDimensionResult('节奏维度', rhythmContext.delta, rhythmScore),
-    strategy: buildDimensionResult('策略维度', strategyContext.delta, strategyScore),
-    vision: buildDimensionResult('视野维度', visionContext.delta, visionScore),
-    collaboration: buildDimensionResult('协作维度', collaborationContext.delta, collaborationScore),
-  };
+  const dimensions = Object.fromEntries(
+    Object.entries(COMPATIBILITY_CONFIG.dimensions).map(([key, config]) => [
+      key,
+      buildDimensionResult(config.label, dimensionContexts[key].delta, dimensionScores[key]),
+    ])
+  );
 
-  const missionSuggestions = buildMissionSuggestions(dimensions);
   const breakdown = {
     cognitiveComplementarity,
     collaborationCompatibility,
@@ -384,37 +573,43 @@ export function buildCompatibilityReport(userA, userB) {
     frictionRisk,
   };
 
+  const pattern = detectPairPattern(dimensions, breakdown);
+  const missionSuggestions = buildMissionSuggestions(dimensions, pattern);
+
+  const displayA = safeDisplay(userA.display);
+  const displayB = safeDisplay(userB.display);
+
   return {
-    reportVersion: REPORT_VERSION,
+    reportVersion: API_VERSIONS.COMPATIBILITY_REPORT_VERSION,
     generatedAt: Date.now(),
     pair: {
       userA: {
-        friendId: userA.friendId,
-        profileId: userA.profileId,
-        displayName: userA.display.displayName,
-        callSign: userA.display.callSign,
-        department: userA.display.department,
-        rank: userA.display.rank,
-        avatar: userA.display.avatar,
+        friendId: userA.friendId || '',
+        profileId: userA.profileId || '',
+        displayName: displayA.displayName,
+        callSign: displayA.callSign,
+        department: displayA.department,
+        rank: displayA.rank,
+        avatar: displayA.avatar,
       },
       userB: {
-        friendId: userB.friendId,
-        profileId: userB.profileId,
-        displayName: userB.display.displayName,
-        callSign: userB.display.callSign,
-        department: userB.display.department,
-        rank: userB.display.rank,
-        avatar: userB.display.avatar,
+        friendId: userB.friendId || '',
+        profileId: userB.profileId || '',
+        displayName: displayB.displayName,
+        callSign: displayB.callSign,
+        department: displayB.department,
+        rank: displayB.rank,
+        avatar: displayB.avatar,
       },
     },
     overall: {
       score: overallScore,
       rating: getRating(overallScore),
-      summary: buildSummary(overallScore, breakdown),
+      summary: buildSummary(overallScore, breakdown, pattern),
     },
     breakdown,
     dimensions,
-    recommendations: buildRecommendations(dimensions, breakdown, missionSuggestions),
+    recommendations: buildRecommendations(dimensions, breakdown, pattern, missionSuggestions),
   };
 }
 
@@ -423,20 +618,11 @@ export function buildPublicCompatibilityReport(report, token, expiresAt) {
     token,
     createdAt: Date.now(),
     expiresAt,
-    reportVersion: PUBLIC_SHARE_VERSION,
+    reportVersion: API_VERSIONS.PUBLIC_SHARE_VERSION,
+    pair: report.pair,
     overall: report.overall,
     breakdown: report.breakdown,
     dimensions: report.dimensions,
     recommendations: report.recommendations,
   };
-}
-
-function json(body, init = {}) {
-  return new Response(JSON.stringify(body), {
-    ...init,
-    headers: {
-      ...COMMON_HEADERS,
-      ...(init.headers || {}),
-    },
-  });
 }
