@@ -131,15 +131,12 @@ export default function SingleReportActions({
   };
 
   return (
-    <div className="w-full max-w-2xl border-2 border-[#00f0ff]/60 bg-black/80 px-4 py-4 sm:px-5 sm:py-5 shadow-[4px_4px_0px_rgba(255,0,127,0.35)]">
+    <div className="w-full border-2 border-[#00f0ff]/60 bg-black/80 px-4 py-4 sm:px-5 sm:py-5 shadow-[4px_4px_0px_rgba(255,0,127,0.35)]">
       <div className="flex flex-col gap-3 sm:gap-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-[11px] sm:text-xs font-pixel tracking-widest text-[#00f0ff] uppercase">
               双人互补报告准备
-            </p>
-            <p className="mt-1 text-xs sm:text-[13px] leading-relaxed text-slate-300 font-sans">
-              先保存当前结果生成自己的好友 ID，再输入好友 ID 进入双人互补报告。
             </p>
           </div>
           <button
@@ -167,7 +164,7 @@ export default function SingleReportActions({
                   {identity.friendId}
                 </p>
                 <p className="mt-1 text-[11px] sm:text-xs text-slate-400 font-sans">
-                  有效期至 {expiresText || '已生成'}，请截图或复制保存，我们暂不提供找回。
+                  有效期至 {expiresText || '已生成'}
                 </p>
               </div>
               <button
@@ -182,43 +179,34 @@ export default function SingleReportActions({
         )}
 
         <div className="border border-dashed border-[#ffe600]/35 bg-[#070b19] px-3 py-3 sm:px-4 sm:py-4">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="w-4 h-4 text-[#ffe600] shrink-0 mt-0.5" />
-            <div className="min-w-0">
-              <p className="text-[11px] sm:text-xs font-pixel tracking-widest text-[#ffe600] uppercase">
-                隐私提示
-              </p>
-              <p className="mt-1 text-[11px] sm:text-xs leading-relaxed text-slate-400 font-sans">
-                `friendId` 用于分享和生成互补报告；删除操作必须依赖当前设备本地保存的 `deleteToken`。
-                如果你清除本地存储且没有删除结果，系统暂不支持找回删除凭证。
-              </p>
-            </div>
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-3.5 h-3.5 text-[#ffe600] shrink-0" />
+            <p className="text-[11px] sm:text-xs text-slate-400 font-sans">
+              friendId 用于生成互补报告，删除凭证仅保存在当前设备。
+            </p>
           </div>
         </div>
 
         <div className="border border-dashed border-[#00f0ff]/35 bg-[#070b19] px-3 py-3 sm:px-4 sm:py-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-            <div className="flex-1">
-              <label className="block text-[11px] sm:text-xs font-pixel tracking-widest text-[#00f0ff] uppercase">
-                输入好友 ID
-              </label>
+          <div className="flex flex-col gap-3">
+            <label className="block text-[11px] sm:text-xs font-pixel tracking-widest text-[#00f0ff] uppercase">
+              输入好友 ID
+            </label>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
               <input
                 value={targetFriendId}
                 onChange={(event) => setTargetFriendId(event.target.value)}
                 placeholder="例如 abc123xyz789"
-                className="mt-2 w-full rounded-none border-2 border-[#00f0ff]/60 bg-black px-3 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-[#00f0ff] font-mono"
+                className="flex-1 w-full rounded-none border-2 border-[#00f0ff]/60 bg-black px-3 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-[#00f0ff] font-mono"
               />
-              <p className="mt-2 text-[11px] sm:text-xs text-slate-400 font-sans">
-                保存了自己的结果后，输入好友 ID 即可进入 `/dual` 双人报告链路。
-              </p>
+              <button
+                onClick={handleOpenDualReport}
+                className="w-full sm:w-auto px-5 py-3 rounded-none border-2 border-[#ffe600] bg-black text-[#ffe600] font-pixel text-xs sm:text-[13px] flex items-center justify-center gap-2 hover:bg-[#ffe600]/10 transition-colors cursor-pointer min-h-[46px]"
+              >
+                <ArrowRight className="w-4 h-4" />
+                <span>生成认知互补度报告</span>
+              </button>
             </div>
-            <button
-              onClick={handleOpenDualReport}
-              className="w-full sm:w-auto px-5 py-3 rounded-none border-2 border-[#ffe600] bg-black text-[#ffe600] font-pixel text-xs sm:text-[13px] flex items-center justify-center gap-2 hover:bg-[#ffe600]/10 transition-colors cursor-pointer min-h-[46px]"
-            >
-              <ArrowRight className="w-4 h-4" />
-              <span>生成认知互补度报告</span>
-            </button>
           </div>
         </div>
 
@@ -230,7 +218,7 @@ export default function SingleReportActions({
                   删除我的结果
                 </p>
                 <p className="mt-1 text-[11px] sm:text-xs leading-relaxed text-slate-400 font-sans">
-                  删除后旧好友 ID 立即失效，后续无法继续生成双人报告。
+                  删除后旧好友 ID 立即失效。
                 </p>
               </div>
               <div className="flex w-full sm:w-auto gap-2">

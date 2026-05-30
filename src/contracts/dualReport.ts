@@ -9,7 +9,7 @@ export const DUAL_REPORT_ENDPOINTS = {
 } as const;
 
 export const DUAL_REPORT_VERSIONS = {
-  questionVersion: 'questions-general-2026-05',
+  questionVersion: 'questions-general-2026-06',
   snapshotVersion: 'snapshot-v1',
   compatibilityReportVersion: 'compatibility-v1',
   publicShareVersion: 'public-share-v1',
@@ -34,6 +34,12 @@ export type CompatibilityDimensionPattern =
   | 'complementary'
   | 'moderate'
   | 'friction';
+
+export type CompatibilityPairPattern =
+  | 'homogeneous'
+  | 'complementary'
+  | 'asymmetric'
+  | 'conflicting';
 
 export const NORMALIZED_SCORE_SEMANTICS = {
   impulsiveReflective: {
@@ -159,6 +165,7 @@ export interface CompatibilityBreakdown {
 export interface CompatibilityReport {
   reportVersion: typeof DUAL_REPORT_VERSIONS.compatibilityReportVersion;
   generatedAt: number;
+  readingGuide: string;
   pair: {
     userA: CompatibilityPairIdentity;
     userB: CompatibilityPairIdentity;
@@ -166,6 +173,7 @@ export interface CompatibilityReport {
   overall: {
     score: number;
     rating: string;
+    pattern: CompatibilityPairPattern;
     summary: string;
   };
   breakdown: CompatibilityBreakdown;
@@ -199,6 +207,7 @@ export interface PublicCompatibilityReport {
   createdAt: number;
   expiresAt: number;
   reportVersion: typeof DUAL_REPORT_VERSIONS.publicShareVersion;
+  readingGuide: string;
   pair: {
     userA: CompatibilityPairIdentity;
     userB: CompatibilityPairIdentity;
@@ -239,3 +248,32 @@ export const DUAL_REPORT_MODULE_BOUNDARIES = {
     'must not require local friendId',
   ],
 } as const;
+
+export interface PatternBadgeInfo {
+  label: string;
+  tagline: string;
+  color: string;
+}
+
+export const PATTERN_BADGE_MAP: Record<CompatibilityPairPattern, PatternBadgeInfo> = {
+  homogeneous: {
+    label: '镜像搭档',
+    tagline: '你们太像了，适合背靠背作战，但要小心一起盲区',
+    color: '#00f0ff',
+  },
+  complementary: {
+    label: '拼图搭档',
+    tagline: '你们互补得刚刚好，一人开脑洞一人踩刹车',
+    color: '#39ff14',
+  },
+  asymmetric: {
+    label: '专精搭档',
+    tagline: '某一方主导，另一方在特定领域补位',
+    color: '#ffe600',
+  },
+  conflicting: {
+    label: '火花搭档',
+    tagline: '你们容易吵架，但吵完方案更好',
+    color: '#ff007f',
+  },
+};

@@ -1,5 +1,5 @@
 export const API_VERSIONS = {
-  QUESTION_VERSION: 'questions-general-2026-05',
+  QUESTION_VERSION: 'questions-general-2026-06',
   SNAPSHOT_VERSION: 'snapshot-v1',
   COMPATIBILITY_REPORT_VERSION: 'compatibility-v1',
   PUBLIC_SHARE_VERSION: 'public-share-v1',

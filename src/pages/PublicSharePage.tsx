@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { AlertCircle, Copy, LoaderCircle, Share2 } from 'lucide-react';
 import PixelAvatar from '../components/PixelAvatar';
 import type { PublicCompatibilityReport } from '../contracts/dualReport';
+import { PATTERN_BADGE_MAP } from '../contracts/dualReport';
 import { getPublicCompatibilityReport } from '../services/compatibilityService';
 
 interface PublicSharePageProps {
@@ -137,6 +138,12 @@ export default function PublicSharePage({ token, onBack }: PublicSharePageProps)
 
           {!loading && report && (
             <div className="flex flex-col gap-4 sm:gap-6">
+              <div className="border border-dashed border-[#ffe600]/30 bg-[#070b19] px-4 py-3">
+                <p className="text-xs sm:text-[13px] leading-relaxed text-slate-300 font-sans">
+                  {report.readingGuide}
+                </p>
+              </div>
+
               {/* 双方身份卡 */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
                 <div className="lg:col-span-8 border-2 border-[#00f0ff]/60 bg-[#070b19] p-4 sm:p-5">
@@ -181,6 +188,23 @@ export default function PublicSharePage({ token, onBack }: PublicSharePageProps)
                       </span>
                       <span className="text-sm font-pixel text-slate-400 pb-2">/ 100</span>
                     </div>
+                    {(() => {
+                      const badge = PATTERN_BADGE_MAP[report.overall.pattern];
+                      return (
+                        <div className="mt-3 flex items-center gap-2">
+                          <span
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 border-2 font-pixel text-xs uppercase tracking-widest"
+                            style={{ borderColor: badge.color, color: badge.color }}
+                          >
+                            <span className="w-2 h-2" style={{ backgroundColor: badge.color }} />
+                            {badge.label}
+                          </span>
+                        </div>
+                      );
+                    })()}
+                    <p className="mt-2 text-[11px] sm:text-xs leading-relaxed text-slate-400 font-sans">
+                      {PATTERN_BADGE_MAP[report.overall.pattern].tagline}
+                    </p>
                     <p className={`mt-3 inline-flex px-3 py-1 border text-xs font-pixel uppercase tracking-widest ${scoreTone(report.overall.score)}`}>
                       {report.overall.rating}
                     </p>

@@ -274,7 +274,7 @@ export const questionsProgrammer: Question[] = [
 
 export const questionsGeneral: Question[] = [
   // ============================================
-  // 维度1: impulsive_reflective (冲动-反思) — 4题
+  // 维度1: impulsive_reflective (冲动-反思) — 6题
   // ============================================
   {
     id: 15,
@@ -293,6 +293,14 @@ export const questionsGeneral: Question[] = [
     humorTip: "我先下水。"
   },
   {
+    id: 20,
+    dimension: "impulsive_reflective",
+    direction: "impulsive",
+    reverse: false,
+    text: "哪怕手头还有事情没做完，遇到朋友临时邀约，我一般都会先答应下来，具体细节路上再想。",
+    humorTip: "说走咱就走啊。"
+  },
+  {
     id: 9,
     dimension: "impulsive_reflective",
     direction: "reflective",
@@ -308,9 +316,17 @@ export const questionsGeneral: Question[] = [
     text: "确定出行计划后，我会提前做好周全安排，较少选择说走就走。",
     humorTip: "我先请假。"
   },
+  {
+    id: 22,
+    dimension: "impulsive_reflective",
+    direction: "reflective",
+    reverse: true,
+    text: "我经常在事后想'如果当时再想想就好了'。",
+    humorTip: "凌晨三点：啊！"
+  },
 
   // ============================================
-  // 维度2: convergent_divergent (聚合-发散) — 4题
+  // 维度2: convergent_divergent (聚合-发散) — 6题
   // ============================================
   {
     id: 5,
@@ -329,6 +345,14 @@ export const questionsGeneral: Question[] = [
     humorTip: "裁判机器人，蜻蜓队长，前来晋见。"
   },
   {
+    id: 21,
+    dimension: "convergent_divergent",
+    direction: "convergent",
+    reverse: false,
+    text: "掌握足够有用的信息后，我就会停止继续搜集，顺势敲定结论，不会一味追求面面俱到、事事圆满。",
+    humorTip: "够够了。"
+  },
+  {
     id: 11,
     dimension: "convergent_divergent",
     direction: "divergent",
@@ -344,9 +368,17 @@ export const questionsGeneral: Question[] = [
     text: "当已有可行落地方案后，我依旧习惯思索其他不同设计思路，尝试探寻不一样的实现方式。",
     humorTip: "好"
   },
+  {
+    id: 23,
+    dimension: "convergent_divergent",
+    direction: "divergent",
+    reverse: true,
+    text: "看书或是与人交流讨论时，我习惯顺着话题发散联想，冒出各种不同思路与相关想法，很难一直顺着单一思路往下思考。",
+    humorTip: "宇宙大爆炸。"
+  },
 
   // ============================================
-  // 维度3: wholistic_analytic (整体-分析) — 4题
+  // 维度3: wholistic_analytic (整体-分析) — 6题
   // ============================================
   {
     id: 7,
@@ -373,12 +405,28 @@ export const questionsGeneral: Question[] = [
     humorTip: "翻阅词典中。"
   },
   {
+    id: 24,
+    dimension: "wholistic_analytic",
+    direction: "analytic",
+    reverse: true,
+    text: "整整理相册和电脑文件时，我习惯细致分类归档、规整命名，不喜欢把各类内容笼统堆放在同一个文件夹里。",
+    humorTip: "我的文件系统是一棵精心修剪的树。"
+  },
+  {
     id: 18,
     dimension: "wholistic_analytic",
     direction: "wholistic",
     reverse: false,
     text: "向别人转述一件事时，我通常会先把核心结论抛出来，而不是按时间顺序一步步铺陈前因后果。",
     humorTip: "我话很少。"
+  },
+  {
+    id: 25,
+    dimension: "wholistic_analytic",
+    direction: "wholistic",
+    reverse: false,
+    text: "我更容易记住一件事的整体概况，平日里不太留意其中细碎的具体细节。",
+    humorTip: "大概是 ..."
   },
 
   // ============================================
@@ -443,269 +491,5 @@ export const questionsGeneral: Question[] = [
     reverse: true,
     text: "在商场、车站这类大型场所找位置，我更容易记住显眼实景地标，不太依靠区域编号这类文字标识。",
     humorTip: "随机掉入迷宫。"
-  } 
-    // === 认知节奏：impulsive_reflective 补充题 ===
-  // {
-  //   id: 20,
-  //   dimension: 'impulsive_reflective',
-  //   direction: 'impulsive',
-  //   text: '在餐厅点单时，我通常快速决定，很少纠结菜单。',
-  //   humorTip: '服务员："需要推荐吗？" 你："不用，就第一个。"',
-  // },
-  // {
-  //   id: 21,
-  //   dimension: 'impulsive_reflective',
-  //   direction: 'reflective',
-  //   text: '即使是很小的决定，我也倾向于列出利弊再行动。',
-  //   humorTip: '买瓶可乐都要做 SWOT 分析的人，说的就是你。',
-  // },
-  // {
-  //   id: 22,
-  //   dimension: 'impulsive_reflective',
-  //   direction: 'reflective',
-  //   text: '我经常在事后想"如果当时再想想就好了"。',
-  //   humorTip: '凌晨三点：啊，那件事我应该那样说的！',
-  // },
-  
-  // // === 信息策略：convergent_divergent 补充题 ===
-  // {
-  //   id: 23,
-  //   dimension: 'convergent_divergent',
-  //   direction: 'divergent',
-  //   text: '我喜欢同时推进多个项目，而不是专注完成一个。',
-  //   humorTip: '电脑里有 47 个打开的标签页，都是"待会儿看"。',
-  // },
-  // {
-  //   id: 24,
-  //   dimension: 'convergent_divergent',
-  //   direction: 'convergent',
-  //   text: '我认为最好的方法是先确定一个可行方案，而不是探索所有可能。',
-  //   humorTip: 'A 计划很好，B 计划多余，C 计划不存在。',
-  // },
-  
-  // // === 视野焦点：wholistic_analytic 补充题 ===
-  // {
-  //   id: 25,
-  //   dimension: 'wholistic_analytic',
-  //   direction: 'wholistic',
-  //   text: '我更容易记住事情的整体氛围，而非具体细节。',
-  //   humorTip: '记得那部电影"很治愈"，但主角名字？忘了。',
-  // },
-  // {
-  //   id: 26,
-  //   dimension: 'wholistic_analytic',
-  //   direction: 'analytic',
-  //   text: '我倾向于把大问题拆解成小块，逐一解决。',
-  //   humorTip: '把人生拆解成甘特图，虽然从来没准时过。',
-  // },
-  
-  // // === 协作维度：直接出题 ===
-  // {
-  //   id: 27,
-  //   dimension: 'solo_team',
-  //   direction: 'solo',
-  //   text: '在团队中，我常常觉得独自完成会更高效。',
-  //   humorTip: '"我们来分工合作" "不用了，我今晚加班搞定。"',
-  // },
-  // {
-  //   id: 28,
-  //   dimension: 'solo_team',
-  //   direction: 'team',
-  //   text: '遇到困难时，我的第一反应是找人讨论。',
-  //   humorTip: '问题还没想清楚，群聊已经拉好了。',
-  // },
-  // {
-  //   id: 29,
-  //   dimension: 'solo_team',
-  //   direction: 'team',
-  //   text: '我认为好的想法通常诞生于多人碰撞，而非独自苦想。',
-  //   humorTip: '头脑风暴 2 小时，产出 50 个想法，0 个可用，但过程很开心。',
-  // },
-  // {
-  //   id: 30,
-  //   dimension: 'solo_team',
-  //   direction: 'solo',
-  //   text: '我需要大量独处时间才能恢复精力。',
-  //   humorTip: '周末社交电量：0%。勿扰模式：ON。',
-  // }
-];
-
-/*
-export const questionsGeneral: Question[] = [
-  {
-    "id": 1,
-    "dimension": "impulsive_reflective",
-    "direction": "impulsive",
-    "text": "在挑选日常消耗品或大件物件时，我偏好依靠直觉和冲动立刻下单，而不是花费数天去研究测评。",
-    "humorTip": "着急付款。 "
-  },
-  {
-    "id": 2,
-    "dimension": "verbal_imagery",
-    "direction": "imagery",
-    "text": "当我要向朋友解释一个复杂概念时，我更倾向于拿张纸边画边讲，而不是发一长段语音或文字。",
-    "humorTip": "请欣赏我的灵魂画作 ~"
-  },
-  {
-    "id": 3,
-    "dimension": "convergent_divergent",
-    "direction": "convergent",
-    "text": "当我想解决一件急事，比起那些未吃透的黑科技或小妙招，我优先去使用最官方、最大众的传统步骤。",
-    "humorTip": "你先别急。"
-  },
-  {
-    "id": 4,
-    "dimension": "wholistic_analytic",
-    "direction": "analytic",
-    "text": "规划小聚会或打磨策划文案时，我很容易被某一个不显眼的手绘小图、中英文混排吸引注意力。",
-    "humorTip": "鹰眼扫描中~"
-  },
-  {
-    "id": 5,
-    "dimension": "solo_team",
-    "direction": "team",
-    "text": "在一个规则完全看不透的新陌生领域，如果没有明确的指引或参考模板，我会感到不知从何下手，需要先找到可以参照的对象。",
-    "humorTip": "赖在沙滩上写SOS。"
-  },
-  {
-    "id": 6,
-    "dimension": "impulsive_reflective",
-    "direction": "impulsive",
-    "text": "在上手一样新入手的小家电或手机软件时，我很乐意直接按着按钮倒腾，而不是先拿起说明书。",
-    "humorTip": "产品说明书是神马。"
-  },
-  {
-    "id": 7,
-    "dimension": "convergent_divergent",
-    "direction": "divergent",
-    "text": "在做汇报 PPT、朋友圈摄影配文或是撰写文章时，我喜欢折腾各种独创的古怪排版与配色，抗拒大众化的标准模板。",
-    "humorTip": "我将燃尽每一个小巧思细菌。"
-  },
-  {
-    "id": 8,
-    "dimension": "verbal_imagery",
-    "direction": "verbal",
-    "text": "学习新技能时，我更习惯先逐字阅读文字菜谱或说明书，而不是先看短视频教程。",
-    "humorTip": "我习惯左手掏右边鼻孔"
-  },
-  {
-    "id": 9,
-    "dimension": "wholistic_analytic",
-    "direction": "wholistic",
-    "text": "拼装乐高、组装家具或进行烹饪时，只要最终成型稳当、吃起来够味，过程中少数小配件没装上、少放了胡椒粉也行。",
-    "humorTip": "糟糕，少了一块？没事，我用口香糖粘上。"
-  },
-  {
-    "id": 10,
-    "dimension": "solo_team",
-    "direction": "solo",
-    "text": "比起和好友一块洗脑商量分工并完成一次厨房大扫除，我更情愿戴上高降噪耳机一人去横扫完，不用分流沟通。",
-    "humorTip": "这个垃圾桶和毛巾现在由我完全掌控"
-  },
-  {
-    "id": 11,
-    "dimension": "impulsive_reflective",
-    "direction": "impulsive",
-    "text": "遇到一个不熟悉的突发任务时，我倾向于先动手尝试、在实践中逐步摸索清楚，而不是先花时间搜集信息、在心里把大致步骤梳理一遍再开始。",
-    "humorTip": "我先下水"
-  },
-  {
-    "id": 12,
-    "dimension": "convergent_divergent",
-    "direction": "convergent",
-    "text": "去超市或商场时，我更倾向于按清单直奔目标、买完就走，而不是在货架间闲逛、顺便发现一些计划外的好物。",
-    "humorTip": "清单在手，别的不瞅"
-  },
-  {
-    "id": 13,
-    "dimension": "verbal_imagery",
-    "direction": "imagery",
-    "text": "当我需要理清一个复杂主题（如工作方案、学习笔记）时，我更习惯先用思维导图或草图把各部分的关系画出来，而不是先列出条理分明的文字提纲。",
-    "humorTip": "我不是小画家 "
-  },
-  {
-    "id": 14,
-    "dimension": "wholistic_analytic",
-    "direction": "analytic",
-    "text": "阅读一本有深度的书时，遇到不熟悉的陌生概念或人名，我更倾向于先停下来查清楚再继续往下读，而不是先标记一下、等读完整体内容再回头看",
-    "humorTip": "本来只是想查一个词的出处，结果等我回过神，已经在读它的三篇相关论文和作者的生辰八字。"
-  },
-  {
-    "id": 15,
-    "dimension": "solo_team",
-    "direction": "team",
-    "text": "做重大决定前，我需要先了解信任的人和权威人士的意见，否则会觉得自己缺少判断的依据。",
-    "humorTip": "我需要你的投票，要不然我可不敢按电梯了。"
-  },
-  {
-    "id": 16,
-    "dimension": "impulsive_reflective",
-    "direction": "reflective",
-    "text": "看完一部让我心头一震的电影或剧集后，比起立刻找朋友分享当下的情绪冲击，我更习惯先独自消化几天，反复琢磨其中的细节。",
-    "humorTip": "‘啊太好看了’ 还是 让我先写一篇结构完整的千字影评。"
-  },
-  {
-    "id": 17,
-    "dimension": "convergent_divergent",
-    "direction": "divergent",
-    "text": "大家一起讨论一个话题时，我的思维更容易从当前话题发散到各种表面上不直接相关的联想上，越聊越远，而不是围绕当前话题逐层深入、直到把结论聊清楚再转向下一个。",
-    "humorTip": "今晚吃什么 -> 什么是快乐星球 ... "
-  },
-  {
-    "id": 18,
-    "dimension": "verbal_imagery",
-    "direction": "verbal",
-    "text": "回忆过去的事情时，我更多是记住当时说的某句话或某个关键词，而不是清晰的画面或场景。",
-    "humorTip": "把回忆化成空~ "
-  },
-  {
-    "id": 19,
-    "dimension": "wholistic_analytic",
-    "direction": "wholistic",
-    "text": "向别人转述一件事时，我更习惯先把最核心的结论或结局抛出来，而不是先按照时间顺序把前因后果和背景细节一步步铺陈清楚。",
-    "humorTip": "我的讲述逻辑是： 大结局先行。"
-  },
-  {
-    "id": 20,
-    "dimension": "solo_team",
-    "direction": "solo",
-    "text": "选定了一个自认为很不错的方案后，即使身边多数人不太认可，我还是会坚持认为自己的方案有可取之处，而不是因为大家的意见就开始怀疑自己的判断。",
-    "humorTip": "我心如磐石，黄金可摧之"
-  },
-  {
-    "id": 21,
-    "dimension": "impulsive_reflective",
-    "direction": "reflective",
-    "text": "在做出远行度假决定时，我偏向先做极其详实规划，不太会说走就走。",
-    "humorTip": "我先请假 ..."
-  },
-  {
-    "id": 22,
-    "dimension": "convergent_divergent",
-    "direction": "convergent",
-    "text": "不论是平时常去的美食店，还是常用的工作技巧，只要有一套行得通，我就不会轻易去试另外的选项。",
-    "humorTip": "求稳是我漫长生命的生存准则。"
-  },
-  {
-    "id": 23,
-    "dimension": "verbal_imagery",
-    "direction": "imagery",
-    "text": "在需要整理思路或记录要点时，我更享受在文字旁涂鸦、画小图或符号来辅助思考，而不是只用纯文字进行线性记录。",
-    "humorTip": "发呆中..."
-  },
-  {
-    "id": 24,
-    "dimension": "wholistic_analytic",
-    "direction": "wholistic",
-    "text": "在推进一个团队项目时，我更倾向于先搭建一个粗糙但能跑的整体框架、确保各环节的依赖关系清晰，而不是先把每个模块内部功能完善再尝试对接",
-    "humorTip": "我先睡了。"
-  },
-  {
-    "id": 25,
-    "dimension": "solo_team",
-    "direction": "team",
-    "text": "在外出或聚会时，我会不自觉地观察同行人的情绪和偏好，并据此调整自己的计划安排。",
-    "humorTip": "含笑跟随大部队。"
   }
-]
-  */
+];

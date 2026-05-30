@@ -326,7 +326,7 @@ function buildDimensionResult(label, delta, score) {
   return {
     score,
     delta: deltaFixed,
-    interpretation: copy.dimensionInterpretation.friction(label),
+    interpretation: copy.dimensionInterpretation.friction(label, deltaFixed),
     pattern: 'friction',
   };
 }
@@ -364,12 +364,19 @@ function buildSummary(overallScore, breakdown, pattern) {
 
 function buildMissionSuggestions(dimensions, pattern) {
   return COMPATIBILITY_CONFIG.missionWeights.map((mission) => {
-    const fitScore = roundScore(
+    let fitScore = roundScore(
       Object.entries(mission.weights).reduce(
         (sum, [key, weight]) => sum + dimensions[key].score * weight,
         0
       )
     );
+
+    if (pattern === 'homogeneous') {
+      fitScore = roundScore(
+        fitScore *
+          (COMPATIBILITY_CONFIG.scoreAdjustments?.homogeneousMissionScoreFactor || 1)
+      );
+    }
 
     const strongestKey = Object.entries(mission.weights).sort(
       ([dimensionKeyA, weightA], [dimensionKeyB, weightB]) =>
@@ -551,7 +558,7 @@ export function buildCompatibilityReport(userA, userB) {
     )
   );
 
-  const overallScore = roundScore(
+  const rawOverallScore = roundScore(
     cognitiveComplementarity * COMPATIBILITY_CONFIG.aggregation.overall.cognitiveComplementarity +
       collaborationCompatibility *
         COMPATIBILITY_CONFIG.aggregation.overall.collaborationCompatibility +
@@ -574,6 +581,12 @@ export function buildCompatibilityReport(userA, userB) {
   };
 
   const pattern = detectPairPattern(dimensions, breakdown);
+  const overallScore =
+    pattern === 'homogeneous'
+      ? roundScore(
+          rawOverallScore - (COMPATIBILITY_CONFIG.scoreAdjustments?.homogeneousPenalty || 0)
+        )
+      : rawOverallScore;
   const missionSuggestions = buildMissionSuggestions(dimensions, pattern);
 
   const displayA = safeDisplay(userA.display);
@@ -582,6 +595,7 @@ export function buildCompatibilityReport(userA, userB) {
   return {
     reportVersion: API_VERSIONS.COMPATIBILITY_REPORT_VERSION,
     generatedAt: Date.now(),
+    readingGuide: copy.readingGuide,
     pair: {
       userA: {
         friendId: userA.friendId || '',
@@ -605,6 +619,7 @@ export function buildCompatibilityReport(userA, userB) {
     overall: {
       score: overallScore,
       rating: getRating(overallScore),
+      pattern,
       summary: buildSummary(overallScore, breakdown, pattern),
     },
     breakdown,
@@ -619,6 +634,7 @@ export function buildPublicCompatibilityReport(report, token, expiresAt) {
     createdAt: Date.now(),
     expiresAt,
     reportVersion: API_VERSIONS.PUBLIC_SHARE_VERSION,
+    readingGuide: report.readingGuide,
     pair: report.pair,
     overall: report.overall,
     breakdown: report.breakdown,

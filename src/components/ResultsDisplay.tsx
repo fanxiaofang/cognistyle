@@ -8,7 +8,6 @@ import { DimensionScore, Category, CognitiveProfile } from '../types';
 import { cognitiveProfiles, buildProfileId } from '../data/suggestions';
 import PixelAvatar from './PixelAvatar';
 import SingleReportActions from './SingleReportActions';
-import html2canvas from 'html2canvas';
 import { 
   Sparkles, 
   AlertCircle, 
@@ -42,8 +41,6 @@ export default function ResultsDisplay({
   onReset,
   onOpenDualReport,
 }: ResultsDisplayProps) {
-  const [capturing, setCapturing] = useState(false);
-  const [captureError, setCaptureError] = useState(false);
   const [showOtherMode, setShowOtherMode] = useState(false);
 
   const { matchedMode, profileId: profileKey, profile } = resolvePrimaryProfile({
@@ -75,189 +72,12 @@ export default function ResultsDisplay({
   const guildKey = `${activeArchetypeParts[1]}-${activeArchetypeParts[2]}`;
   const guildInfo = guildEssenceMap[guildKey];
 
-  const svgToImg = (svg: SVGSVGElement): Promise<HTMLImageElement> => {
-    return new Promise((resolve, reject) => {
-      const clone = svg.cloneNode(true) as SVGSVGElement;
-      clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-      const rect = svg.getBoundingClientRect();
-      const w = rect.width || parseInt(svg.getAttribute('width') || '0') || 52;
-      const h = rect.height || parseInt(svg.getAttribute('height') || '0') || 52;
-
-      const canvas = document.createElement('canvas');
-      canvas.width = w * 2;
-      canvas.height = h * 2;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) { reject(new Error('no 2d context')); return; }
-
-      const svgString = new XMLSerializer().serializeToString(clone);
-      const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-      const url = URL.createObjectURL(svgBlob);
-
-      const img = new Image();
-      img.onload = () => {
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        URL.revokeObjectURL(url);
-
-        const pngUrl = canvas.toDataURL('image/png');
-        const replacement = document.createElement('img');
-        replacement.style.display = 'block';
-        replacement.style.width = w + 'px';
-        replacement.style.height = h + 'px';
-        replacement.src = pngUrl;
-        resolve(replacement);
-      };
-      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('svg load fail')); };
-      img.src = url;
-    });
-  };
-
-  const resolveOklch = (() => {
-    const cache: Record<string, string> = {};
-    const probe = document.createElement('div');
-    probe.style.display = 'none';
-    document.body.appendChild(probe);
-
-    return (oklchStr: string): string => {
-      if (cache[oklchStr]) return cache[oklchStr];
-      probe.style.color = oklchStr;
-      const resolved = getComputedStyle(probe).color;
-      cache[oklchStr] = resolved;
-      return resolved;
-    };
-  })();
-
-  const captureCanvas = async (el: HTMLElement): Promise<HTMLCanvasElement> => {
-    const rect = el.getBoundingClientRect();
-    return html2canvas(el, {
-      useCORS: true,
-      backgroundColor: '#050814',
-      scale: 2,
-      logging: false,
-      width: Math.ceil(rect.width),
-      height: Math.ceil(rect.height),
-      onclone: (clonedDoc) => {
-        clonedDoc.querySelectorAll('style').forEach(style => {
-          const original = style.textContent || '';
-          const replaced = original.replace(/oklch\([^)]+\)/g, resolveOklch);
-          if (replaced !== original) {
-            style.textContent = replaced;
-          }
-        });
-
-        clonedDoc.querySelectorAll('*').forEach(el => {
-          const s = (el as HTMLElement).style;
-          for (let i = s.length - 1; i >= 0; i--) {
-            const val = s.getPropertyValue(s[i]);
-            if (val.includes('oklch(')) {
-              s.setProperty(s[i], val.replace(/oklch\([^)]+\)/g, resolveOklch));
-            }
-          }
-        });
-
-        const scanlines = clonedDoc.querySelector('.scanlines') as HTMLElement | null;
-        if (scanlines) scanlines.style.display = 'none';
-
-        clonedDoc.querySelectorAll('.fixed').forEach(el => {
-          (el as HTMLElement).style.display = 'none';
-        });
-
-        clonedDoc.querySelectorAll('.glow-cyan, .glow-magenta, .glow-yellow, .glow-green').forEach(el => {
-          (el as HTMLElement).style.textShadow = 'none';
-        });
-      },
-    });
-  };
-
-  // html2canvas handler
-  const handleSaveImage = async () => {
-    const captureArea = document.getElementById('cognistyle-share-card');
-    if (!captureArea) {
-      setCaptureError(true);
-      return;
-    }
-
-    const filename = `CogniStyle_Result_${activeProfileId}_${category}.png`;
-    const svgs = captureArea.querySelectorAll('svg');
-    const replacements: { svg: SVGSVGElement; parent: Node; img: HTMLImageElement }[] = [];
-
-    try {
-      setCapturing(true);
-      setCaptureError(false);
-
-      if (document.fonts?.ready) {
-        await document.fonts.ready;
-      }
-      await new Promise(resolve => setTimeout(resolve, 80));
-
-      for (const svg of svgs) {
-        try {
-          const img = await svgToImg(svg as SVGSVGElement);
-          replacements.push({ svg: svg as SVGSVGElement, parent: svg.parentNode!, img });
-          svg.parentNode?.replaceChild(img, svg);
-        } catch {
-          // skip this svg if conversion fails
-        }
-      }
-
-      await new Promise(resolve => setTimeout(resolve, 50));
-
-      const canvas = await captureCanvas(captureArea);
-
-      for (const { svg, parent, img } of replacements) {
-        try {
-          if (parent.contains(img)) {
-            parent.replaceChild(svg, img);
-          }
-        } catch { /* best effort restore */ }
-      }
-
-      if (canvas.toBlob) {
-        const blob = await new Promise<Blob>((resolve, reject) => {
-          canvas.toBlob((b) => {
-            if (!b) reject(new Error('Canvas export failed'));
-            else resolve(b);
-          }, 'image/png');
-        });
-
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = filename;
-        link.rel = 'noopener';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-      } else {
-        const dataUrl = canvas.toDataURL('image/png');
-        const link = document.createElement('a');
-        link.href = dataUrl;
-        link.download = filename;
-        link.rel = 'noopener';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }
-    } catch (err) {
-      console.error('保存测评长图出现异常:', err);
-
-      for (const { svg, parent, img } of replacements) {
-        try {
-          if (parent.contains(img)) parent.replaceChild(svg, img);
-        } catch { /* ignore */ }
-      }
-
-      setCaptureError(true);
-    } finally {
-      setCapturing(false);
-    }
-  };
 
   return (
     <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 py-4 sm:py-8">
-      {/* Save Area Wrapper */}
-      <div id="cognistyle-share-card" className="bg-black border-2 border-[#00f0ff]/80 p-3 sm:p-6 md:p-10 shadow-[6px_6px_0px_rgba(255,0,127,0.6)] relative overflow-hidden font-mono min-w-0">
-        {/* Abstract futuristic grid background layout for screenshot elegance - pixel laser bar */}
+      {/* Result Card */}
+      <div className="bg-black border-2 border-[#00f0ff]/80 p-3 sm:p-6 md:p-10 shadow-[6px_6px_0px_rgba(255,0,127,0.6)] relative overflow-hidden font-mono min-w-0">
+        {/* Pixel laser bar */}
         <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-[#00f0ff] via-[#ff007f] to-[#ffe600]" />
         <div className="absolute -top-[400px] -right-[200px] w-[600px] h-[600px] bg-[#00f0ff]/5 rounded-none pointer-events-none" />
         <div className="absolute -bottom-[400px] -left-[200px] w-[600px] h-[600px] bg-[#ff007f]/5 rounded-none pointer-events-none" />
@@ -437,21 +257,21 @@ export default function ResultsDisplay({
                 </p>
               </div>
 
-                      {/* 第二身份切换 */}
-        {otherProfile && (
-          <button
-            onClick={() => setShowOtherMode(!showOtherMode)}
-            className="group relative w-full max-w-md px-5 py-4 rounded-none bg-gradient-to-r from-black via-[#0a0f1f] to-black border-2 border-[#ffe600]/80 text-[#ffe600] font-pixel text-sm flex items-center justify-center gap-3 shadow-[0_0_15px_rgba(255,230,0,0.2)] hover:shadow-[0_0_25px_rgba(255,230,0,0.4)] hover:border-[#ffe600] active:scale-[0.98] transition-all duration-300 cursor-pointer min-h-[52px] sm:min-h-0 overflow-hidden"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#ffe600]/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-            <Repeat className="w-4 h-4 shrink-0" />
-            <span className="text-left leading-tight tracking-wider">
-              {showOtherMode
-                ? <>返回主身份<span className="text-[#ff007f] font-bold">【{profile.displayName}】</span></>
-                : <>发现你的第二身份<span className="text-[#00f0ff] font-bold">【{otherProfile.displayName}】</span></>}
-            </span>
-          </button>
-        )}
+              {/* 第二身份切换 */}
+              {otherProfile && (
+                <button
+                  onClick={() => setShowOtherMode(!showOtherMode)}
+                  className="group relative w-full max-w-md px-5 py-4 rounded-none bg-gradient-to-r from-black via-[#0a0f1f] to-black border-2 border-[#ffe600]/80 text-[#ffe600] font-pixel text-sm flex items-center justify-center gap-3 shadow-[0_0_15px_rgba(255,230,0,0.2)] hover:shadow-[0_0_25px_rgba(255,230,0,0.4)] hover:border-[#ffe600] active:scale-[0.98] transition-all duration-300 cursor-pointer min-h-[52px] sm:min-h-0 overflow-hidden"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#ffe600]/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                  <Repeat className="w-4 h-4 shrink-0" />
+                  <span className="text-left leading-tight tracking-wider">
+                    {showOtherMode
+                      ? <>返回主身份<span className="text-[#ff007f] font-bold">【{profile.displayName}】</span></>
+                      : <>发现你的第二身份<span className="text-[#00f0ff] font-bold">【{otherProfile.displayName}】</span></>}
+                  </span>
+                </button>
+              )}
 
             </div>
 
@@ -460,7 +280,7 @@ export default function ResultsDisplay({
         </div>
       </div>
 
-      {/* Sharing and Action controls - OUTSIDE screenshot capture container */}
+      {/* Sharing and Action controls */}
       <div className="flex flex-col items-center gap-4 sm:gap-8 mt-4 sm:mt-8 relative z-20 font-mono select-none">
         <SingleReportActions
           snapshotRequest={snapshotRequest}
@@ -470,11 +290,6 @@ export default function ResultsDisplay({
 
 
 
-        {captureError && (
-          <p className="text-[11px] sm:text-xs font-pixel text-[#ff007f] bg-black border border-[#ff007f] px-3 sm:px-4 py-2 glow-magenta text-center">
-            [ SAVE ERROR ] 图片生成失败，请尝试滚动到页面顶部后重新保存
-          </p>
-        )}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
 
 

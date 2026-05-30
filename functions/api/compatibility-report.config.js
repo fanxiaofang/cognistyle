@@ -6,33 +6,33 @@ export const COMPATIBILITY_CONFIG = {
       label: '节奏维度',
       shortLabel: '节奏',
       sourceKey: 'impulsiveReflective',
-      idealGap: 0.35,
-      tolerance: 0.2,
-      floor: 35,
+      idealGap: 0.28,
+      tolerance: 0.22,
+      floor: 8,
     },
     strategy: {
       label: '策略维度',
       shortLabel: '策略',
       sourceKey: 'convergentDivergent',
-      idealGap: 0.6,
-      tolerance: 0.22,
-      floor: 20,
+      idealGap: 0.38,
+      tolerance: 0.25,
+      floor: 3,
     },
     vision: {
       label: '视野维度',
       shortLabel: '视野',
       sourceKey: 'wholisticAnalytic',
-      idealGap: 0.55,
-      tolerance: 0.28,
-      floor: 30,
+      idealGap: 0.35,
+      tolerance: 0.27,
+      floor: 5,
     },
     collaboration: {
       label: '协作维度',
       shortLabel: '协作',
       sourceKey: 'soloTeam',
-      idealGap: 0.1,
-      tolerance: 0.18,
-      floor: 15,
+      idealGap: 0.08,
+      tolerance: 0.17,
+      floor: 2,
     },
   },
   coverage: {
@@ -42,10 +42,10 @@ export const COMPATIBILITY_CONFIG = {
     strengthWeight: 0.6,
   },
   friction: {
-    rhythm: { dangerStart: 0.6, weight: 0.45 },
-    collaboration: { dangerStart: 0.5, weight: 0.35 },
-    strategy: { dangerStart: 0.85, weight: 0.1 },
-    vision: { dangerStart: 0.9, weight: 0.1 },
+    rhythm: { dangerStart: 0.4, weight: 0.4 },
+    collaboration: { dangerStart: 0.35, weight: 0.35 },
+    strategy: { dangerStart: 0.6, weight: 0.15 },
+    vision: { dangerStart: 0.65, weight: 0.1 },
   },
   aggregation: {
     cognitiveComplementarity: {
@@ -54,11 +54,15 @@ export const COMPATIBILITY_CONFIG = {
       vision: 0.35,
     },
     overall: {
-      cognitiveComplementarity: 0.45,
-      collaborationCompatibility: 0.2,
-      blindSpotCoverage: 0.2,
-      inverseFrictionRisk: 0.15,
+      cognitiveComplementarity: 0.5,
+      collaborationCompatibility: 0.15,
+      blindSpotCoverage: 0.25,
+      inverseFrictionRisk: 0.1,
     },
+  },
+  scoreAdjustments: {
+    homogeneousPenalty: 5,
+    homogeneousMissionScoreFactor: 0.85,
   },
   pattern: {
     cognitiveDimensions: ['rhythm', 'strategy', 'vision'],
@@ -81,11 +85,11 @@ export const COMPATIBILITY_CONFIG = {
     moderateMinScore: 50,
   },
   rating: [
-    { min: 80, label: '完美协作' },
+    { min: 80, label: '卓越协作' },
     { min: 65, label: '高度协作' },
     { min: 50, label: '良好协同' },
-    { min: 35, label: '基本互补' },
-    { min: 0, label: '显著摩擦' },
+    { min: 35, label: '潜力搭档' },
+    { min: 0, label: '探索磨合' },
   ],
   missionWeights: [
     {
@@ -132,6 +136,26 @@ export const COMPATIBILITY_COPY = {
       normalizedScoresMissing: '结果快照缺少归一化分数。',
       internalError: '服务器内部错误',
     },
+    readingGuide:
+      '本报告不是判断你们"合不合"，而是帮你们找到"在什么场景下、以什么方式协作最省力"。分数高低不决定关系好坏，只反映当前互补结构的成熟度。',
+    patternBadge: {
+      homogeneous: {
+        label: '镜像搭档',
+        tagline: '你们太像了，适合背靠背作战，但要小心一起盲区',
+      },
+      complementary: {
+        label: '拼图搭档',
+        tagline: '你们互补得刚刚好，一人开脑洞一人踩刹车',
+      },
+      asymmetric: {
+        label: '专精搭档',
+        tagline: '某一方主导，另一方在特定领域补位',
+      },
+      conflicting: {
+        label: '火花搭档',
+        tagline: '你们容易吵架，但吵完方案更好',
+      },
+    },
     dimensionInterpretation: {
       similar: (label, delta) =>
         `${label}高度一致（差异度=${delta}）。协作无摩擦，但也意味着该维度上无人补位，容易形成共同盲区。`,
@@ -139,18 +163,19 @@ export const COMPATIBILITY_COPY = {
         `${label}差异过大（差异度=${delta}）。视角差异虽大，但配合成本可能高于收益，需要明确的接口和缓冲机制。`,
       complementary: (label) => `${label}差异适中且协作顺畅，形成稳定补位。`,
       moderate: (label) => `${label}有一定互补价值，但需要在执行中主动协调。`,
-      friction: (label) => `${label}差异没有稳定转化为协同收益，容易带来摩擦。`,
+      friction: (label, delta) =>
+        `${label}差异（差异度=${delta}）没有稳定转化为协同收益，容易带来摩擦。`,
     },
     summary: {
       homogeneous:
-        '你们在核心认知路径上高度重合，协作顺畅但盲区叠加。这不是"合不来"，而是"容易一起掉进同一个坑"。建议在关键决策节点引入第三方视角，或刻意分配不同信息源。',
+        '你们在核心认知路径上高度重合，协作顺畅但盲区叠加。这不是"合不来"，而是"容易一起掉进同一个坑"。系统已对高度重合组合启用保守评分协议，以提示共同盲区风险。建议在关键决策节点引入第三方视角，或刻意分配不同信息源。',
       conflicting:
         '你们在关键维度上差异显著，互补潜力存在但执行摩擦偏高。这不是"性格不合"，而是"接口没对齐"。建议先约定决策机制和节奏，再进入实质协作。',
       excellent: '你们既能形成明显补位，又没有被协作成本显著拖累，属于高潜力搭档组合。',
       strong: '你们在关键维度上存在明确互补，只要提前对齐节奏和分工，就能稳定放大彼此长板。',
-      workable: '这是一组具备协同价值的组合，但需要在合作方式上做主动设计，才能把差异转化为产出。',
+      workable: '你们的差异有互补潜力，但不会自然生效。刻意分工——一人发散一人收敛、一人盯全局一人盯细节——才能把潜力变成结果。',
       highFriction: '你们不是没有互补潜力，而是执行摩擦偏高，需要更明确的接口、节奏和角色划分。',
-      default: '你们当前的差异尚未形成有效协同，若缺少明确分工，很容易在合作中互相消耗。',
+      default: '你们在某些认知维度上存在差异，但目前尚未形成稳定的补位结构。建议先明确各自主导的维度，再逐步建立互补默契。',
     },
     missionReason: {
       homogeneous: (strongest) =>
@@ -172,7 +197,7 @@ export const COMPATIBILITY_COPY = {
         ],
         strategyVisionStrong: '一人发散探索，一人负责收敛和落地的复杂任务',
         highComplementarity: '需要不同视角共同参与的方案评估与决策',
-        default: '边界清晰、目标明确的小范围协作任务',
+        default: '目标明确、可拆解为独立交付物的协作任务',
         highCollaboration: '需要频繁对齐、需要同步反馈的合作场景',
         asyncCollaboration: '可以拆解模块、采用异步接口对齐的协作方式',
       },
