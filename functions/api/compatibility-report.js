@@ -362,7 +362,29 @@ function buildSummary(overallScore, breakdown, pattern) {
   return copy.summary.default;
 }
 
-function buildMissionSuggestions(dimensions, pattern) {
+function buildShareCaption(overallScore, breakdown, pattern) {
+  if (pattern === 'homogeneous') {
+    return copy.shareCaption.homogeneous;
+  }
+  if (pattern === 'conflicting') {
+    return copy.shareCaption.conflicting;
+  }
+  if (overallScore >= 80) {
+    return copy.shareCaption.excellent;
+  }
+  if (overallScore >= 65) {
+    return copy.shareCaption.strong;
+  }
+  if (overallScore >= 50) {
+    return copy.shareCaption.workable;
+  }
+  if (breakdown.frictionRisk >= 60) {
+    return copy.shareCaption.highFriction;
+  }
+  return copy.shareCaption.default;
+}
+
+function buildMissionSuggestions(dimensions, pattern, pairCallSigns) {
   return COMPATIBILITY_CONFIG.missionWeights.map((mission) => {
     let fitScore = roundScore(
       Object.entries(mission.weights).reduce(
@@ -393,11 +415,17 @@ function buildMissionSuggestions(dimensions, pattern) {
       reason = copy.missionReason.default(strongest);
     }
 
+    const roleSplitFn = copy.missionRoleSplit[mission.name];
+    const roleSplit = roleSplitFn
+      ? roleSplitFn(pairCallSigns.callSignA, pairCallSigns.callSignB)
+      : '';
+
     return {
       name: mission.name,
       department: mission.department,
       fitScore,
       reason,
+      roleSplit,
     };
   })
     .sort((a, b) => b.fitScore - a.fitScore)
@@ -573,6 +601,28 @@ export function buildCompatibilityReport(userA, userB) {
     ])
   );
 
+  const dimEntries = Object.entries(dimensions);
+  const highlightOrder = dimEntries
+    .map(([key, dim]) => {
+      let priority = 0;
+      if (dim.pattern === 'complementary') priority = 4;
+      else if (dim.pattern === 'opposite') priority = 3;
+      else if (dim.pattern === 'moderate') priority = 2;
+      else if (dim.pattern === 'similar') priority = 1;
+      return { key, dim, priority };
+    })
+    .sort((a, b) => {
+      if (b.priority !== a.priority) return b.priority - a.priority;
+      return b.dim.score - a.dim.score;
+    });
+
+  const highlightKeys = new Set(highlightOrder.slice(0, 2).map((h) => h.key));
+
+  for (const [key, dim] of dimEntries) {
+    dim.highlight = highlightKeys.has(key);
+    dim.oneLiner = copy.dimensionOneLiner[dim.pattern](COMPATIBILITY_CONFIG.dimensions[key].label);
+  }
+
   const breakdown = {
     cognitiveComplementarity,
     collaborationCompatibility,
@@ -587,7 +637,10 @@ export function buildCompatibilityReport(userA, userB) {
           rawOverallScore - (COMPATIBILITY_CONFIG.scoreAdjustments?.homogeneousPenalty || 0)
         )
       : rawOverallScore;
-  const missionSuggestions = buildMissionSuggestions(dimensions, pattern);
+  const missionSuggestions = buildMissionSuggestions(dimensions, pattern, {
+    callSignA: safeDisplay(userA.display).callSign || userA.profileId || 'A',
+    callSignB: safeDisplay(userB.display).callSign || userB.profileId || 'B',
+  });
 
   const displayA = safeDisplay(userA.display);
   const displayB = safeDisplay(userB.display);
@@ -621,6 +674,7 @@ export function buildCompatibilityReport(userA, userB) {
       rating: getRating(overallScore),
       pattern,
       summary: buildSummary(overallScore, breakdown, pattern),
+      shareCaption: buildShareCaption(overallScore, breakdown, pattern),
     },
     breakdown,
     dimensions,

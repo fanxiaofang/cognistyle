@@ -146,6 +146,8 @@ export interface CompatibilityDimensionResult {
   delta: number;
   interpretation: string;
   pattern: CompatibilityDimensionPattern;
+  highlight: boolean;
+  oneLiner: string;
 }
 
 export interface MissionSuggestion {
@@ -153,6 +155,7 @@ export interface MissionSuggestion {
   department: string;
   fitScore: number;
   reason: string;
+  roleSplit: string;
 }
 
 export interface CompatibilityBreakdown {
@@ -175,6 +178,7 @@ export interface CompatibilityReport {
     rating: string;
     pattern: CompatibilityPairPattern;
     summary: string;
+    shareCaption: string;
   };
   breakdown: CompatibilityBreakdown;
   dimensions: Record<CompatibilityDimensionKey, CompatibilityDimensionResult>;
@@ -258,22 +262,22 @@ export interface PatternBadgeInfo {
 export const PATTERN_BADGE_MAP: Record<CompatibilityPairPattern, PatternBadgeInfo> = {
   homogeneous: {
     label: '镜像搭档',
-    tagline: '你们太像了，适合背靠背作战，但要小心一起盲区',
+    tagline: '同款脑回路，同款盲区',
     color: '#00f0ff',
   },
   complementary: {
     label: '拼图搭档',
-    tagline: '你们互补得刚刚好，一人开脑洞一人踩刹车',
-    color: '#39ff14',
+    tagline: '各司所长，刚好补齐彼此缺口',
+    color: '#00e676',
   },
   asymmetric: {
-    label: '专精搭档',
-    tagline: '某一方主导，另一方在特定领域补位',
-    color: '#ffe600',
+    label: '齿轮搭档',
+    tagline: '精准咬合，互相带动才能全速推进',
+    color: '#ffb800',
   },
   conflicting: {
     label: '火花搭档',
-    tagline: '你们容易吵架，但吵完方案更好',
+    tagline: '见面就吵，吵完就赢',
     color: '#ff007f',
   },
 };

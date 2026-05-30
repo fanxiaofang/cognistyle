@@ -50,11 +50,11 @@ function makeSnapshot(
 }
 
 function scoreLabel(score: number) {
-  if (score >= 80) return '卓越协作';
-  if (score >= 65) return '高度协作';
-  if (score >= 50) return '良好协同';
-  if (score >= 35) return '潜力搭档';
-  return '探索磨合';
+  if (score >= 80) return '王牌';
+  if (score >= 65) return '合拍';
+  if (score >= 50) return '适配';
+  if (score >= 35) return '可期';
+  return '磨合';
 }
 
 const fixedSamples: FixedSample[] = [
@@ -237,8 +237,8 @@ function runDistributionSimulation(iterations = 50000) {
   console.log(`0-34   探索磨合: ${percent(bins.low)}`);
   console.log(`35-49  潜力搭档: ${percent(bins.basic)}`);
   console.log(`50-64  良好协同: ${percent(bins.workable)}`);
-  console.log(`65-79  高度协作: ${percent(bins.strong)}`);
-  console.log(`80-100 卓越协作: ${percent(bins.excellent)}`);
+  console.log(`65-79  合拍: ${percent(bins.strong)}`);
+  console.log(`80-100 王牌: ${percent(bins.excellent)}`);
 }
 
 runFixedSamples();
