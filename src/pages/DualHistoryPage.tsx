@@ -107,24 +107,24 @@ export default function DualHistoryPage({ onBack, onOpenReport }: DualHistoryPag
                 {!confirmClear ? (
                   <button
                     onClick={() => setConfirmClear(true)}
-                    className="text-[10px] font-pixel text-[#ff007f]/60 hover:text-[#ff007f] transition-colors cursor-pointer flex items-center gap-1"
+                    className="text-[10px] font-pixel text-[#ff007f]/60 hover:text-[#ff007f] transition-colors cursor-pointer flex items-center gap-1 whitespace-nowrap"
                   >
                     <Trash2 className="w-3 h-3" />
                     清空全部
                   </button>
                 ) : (
-                  <div className="flex items-center gap-2">
-                    <AlertTriangle className="w-3 h-3 text-[#ffe600]" />
-                    <span className="text-[10px] font-pixel text-[#ffe600]">确认清空？</span>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <AlertTriangle className="w-3 h-3 text-[#ffe600] shrink-0" />
+                    <span className="text-[10px] font-pixel text-[#ffe600] whitespace-nowrap">确认清空？</span>
                     <button
                       onClick={handleClearAll}
-                      className="px-2 py-0.5 border border-[#ff007f] text-[#ff007f] font-pixel text-[10px] hover:bg-[#ff007f]/10 transition-colors cursor-pointer"
+                      className="px-2 py-1 border border-[#ff007f] text-[#ff007f] font-pixel text-[10px] hover:bg-[#ff007f]/10 transition-colors cursor-pointer min-h-[36px]"
                     >
                       确认
                     </button>
                     <button
                       onClick={() => setConfirmClear(false)}
-                      className="px-2 py-0.5 border border-[#00f0ff]/40 text-[#00f0ff]/60 font-pixel text-[10px] hover:bg-[#00f0ff]/5 transition-colors cursor-pointer"
+                      className="px-2 py-1 border border-[#00f0ff]/40 text-[#00f0ff]/60 font-pixel text-[10px] hover:bg-[#00f0ff]/5 transition-colors cursor-pointer min-h-[36px]"
                     >
                       取消
                     </button>
@@ -157,45 +157,49 @@ export default function DualHistoryPage({ onBack, onOpenReport }: DualHistoryPag
                               </span>
                             )}
                           </div>
-                          <div className="flex items-center gap-3 mt-1 flex-wrap">
-                            <span className="text-[10px] text-slate-500 font-mono">
+                          <div className="flex items-center gap-2 sm:gap-3 mt-1 flex-wrap text-[10px]">
+                            <span className="text-slate-500 font-mono whitespace-nowrap">
                               {entry.targetDepartment}
                             </span>
-                            <span className="text-[10px] text-slate-500 font-mono">
+                            <span className="text-slate-600 font-mono hidden sm:inline">·</span>
+                            <span className="text-slate-500 font-mono whitespace-nowrap">
                               ID: <span className="text-slate-600">{entry.targetFriendId}</span>
                             </span>
-                            <span className="text-[10px] text-slate-600 font-mono">
+                            <span className="text-slate-600 font-mono hidden sm:inline">·</span>
+                            <span className="text-slate-600 font-mono whitespace-nowrap">
                               {formatDate(entry.generatedAt)}
                             </span>
                           </div>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-3 sm:gap-4 shrink-0">
-                        <div className="flex items-center gap-2">
-                          <PatternBadgeIcon pattern={entry.pattern} size={36} />
-                          <div className="hidden sm:block">
-                            <span className="text-[10px] font-pixel" style={{ color: badge.color }}>
-                              {badge.label}
-                            </span>
+                      <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:gap-4 shrink-0 w-full sm:w-auto">
+                        <div className="flex items-center justify-between gap-2 sm:gap-4">
+                          <div className="flex items-center gap-2">
+                            <PatternBadgeIcon pattern={entry.pattern} size={36} />
+                            <div className="hidden sm:block">
+                              <span className="text-[10px] font-pixel" style={{ color: badge.color }}>
+                                {badge.label}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className={`text-xl sm:text-xl font-black font-display ${scoreClass} min-w-[2.5rem] text-right`}>
+                            {entry.overallScore}
                           </div>
                         </div>
 
-                        <div className={`text-lg sm:text-xl font-black font-display ${scoreClass} min-w-[2.5rem] text-right`}>
-                          {entry.overallScore}
-                        </div>
-
-                        <div className="flex flex-col sm:flex-row gap-1.5">
+                        <div className="flex items-center gap-2 sm:gap-1.5">
                           <button
                             onClick={() => handleOpen(entry.targetFriendId)}
-                            className="px-3 py-2 border border-[#00f0ff] text-[#00f0ff] bg-black font-pixel text-[10px] flex items-center gap-1 hover:bg-[#00f0ff]/10 transition-colors cursor-pointer whitespace-nowrap"
+                            className="flex-1 sm:flex-none px-3 py-2.5 border border-[#00f0ff] text-[#00f0ff] bg-black font-pixel text-[10px] flex items-center justify-center gap-1 hover:bg-[#00f0ff]/10 transition-colors cursor-pointer min-h-[44px]"
                           >
                             <Eye className="w-3 h-3" />
                             <span className="hidden sm:inline">重新查看</span>
                           </button>
                           <button
                             onClick={() => handleDelete(entry.targetFriendId)}
-                            className="px-3 py-2 border border-[#ff007f]/40 text-[#ff007f]/50 bg-black font-pixel text-[10px] flex items-center gap-1 hover:border-[#ff007f] hover:text-[#ff007f] transition-colors cursor-pointer"
+                            className="px-3 py-2.5 border border-[#ff007f]/40 text-[#ff007f]/50 bg-black font-pixel text-[10px] flex items-center justify-center gap-1 hover:border-[#ff007f] hover:text-[#ff007f] transition-colors cursor-pointer min-h-[44px]"
                           >
                             <Trash2 className="w-3 h-3" />
                           </button>
