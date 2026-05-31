@@ -1,10 +1,11 @@
 /**
- * 本地 EdgeOne 模拟层
+ * 本地 API 模拟层
  *
  * 用途：
- * - 在本地开发时模拟 EdgeOne Functions 运行时与 KV 存储
+ * - 在本地开发时模拟 EdgeOne Pages / Cloudflare Workers Functions 运行时与 KV 存储
  * - 读取 functions/api/ 下的所有函数并挂载为 Express 路由
  * - 通过 Vite proxy 将前端的 /api/* 请求转发至此
+ * - KV 同时注入 env（兼容 Cloudflare）与 globalThis（兼容 EdgeOne），供 getSnapshotKv 自动检测
  *
  * 使用方式：
  *   node dev-server.js          # 默认端口 8788
@@ -15,7 +16,7 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-/* ------- 内存 KV（兼容 EdgeOne KV 接口）------- */
+/* ------- 内存 KV（兼容 EdgeOne / Cloudflare KV 接口）------- */
 class MemoryKV {
   constructor() {
     this._store = new Map();
@@ -44,9 +45,11 @@ class MemoryKV {
   }
 }
 
-/* ------- 工具函数 ------- */
+/* ------- 全局 KV 注入（兼容 EdgeOne 全局变量 + Cloudflare env）------- */
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const kv = new MemoryKV();
+globalThis.RESULT_SNAPSHOT_KV = kv;
+globalThis.MY_KV = kv;
 
 function toWebRequest(expressReq) {
   const url = `http://127.0.0.1:${PORT}${expressReq.originalUrl}`;

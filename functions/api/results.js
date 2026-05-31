@@ -19,18 +19,19 @@ export async function onRequest(context) {
   let stage = 'init';
 
   const envKeys = Object.keys(env);
-  const kvCandidate = env.RESULT_SNAPSHOT_KV || env.MY_KV;
+  const kv = getSnapshotKv(env);
 
-  if (!kvCandidate) {
+  if (!kv) {
     return json(
       {
         error: '结果存储未配置，请先绑定 KV。',
         code: 'INTERNAL_ERROR',
         debug: {
           envKeys,
-          hasResultSnapshotKv: !!env.RESULT_SNAPSHOT_KV,
-          hasMyKv: !!env.MY_KV,
-          kvType: typeof kvCandidate,
+          hasResultSnapshotKvOnEnv: !!env.RESULT_SNAPSHOT_KV,
+          hasMyKvOnEnv: !!env.MY_KV,
+          hasResultSnapshotKvOnGlobal: typeof globalThis.RESULT_SNAPSHOT_KV !== 'undefined',
+          hasMyKvOnGlobal: typeof globalThis.MY_KV !== 'undefined',
         },
       },
       COMMON_HEADERS,
@@ -47,15 +48,6 @@ export async function onRequest(context) {
       { error: 'Method Not Allowed', code: 'BAD_REQUEST' },
       COMMON_HEADERS,
       { status: 405 }
-    );
-  }
-
-  const kv = getSnapshotKv(env);
-  if (!kv) {
-    return json(
-      { error: '结果存储未配置，请先绑定 KV。', code: 'INTERNAL_ERROR' },
-      COMMON_HEADERS,
-      { status: 500 }
     );
   }
 

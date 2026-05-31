@@ -1,7 +1,45 @@
 import { DEFAULT_RATE_LIMIT } from './api-constants.js';
 
+const KNOWN_KV_BINDINGS = ['RESULT_SNAPSHOT_KV', 'MY_KV', 'KV', 'kv', 'KV_STORE', 'kv_store'];
+
 export function getSnapshotKv(env) {
-  return env.RESULT_SNAPSHOT_KV || env.MY_KV || null;
+  for (const name of KNOWN_KV_BINDINGS) {
+    const global = globalThis[name];
+    if (global && typeof global.get === 'function' && typeof global.put === 'function') {
+      return global;
+    }
+    const candidate = env[name];
+    if (candidate && typeof candidate.get === 'function' && typeof candidate.put === 'function') {
+      return candidate;
+    }
+  }
+
+  const envKeys = Object.keys(env);
+  for (const key of envKeys) {
+    const candidate = env[key];
+    if (
+      candidate &&
+      typeof candidate === 'object' &&
+      typeof candidate.get === 'function' &&
+      typeof candidate.put === 'function'
+    ) {
+      return candidate;
+    }
+  }
+
+  for (const key of Object.keys(globalThis)) {
+    const candidate = globalThis[key];
+    if (
+      candidate &&
+      typeof candidate === 'object' &&
+      typeof candidate.get === 'function' &&
+      typeof candidate.put === 'function'
+    ) {
+      return candidate;
+    }
+  }
+
+  return null;
 }
 
 export async function hitRateLimit(kv, clientIp, keyPrefix, max = DEFAULT_RATE_LIMIT.COMPATIBILITY_MAX) {

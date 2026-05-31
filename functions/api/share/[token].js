@@ -4,6 +4,7 @@ import {
   COMMON_HEADERS_GET,
 } from '../shared/api-constants.js';
 import {
+  getSnapshotKv,
   hitRateLimit,
   extractClientIp,
   json,
@@ -27,7 +28,7 @@ export async function onRequest(context) {
     );
   }
 
-  const kv = env.RESULT_SNAPSHOT_KV || env.MY_KV || null;
+  const kv = getSnapshotKv(env);
   if (!kv) {
     return json(
       { error: sharedCopy.errors.storageMissing, code: 'INTERNAL_ERROR' },

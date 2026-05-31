@@ -1,8 +1,12 @@
 # CogniStyle · 认知风格测评系统
 
+- 在线测评网址：[https://ultraseven.top/](https://ultraseven.top/)
+
+
 > **第七区认知适配协议 · 2147 · 后企业时代**
 
 CogniStyle 是一个沉浸式赛博朋克主题的在线认知风格测评系统。通过精心设计的 Likert 量表问卷，评估用户在多个认知维度上的偏好倾向，并结合"第七区（Sector 7）"世界观，为每位受测者匹配独特的职能身份与职业定位。
+
 
 ## 核心功能
 
@@ -65,9 +69,9 @@ CogniStyle 是一个沉浸式赛博朋克主题的在线认知风格测评系统
 - Node.js 18+
 - npm 9+
 
-### 安装与运行
+### 本地部署
 
-项目采用**双服务架构**：Vite 前端 + EdgeOne Functions API 模拟层，需要同时运行两个终端。
+项目采用**双服务架构**：Vite 前端 + API 模拟层，需要同时运行两个终端。
 
 ```bash
 # 1. 安装依赖
@@ -75,7 +79,7 @@ npm install
 
 # 2. 启动 API 模拟层（终端 1，先启动）
 npm run dev:api
-# 输出：[dev-server] EdgeOne Functions 模拟层已启动
+# 输出：[dev-server] API 模拟层已启动
 #       [dev-server] 地址  : http://127.0.0.1:8788
 
 # 3. 启动前端开发服务器（终端 2）
@@ -83,17 +87,56 @@ npm run dev
 # 输出：➜  Local:   http://localhost:3000/
 ```
 
-打开 `http://localhost:3000` 即可使用完整功能。
+打开 `http://localhost:3000` 即可使用完整功能。本地 KV 为内存存储，重启 `dev-server.js` 时数据会被清空。
+
+### EdgeOne Pages 部署
+
+#### 部署兼容性
+
+项目代码同时兼容 **EdgeOne Pages**、**Cloudflare Workers** 和 **本地 dev-server** 三种运行环境。
+
+> 无论部署到哪个平台，代码都会自动检测并适配 KV 访问方式，**无需修改任何代码**。
+
+#### 部署步骤
+
+1. 将代码推送到 Git 仓库（GitHub / GitLab / Gitee）
+2. 在 [EdgeOne Pages 控制台](https://console.cloud.tencent.com/edgeone/pages) 创建项目，导入仓库
+3. 框架预设选择 **自定义**，构建命令 `npm run build`，输出目录 `dist`
+4. EdgeOne 会自动执行 `npm install` 和 `npm run build`，无需本地手动构建
+
+#### KV 存储配置
+
+> 要使「保存并生成好友 ID」功能正常工作，必须在 EdgeOne Pages 项目中绑定 KV 命名空间。
+
+**1. 创建 KV 命名空间**
+
+在 EdgeOne Pages 控制台左侧菜单进入「KV 存储」→ 点击「创建命名空间」→ 输入名称（例如 `cognistyle-kv`）→ 记录命名空间 ID。
+
+**2. 绑定到项目**
+
+进入你的 Pages 项目 →「设置」→「绑定」→「添加」→ 选择 **KV 命名空间**：
+
+| 配置项 | 填写内容 |
+|--------|---------|
+| 变量名 | `RESULT_SNAPSHOT_KV` |
+| 类型 | KV 命名空间 |
+| 命名空间 | 选择第 1 步创建的命名空间 |
+
+**3. 重新部署**
+
+绑定 KV 后需要**重新部署项目**才能生效。点击项目右上角「部署」→「重新部署」即可。
+
+> 💡 源码中已预设了 `KV`、`kv`、`KV_STORE`、`MY_KV` 等多个已知变量名作为兜底。如果你习惯用其他变量名，`getSnapshotKv` 也会自动扫描 `globalThis` 找到任何具有 `get`/`put` 方法的 KV 对象。
+
+### 构建生产版本
 
 ```bash
-# 构建生产版本
+# 构建
 npm run build
 
-# 预览生产构建
+# 本地预览生产构建
 npm run preview
 ```
-**Q: KV 数据什么时候清空？**
-每次重启 `dev-server.js` 时，内存中的数据会被清空。如需持久化测试数据，请部署到 EdgeOne Pages 使用真实 KV。
 
 ## 世界观：第七区（Sector 7）
 
