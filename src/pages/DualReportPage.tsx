@@ -7,17 +7,11 @@ import { PATTERN_BADGE_MAP } from '../contracts/dualReport';
 import { getLocalResultIdentity } from '../services/resultSnapshotService';
 import { createCompatibilityReport, createPublicShare } from '../services/compatibilityService';
 import { addDualReportHistory } from '../services/dualHistoryService';
+import { scoreTone } from '../utils/format';
 
 interface DualReportPageProps {
   targetFriendId: string | null;
   onBack: () => void;
-}
-
-function scoreTone(score: number) {
-  if (score >= 75) return 'text-[#39ff14] border-[#39ff14]/40';
-  if (score >= 50) return 'text-[#00f0ff] border-[#00f0ff]/40';
-  if (score >= 35) return 'text-[#ffe600] border-[#ffe600]/40';
-  return 'text-[#ff007f] border-[#ff007f]/40';
 }
 
 export default function DualReportPage({ targetFriendId, onBack }: DualReportPageProps) {

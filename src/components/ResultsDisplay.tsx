@@ -4,8 +4,8 @@
  */
 
 import React, { useState } from 'react';
-import { DimensionScore, Category, CognitiveProfile } from '../types';
-import { cognitiveProfiles, buildProfileId } from '../data/suggestions';
+import { ArchetypeKey, buildProfileId, DimensionScore, Category, CognitiveProfile } from '../types';
+import { cognitiveProfiles } from '../data/suggestions';
 import PixelAvatar from './PixelAvatar';
 import SingleReportActions from './SingleReportActions';
 import { 
@@ -47,7 +47,7 @@ export default function ResultsDisplay({
     scoreMap,
     primaryArchetype,
   });
-  const otherProfileKey = buildProfileId(secondaryArchetype.key as any, matchedMode);
+  const otherProfileKey = buildProfileId(secondaryArchetype.key as ArchetypeKey, matchedMode);
   const otherProfile: CognitiveProfile | undefined = cognitiveProfiles[otherProfileKey];
   const snapshotRequest = buildResultSnapshot({
     category: 'general',

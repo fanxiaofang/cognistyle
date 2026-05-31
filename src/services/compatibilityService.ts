@@ -14,7 +14,7 @@ function isApiErrorResponse(value: unknown): value is ApiErrorResponse {
   return !!value && typeof value === 'object' && 'error' in value;
 }
 
-function sleep(ms: number) {
+function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 

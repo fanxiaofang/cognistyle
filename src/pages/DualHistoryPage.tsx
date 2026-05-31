@@ -4,36 +4,15 @@ import PixelAvatar from '../components/PixelAvatar';
 import PatternBadgeIcon from '../components/PatternBadgeIcon';
 import { PATTERN_BADGE_MAP } from '../contracts/dualReport';
 import type { DualReportHistoryEntry } from '../services/dualHistoryService';
-import {
+import { clearDualReportHistory,
   getDualReportHistory,
   removeDualReportHistory,
-  clearDualReportHistory,
 } from '../services/dualHistoryService';
+import { formatDate, scoreTone } from '../utils/format';
 
 interface DualHistoryPageProps {
   onBack: () => void;
   onOpenReport: (targetFriendId: string) => void;
-}
-
-function scoreTone(score: number) {
-  if (score >= 75) return 'text-[#39ff14]';
-  if (score >= 50) return 'text-[#00f0ff]';
-  if (score >= 35) return 'text-[#ffe600]';
-  return 'text-[#ff007f]';
-}
-
-function formatDate(timestamp: number): string {
-  try {
-    return new Intl.DateTimeFormat('zh-CN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(timestamp);
-  } catch {
-    return '';
-  }
 }
 
 export default function DualHistoryPage({ onBack, onOpenReport }: DualHistoryPageProps) {

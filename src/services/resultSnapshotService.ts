@@ -51,7 +51,7 @@ export function saveLocalResultIdentity(
   return identity;
 }
 
-export function clearLocalResultIdentity() {
+export function clearLocalResultIdentity(): void {
   localStorage.removeItem(LOCAL_IDENTITY_STORAGE_KEY);
 }
 

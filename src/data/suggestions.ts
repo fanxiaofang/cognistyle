@@ -4,7 +4,7 @@
  * 
  */
 
-import { CognitiveProfile, ArchetypeKey, ModeKey, ProfileId } from '../types';
+import { CognitiveProfile, ArchetypeKey, ModeKey } from '../types';
 
 export const worldview = {
   name: "第七区",
@@ -23,9 +23,6 @@ export const worldview = {
   }
 };
 
-export function buildProfileId(archetype: ArchetypeKey, mode: ModeKey): ProfileId {
-  return `${archetype}-${mode}`;
-}
 
 const rawProfiles: CognitiveProfile[] = [
     {

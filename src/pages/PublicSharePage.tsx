@@ -7,30 +7,11 @@ import { PATTERN_BADGE_MAP } from '../contracts/dualReport';
 import { getPublicCompatibilityReport } from '../services/compatibilityService';
 import { getLocalResultIdentity } from '../services/resultSnapshotService';
 import { addDualReportHistory } from '../services/dualHistoryService';
+import { formatExpiry, scoreTone } from '../utils/format';
 
 interface PublicSharePageProps {
   token: string | null;
   onBack: () => void;
-}
-
-function scoreTone(score: number) {
-  if (score >= 75) return 'text-[#39ff14] border-[#39ff14]/40';
-  if (score >= 50) return 'text-[#00f0ff] border-[#00f0ff]/40';
-  if (score >= 35) return 'text-[#ffe600] border-[#ffe600]/40';
-  return 'text-[#ff007f] border-[#ff007f]/40';
-}
-
-function formatExpiry(expiresAt: number) {
-  try {
-    return new Intl.DateTimeFormat('zh-CN', {
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(expiresAt);
-  } catch {
-    return '';
-  }
 }
 
 export default function PublicSharePage({ token, onBack }: PublicSharePageProps) {

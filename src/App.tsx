@@ -13,7 +13,7 @@ import CognitiveHandbook from './components/CognitiveHandbook';
 import DualReportPage from './pages/DualReportPage';
 import PublicSharePage from './pages/PublicSharePage';
 import DualHistoryPage from './pages/DualHistoryPage';
-import { GraduationCap, ChevronRight, BookOpen, History } from 'lucide-react';
+import { ChevronRight, BookOpen, History } from 'lucide-react';
 
 type AppRoute =
   | { kind: 'main' }
@@ -449,7 +449,7 @@ export default function App() {
               </h1>
               
               <p className="text-slate-400 text-[13px] sm:text-sm font-sans max-w-md mx-auto mb-8 sm:mb-12 leading-relaxed select-none">
-                第七区需要每一位公民找到最适合自己的位置。通过认知适配协议，我们将为你匹配最契合的职能身份——从应急局的抢险前线，到生科所的微观深渊。
+                第七区需要每一位公民找到最适合自己的位置。通过认知适配协议，测绘你的原生态思维底色，适配结果将关联第七区八大职能部门的职业定位。
               </p>
 
               {/* 单卡片 - 通用版独占 */}
@@ -465,29 +465,23 @@ export default function App() {
                   </div>
 
                   <div>
-                    <div className="w-12 h-12 bg-black flex items-center justify-center border-2 border-[#ff007f] mb-6 shadow-[3px_3px_0px_#00f0ff] group-hover:scale-105 transition-transform">
-                      <GraduationCap className="w-6 h-6 text-[#ff007f]" />
-                    </div>
-                    <h3 className="text-xl sm:text-2xl font-black text-white mb-2 group-hover:text-[#ff007f] transition-colors font-display tracking-widest uppercase">
+                    <h3 className="text-xs sm:text-sm font-normal text-slate-500 mb-3 group-hover:text-[#ff007f] transition-colors font-display">
                       通用认知适配
                     </h3>
-                    <p className="text-slate-400 text-xs sm:text-xs leading-relaxed mb-3 sm:mb-4 font-sans">
-                      基于日常生活场景——旅行规划、购物决策、学习新技能——测绘你的原生态思维底色。适配结果将关联第七区八大职能部门的职业定位。
-                    </p>
                   </div>
 
-                  <div className="flex items-center gap-2 text-xs font-pixel text-[#ff007f] mt-2 group-hover:translate-x-1 transition-transform">
+                  <div className="flex items-center gap-2 text-base sm:text-lg font-black font-pixel text-[#ff007f] mt-2 group-hover:translate-x-1.5 transition-transform tracking-widest">
                     [ 启动适配协议 ]
-                    <ChevronRight className="w-4 h-4" />
+                    <ChevronRight className="w-6 h-6" />
                   </div>
                 </button>
               </div>
               
-              {/* 底部安全声明 - 世界观化 */}
+              {/* 底部安全声明 - 世界观化
               <div className="mt-8 sm:mt-14 text-[11px] sm:text-xs font-pixel text-[#00f0ff]/60 tracking-widest uppercase flex items-center justify-center gap-2 bg-[#0c1229]/60 border border-[#00f0ff]/20 max-w-md mx-auto py-2.5 px-3 sm:px-4 select-none">
                 <span className="w-2 h-2 bg-[#39ff14] rounded-none animate-ping" />
                 <span>SECTOR 7 SECURE / NO TELEMETRY TO CORPORATE OVERLORDS</span>
-              </div>
+              </div> */}
             </motion.div>
           )}
 

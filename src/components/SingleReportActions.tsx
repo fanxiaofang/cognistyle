@@ -8,23 +8,11 @@ import {
   getLocalResultIdentity,
   saveLocalResultIdentity,
 } from '../services/resultSnapshotService';
+import { formatExpiry } from '../utils/format';
 
 interface SingleReportActionsProps {
   snapshotRequest: CreateResultSnapshotRequest;
   onOpenDualReport: (targetFriendId: string) => void;
-}
-
-function formatExpiry(expiresAt: number) {
-  try {
-    return new Intl.DateTimeFormat('zh-CN', {
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(expiresAt);
-  } catch {
-    return '';
-  }
 }
 
 export default function SingleReportActions({

@@ -1,5 +1,6 @@
-import { cognitiveProfiles, buildProfileId } from '../data/suggestions';
-import type { CognitiveProfile, DimensionScore, ModeKey } from '../types';
+import { cognitiveProfiles } from '../data/suggestions';
+import type { ArchetypeKey, CognitiveProfile, DimensionScore, ModeKey } from '../types';
+import { buildProfileId } from '../types';
 import {
   DUAL_REPORT_VERSIONS,
   type CreateResultSnapshotRequest,
@@ -58,7 +59,7 @@ export function resolvePrimaryProfile({
   primaryArchetype,
 }: Pick<BuildResultSnapshotInput, 'scoreMap' | 'primaryArchetype'>): ResolvedPrimaryProfile {
   const matchedMode: ModeKey = (scoreMap['solo_team'] ?? 5) >= 5 ? 'T' : 'S';
-  const profileId = buildProfileId(primaryArchetype.key as any, matchedMode);
+  const profileId = buildProfileId(primaryArchetype.key as ArchetypeKey, matchedMode);
   const profile = cognitiveProfiles[profileId] || buildFallbackProfile(profileId, matchedMode);
 
   return {

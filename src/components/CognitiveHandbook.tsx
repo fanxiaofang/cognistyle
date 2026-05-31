@@ -35,7 +35,7 @@ interface Guild {
   id: string;
   name: string;
   english: string;
-  icon: React.ComponentType<any>;
+  icon: React.ComponentType<{ className?: string }>;
   color: string;
   borderColor: string;
   shadowColor: string;
