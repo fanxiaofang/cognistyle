@@ -1,13 +1,26 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import fs from 'fs';
 import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
-    //  👇 关键：添加这一行，告诉 Vite 使用相对路径加载资源
-    base: './',
-    plugins: [react(), tailwindcss()],
+    base: '/',
+    plugins: [
+      react(),
+      tailwindcss(),
+      {
+        name: 'copy-redirects',
+        writeBundle() {
+          const src = path.resolve(__dirname, 'public/_redirects');
+          const dest = path.resolve(__dirname, 'dist/_redirects');
+          if (fs.existsSync(src)) {
+            fs.copyFileSync(src, dest);
+          }
+        },
+      },
+    ],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),

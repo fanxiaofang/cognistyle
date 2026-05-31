@@ -128,6 +128,21 @@ npm run dev
 
 > 💡 源码中已预设了 `KV`、`kv`、`KV_STORE`、`MY_KV` 等多个已知变量名作为兜底。如果你习惯用其他变量名，`getSnapshotKv` 也会自动扫描 `globalThis` 找到任何具有 `get`/`put` 方法的 KV 对象。
 
+#### SPA 路由配置
+
+> EdgeOne Pages 默认只对存在的静态文件返回 200，访问 `/share/{token}` 等前端路由会返回 404。本项目通过 `public/_redirects` 文件配置 SPA 回退规则来解决此问题。
+
+项目根目录 `public/_redirects` 文件内容（构建后会自动复制到 `dist/`）：
+
+```
+/api/*  /api/:splat  200     # API 请求不变，由 Edge Functions 处理
+/*       /index.html   200     # 其余路径回退到 index.html（SPA 接管）
+```
+
+**原理**：EdgeOne Pages 兼容 Cloudflare 的 `_redirects` 格式。状态码 `200` 表示在原始 URL 下透传目标文件内容——用户看到的 URL 仍是 `/share/{token}`，但实际收到的是 `index.html`，之后由 `App.tsx` 前端路由解析 URL 并渲染 `PublicSharePage`。
+
+> ⚠️ 如部署后分享链接仍 404，请检查 EdgeOne 控制台「项目设置 → 构建部署配置」是否已启用 SPA 模式（如有此开关），或确认 `dist/_redirects` 文件存在。
+
 ### 构建生产版本
 
 ```bash
