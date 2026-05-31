@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { AlertCircle, Copy, LoaderCircle, Share2, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
 import PixelAvatar from '../components/PixelAvatar';
 import PatternBadgeIcon from '../components/PatternBadgeIcon';
-import type { PublicCompatibilityReport } from '../contracts/dualReport';
+import type { PublicCompatibilityReport, CompatibilityPairIdentity } from '../contracts/dualReport';
 import { PATTERN_BADGE_MAP } from '../contracts/dualReport';
 import { getPublicCompatibilityReport } from '../services/compatibilityService';
+import { getLocalResultIdentity } from '../services/resultSnapshotService';
+import { addDualReportHistory } from '../services/dualHistoryService';
 
 interface PublicSharePageProps {
   token: string | null;
@@ -72,6 +74,35 @@ export default function PublicSharePage({ token, onBack }: PublicSharePageProps)
       active = false;
     };
   }, [token]);
+
+  useEffect(() => {
+    if (!report) return;
+
+    const localIdentity = getLocalResultIdentity();
+    if (!localIdentity?.friendId) return;
+
+    const myFriendId = localIdentity.friendId;
+    let target: CompatibilityPairIdentity | null = null;
+
+    if (report.pair.userA.friendId === myFriendId) {
+      target = report.pair.userB;
+    } else if (report.pair.userB.friendId === myFriendId) {
+      target = report.pair.userA;
+    }
+
+    if (!target) return;
+
+    addDualReportHistory({
+      targetFriendId: target.friendId,
+      targetProfileId: target.profileId,
+      targetDisplayName: target.displayName,
+      targetCallSign: target.callSign,
+      targetDepartment: target.department,
+      overallScore: report.overall.score,
+      pattern: report.overall.pattern,
+      generatedAt: report.createdAt,
+    });
+  }, [report]);
 
   const handleCopy = async () => {
     try {
@@ -159,34 +190,7 @@ export default function PublicSharePage({ token, onBack }: PublicSharePageProps)
                       &ldquo;{badge.tagline}&rdquo;
                     </p>
 
-                    <div className="mt-6 flex items-center justify-center gap-3 sm:gap-5 flex-wrap">
-                      <div className="flex flex-col items-center gap-1">
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 border-2 border-[#ff007f] bg-black flex items-center justify-center">
-                          <PixelAvatar id={report.pair.userA.profileId} size={40} />
-                        </div>
-                        <span className="text-[10px] text-slate-400 font-pixel max-w-[80px] truncate">
-                          {report.pair.userA.callSign || report.pair.userA.displayName}
-                        </span>
-                      </div>
-                      <span className="text-xl sm:text-2xl font-black text-[#ff007f] font-display">+</span>
-                      <div className="flex flex-col items-center gap-1">
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 border-2 border-[#ff007f] bg-black flex items-center justify-center">
-                          <PixelAvatar id={report.pair.userB.profileId} size={40} />
-                        </div>
-                        <span className="text-[10px] text-slate-400 font-pixel max-w-[80px] truncate">
-                          {report.pair.userB.callSign || report.pair.userB.displayName}
-                        </span>
-                      </div>
-                      <span className="text-xl sm:text-2xl font-black text-[#ffe600] font-display">=</span>
-                      <span
-                        className="px-3 py-1.5 border-2 font-pixel text-xs sm:text-sm uppercase tracking-widest"
-                        style={{ borderColor: badge.color, color: badge.color }}
-                      >
-                        {badge.label}
-                      </span>
-                    </div>
-
-                    <div className="mt-6 flex items-center justify-center gap-3">
+                    <div className="mt-4 flex items-center justify-center gap-3">
                       <span className={`text-2xl sm:text-3xl font-black font-display ${scoreTone(report.overall.score).split(' ')[0]}`}>
                         {report.overall.score}
                       </span>
@@ -196,10 +200,6 @@ export default function PublicSharePage({ token, onBack }: PublicSharePageProps)
                         {report.overall.rating}
                       </span>
                     </div>
-
-                    <p className="mt-4 text-sm sm:text-base text-slate-300 font-sans italic px-6 max-w-2xl mx-auto leading-relaxed">
-                      &ldquo;{report.overall.shareCaption}&rdquo;
-                    </p>
 
                     <p className="mt-3 text-[11px] sm:text-xs text-slate-500 font-sans px-6 max-w-xl mx-auto">
                       不是判断合不合，而是找到什么场景协作最省力

@@ -19,10 +19,12 @@ src/
 │   └── SingleReportActions.tsx # 单报告操作按钮
 ├── pages/
 │   ├── DualReportPage.tsx      # 双人互补报告页
-│   └── PublicSharePage.tsx     # 公开分享页
+│   ├── PublicSharePage.tsx     # 公开分享页
+│   └── DualHistoryPage.tsx     # 测试历史记录列表页
 ├── services/
 │   ├── compatibilityService.ts   # 互补报告 API 调用
-│   └── resultSnapshotService.ts  # 结果快照服务
+│   ├── resultSnapshotService.ts  # 结果快照服务
+│   └── dualHistoryService.ts     # 双人报告历史 localStorage 读写
 ├── contracts/
 │   └── dualReport.ts           # API 请求/响应类型契约
 ├── data/
@@ -31,11 +33,11 @@ src/
 ├── utils/
 │   └── buildResultSnapshot.ts  # 结果快照构建工具
 ├── types.ts                    # 全局类型定义（3 层维度 + 16 格身份）
-├── App.tsx                     # 路由、状态管理、测评主流程
+├── App.tsx                     # 路由派发、状态管理、测评主流程、Header 导航（图鉴+历史）
 ├── index.css                   # Tailwind 主题 + 赛博朋克视觉特效
 └── main.tsx                    # 应用入口
 
-functions/api/                  # Cloudflare Workers API
+functions/api/                  # Edgeone pages API
 ├── compatibility-report.js     # 互补度评分计算
 ├── compatibility-report.config.js  # 评分参数配置
 ├── results.js                  # 结果 CRUD
@@ -52,7 +54,7 @@ scripts/
 - **类型系统**：所有共享类型定义在 `src/types.ts`，按 CoreDimension（3维）→ CollaborationDimension（1维）→ RepresentationDimension（1维）三层组织
 - **API 契约**：前后端通过 `src/contracts/dualReport.ts` 共享类型，API 路径常量集中管理
 - **状态管理**：React useState + sessionStorage 持久化 + URL 参数分享，无外部状态库
-- **路由**：自定义 `AppRoute` 判别联合类型，无 React Router，基于 `window.location.pathname` 派发
+- **路由**：自定义 `AppRoute` 判别联合类型（`main` / `dual` / `share` / `history`），无 React Router，基于 `window.location.pathname` 派发
 - **样式**：类名直接写在 JSX className 中（Tailwind），无独立 CSS 文件（除 index.css 主题定义）
 - **构建**：`npm run lint`（tsc --noEmit）→ `npm run build`（vite build）
 

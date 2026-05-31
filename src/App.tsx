@@ -12,12 +12,14 @@ import ResultsDisplay from './components/ResultsDisplay';
 import CognitiveHandbook from './components/CognitiveHandbook';
 import DualReportPage from './pages/DualReportPage';
 import PublicSharePage from './pages/PublicSharePage';
-import { GraduationCap, ChevronRight, BookOpen } from 'lucide-react';
+import DualHistoryPage from './pages/DualHistoryPage';
+import { GraduationCap, ChevronRight, BookOpen, History } from 'lucide-react';
 
 type AppRoute =
   | { kind: 'main' }
   | { kind: 'dual'; targetFriendId: string | null }
-  | { kind: 'share'; token: string | null };
+  | { kind: 'share'; token: string | null }
+  | { kind: 'history' };
 
 function getCurrentRoute(): AppRoute {
   if (typeof window === 'undefined') {
@@ -32,6 +34,10 @@ function getCurrentRoute(): AppRoute {
       kind: 'dual',
       targetFriendId: params.get('friend'),
     };
+  }
+
+  if (pathname === '/history') {
+    return { kind: 'history' };
   }
 
   if (pathname.startsWith('/share/')) {
@@ -225,6 +231,16 @@ export default function App() {
     setRoute({ kind: 'main' });
   };
 
+  const handleBackFromHistory = () => {
+    window.history.pushState(null, '', buildResultUrl() || '/');
+    setRoute({ kind: 'main' });
+  };
+
+  const handleOpenHistory = () => {
+    window.history.pushState(null, '', '/history');
+    setRoute({ kind: 'history' });
+  };
+
   // 4. Score Math calculations
   // Dimensions order maps questions exactly
   const getResultsData = (): { scoreMap: Record<string, number>; scores: (DimensionScore & { percentage: number })[]; primaryArchetype: { key: string; matchScore: number }; secondaryArchetype: { key: string; matchScore: number } } => {
@@ -344,6 +360,13 @@ export default function App() {
         </div>
         <div className="flex items-center gap-3">
           <button
+            onClick={handleOpenHistory}
+            className="flex items-center gap-1.5 px-3 py-2 sm:py-1.5 border-2 border-[#ffe600] bg-black text-[#ffe600] font-pixel text-xs sm:text-xs hover:bg-[#ffe600]/10 focus:outline-none transition-all cursor-pointer shadow-[2.5px_2.5px_0px_#00f0ff] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0px_#00f0ff] min-h-[40px] sm:min-h-0"
+          >
+            <History className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+            <span>测试历史</span>
+          </button>
+          <button
             onClick={() => setShowHandbook(true)}
             className="flex items-center gap-1.5 px-3 py-2 sm:py-1.5 border-2 border-[#39ff14] bg-black text-[#39ff14] font-pixel text-xs sm:text-xs hover:bg-[#39ff14]/15 focus:outline-none transition-all cursor-pointer shadow-[2.5px_2.5px_0px_#00f0ff] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0px_#00f0ff] min-h-[40px] sm:min-h-0"
           >
@@ -383,6 +406,22 @@ export default function App() {
               className="w-full"
             >
               <PublicSharePage token={route.token} onBack={handleBackFromShare} />
+            </motion.div>
+          )}
+
+          {route.kind === 'history' && (
+            <motion.div
+              key="history"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.35 }}
+              className="w-full"
+            >
+              <DualHistoryPage
+                onBack={handleBackFromHistory}
+                onOpenReport={handleOpenDualReport}
+              />
             </motion.div>
           )}
 

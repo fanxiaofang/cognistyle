@@ -1,6 +1,6 @@
 {
   "name": "CogniStyle",
-  "description": "在线认知风格测评系统，了解你的思维、学习和工作风格，获取个性化职业建议。",
+  "description": "第七区在线思维测评系统，解析认知风格，生成身份档案，匹配搭档与专属任务。",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
