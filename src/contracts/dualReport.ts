@@ -19,8 +19,7 @@ export type NormalizedScoreKey =
   | 'impulsiveReflective'
   | 'convergentDivergent'
   | 'wholisticAnalytic'
-  | 'soloTeam'
-  | 'verbalImagery';
+  | 'soloTeam';
 
 export type CompatibilityDimensionKey =
   | 'rhythm'
@@ -62,11 +61,6 @@ export const NORMALIZED_SCORE_SEMANTICS = {
     one: 'team',
     sourceDimensionId: 'solo_team',
   },
-  verbalImagery: {
-    zero: 'verbal',
-    one: 'imagery',
-    sourceDimensionId: 'verbal_imagery',
-  },
 } as const;
 
 export interface ResultSnapshotNormalizedScores {
@@ -74,7 +68,6 @@ export interface ResultSnapshotNormalizedScores {
   convergentDivergent: number;
   wholisticAnalytic: number;
   soloTeam: number;
-  verbalImagery?: number;
 }
 
 export interface SnapshotArchetypeMatch {

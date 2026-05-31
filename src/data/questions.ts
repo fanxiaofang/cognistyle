@@ -78,20 +78,6 @@ export const dimensionMeta: Record<string, DimensionMetaItem> = {
       programmerDescription: '高度重视团队契合度与他人反馈，擅于利用 Code Review、结对编程或高频对齐优化产出。'
     }
   },
-  verbal_imagery: {
-    id: 'verbal_imagery',
-    label: '言语型 vs 表象型',
-    leftPolarity: {
-      key: 'verbal',
-      label: '逻辑阐述者 (言语型)',
-      description: '偏好通过文字、注释和口头表达来理解和传递系统逻辑，对逻辑链路和文字表述高度敏感。'
-    },
-    rightPolarity: {
-      key: 'imagery',
-      label: '视觉构图者 (表象型)',
-      description: '偏好通过架构图、流程图和空间模型来进行系统构思，拥有极强的直觉和空间想象力。'
-    }
-  }
 };
 
 export const questionsProgrammer: Question[] = [
@@ -124,13 +110,6 @@ export const questionsProgrammer: Question[] = [
     "humorTip": "debug中，请稍后..."
   },
   {
-    "id": 5,
-    "dimension": "verbal_imagery",
-    "direction": "imagery",
-    "text": "在规划复杂任务或多步骤流程时，我习惯先画出流程图、结构草图，而不是先用文字列出步骤清单。",
-    "humorTip": "debug中，请稍后..."
-  },
-  {
     "id": 6,
     "dimension": "impulsive_reflective",
     "direction": "reflective",
@@ -156,13 +135,6 @@ export const questionsProgrammer: Question[] = [
     "dimension": "solo_team",
     "direction": "team",
     "text": "进入一个新项目或陌生技术领域时，如果没有明确的任务拆分和参考指引，我会先找到有经验的同事或参考项目来定方向，而不是直接开始自行摸索。",
-    "humorTip": "debug中，请稍后..."
-  },
-  {
-    "id": 10,
-    "dimension": "verbal_imagery",
-    "direction": "verbal",
-    "text": "学习新框架时，我更依赖官方文字教程和API文档，而不是去看视频教程或架构图解。",
     "humorTip": "debug中，请稍后..."
   },
   {
@@ -194,13 +166,6 @@ export const questionsProgrammer: Question[] = [
     "humorTip": "debug中，请稍后..."
   },
   {
-    "id": 15,
-    "dimension": "verbal_imagery",
-    "direction": "imagery",
-    "text": "理解一个遗留系统，我会先找有没有现成的架构图或数据库ER图，而不是逐行阅读代码注释。",
-    "humorTip": "debug中，请稍后..."
-  },
-  {
     "id": 16,
     "dimension": "impulsive_reflective",
     "direction": "reflective",
@@ -226,13 +191,6 @@ export const questionsProgrammer: Question[] = [
     "dimension": "solo_team",
     "direction": "team",
     "text": "在团队项目中，涉及技术决策时，我习惯先征询有经验的同事意见再拍板，而不是基于自己的判断直接定下来。",
-    "humorTip": "debug中，请稍后..."
-  },
-  {
-    "id": 20,
-    "dimension": "verbal_imagery",
-    "direction": "verbal",
-    "text": "代码审查时，我更喜欢同事直接写清楚文字注释说明改动原因，而不是用屏幕分享口头讲解。",
     "humorTip": "debug中，请稍后..."
   },
   {
@@ -263,13 +221,6 @@ export const questionsProgrammer: Question[] = [
     "text": "比起独自推进一个开发任务，我更享受和同事实时协作——结对编程、随时互相 review，而不是各自闷头写完再合并对齐。",
     "humorTip": "debug中，请稍后..."
   },
-  {
-    "id": 25,
-    "dimension": "verbal_imagery",
-    "direction": "imagery",
-    "text": "当我向别人解释技术方案时，我更倾向于打开画板边画边讲，而不是发一篇详细的文档说明。",
-    "humorTip": "debug中，请稍后..."
-  }
 ];
 
 export const questionsGeneral: Question[] = [
@@ -466,30 +417,4 @@ export const questionsGeneral: Question[] = [
   },
 
   // ============================================
-  // 维度5: verbal_imagery (言语-表象) — 3题
-  // ============================================
-  {
-    id: 8,
-    dimension: "verbal_imagery",
-    direction: "imagery",
-    reverse: true,
-    text: "学习新技能时，我通常会先看视频教程，而不是先阅读文字教程。",
-    humorTip: "我许可。"
-  },
-  {
-    id: 14,
-    dimension: "verbal_imagery",
-    direction: "verbal",
-    reverse: false,
-    text: "外出使用手机导航行路时，我更愿意跟着指令走，不太习惯盯着地图画面辨认路线。",
-    humorTip: "忙忙碌碌寻宝藏。"
-  },
-  {
-    id: 16,
-    dimension: "verbal_imagery",
-    direction: "imagery",
-    reverse: true,
-    text: "在商场、车站这类大型场所找位置，我更容易记住显眼实景地标，不太依靠区域编号这类文字标识。",
-    humorTip: "随机掉入迷宫。"
-  }
 ];

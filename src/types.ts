@@ -51,27 +51,11 @@ export interface CollaborationDimensionMetadata {
 }
 
 // ============================================
-// 第三层：知识表征维度（可选补充维度）
-// ============================================
-
-export type RepresentationDimensionId = 'verbal_imagery';
-
-export type RepresentationPolarityKey = 'verbal' | 'imagery';
-
-export interface RepresentationDimensionMetadata {
-  id: RepresentationDimensionId;
-  label: string;
-  verbalLabel: string;  // 文本/符号/线性
-  imageryLabel: string; // 图形/空间/可视化
-  description: string;
-}
-
-// ============================================
 // 组合维度类型（用于测验计算）
 // ============================================
 
-export type AllDimensionId = CoreDimensionId | CollaborationDimensionId | RepresentationDimensionId;
-export type AllPolarityKey = CorePolarityKey | CollaborationPolarityKey | RepresentationPolarityKey;
+export type AllDimensionId = CoreDimensionId | CollaborationDimensionId;
+export type AllPolarityKey = CorePolarityKey | CollaborationPolarityKey;
 
 // ============================================
 // 测验题目结构
@@ -79,7 +63,7 @@ export type AllPolarityKey = CorePolarityKey | CollaborationPolarityKey | Repres
 
 export interface Question {
   id: number;
-  dimension: CoreDimensionId | CollaborationDimensionId | RepresentationDimensionId;
+  dimension: CoreDimensionId | CollaborationDimensionId;
   direction: AllPolarityKey;
   reverse?: boolean;
   text: string;
@@ -209,7 +193,6 @@ export interface TestResult {
   // 维度得分
   coreDimensions: DimensionScore[];           // I/R, C/D, W/A
   collaborationPreference: DimensionScore;  // S/T
-  representationDimension?: DimensionScore;   // V/I（可选）
   
   // 匹配结果
   matchedArchetype: ArchetypeKey;

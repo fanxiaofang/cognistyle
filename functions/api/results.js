@@ -208,16 +208,6 @@ function validateSnapshotPayload(payload) {
     }
   }
 
-  if (
-    scores.verbalImagery !== undefined &&
-    (typeof scores.verbalImagery !== 'number' ||
-      Number.isNaN(scores.verbalImagery) ||
-      scores.verbalImagery < 0 ||
-      scores.verbalImagery > 1)
-  ) {
-    return 'normalizedScores.verbalImagery 必须为 0 到 1 之间的数字。';
-  }
-
   const display = payload.display;
   if (!display || typeof display !== 'object') {
     return 'display 缺失。';

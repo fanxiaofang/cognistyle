@@ -81,7 +81,6 @@ function buildNormalizedScores(scores: ResultScoreLike[]): ResultSnapshotNormali
     convergentDivergent: clampNormalizedScore(getScore('convergent_divergent')) ?? 0.5,
     wholisticAnalytic: clampNormalizedScore(getScore('wholistic_analytic')) ?? 0.5,
     soloTeam: clampNormalizedScore(getScore('solo_team')) ?? 0.5,
-    verbalImagery: clampNormalizedScore(getScore('verbal_imagery')),
   };
 }
 
