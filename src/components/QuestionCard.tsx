@@ -68,14 +68,6 @@ export default function QuestionCard({
             {question.text}
           </h2>
 
-          {/* Humorous Tip Box */}
-          <div className="flex gap-2 sm:gap-3 items-start p-3 sm:p-4 bg-black border-2 border-[#ff007f]/70 mb-6 sm:mb-10 shadow-[2.5px_2.5px_0px_rgba(0,240,255,0.6)]">
-            <Quote className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#ff007f] shrink-0 mt-0.5" />
-            <p className="text-xs sm:text-[13px] text-[#00f0ff] italic font-sans leading-relaxed select-none">
-              {question.humorTip}
-            </p>
-          </div>
-
           {/* Likert Selection Nodes - Horizontal on desktop, Vertical/Adaptive on Mobile */}
           <div className="mb-6 sm:mb-10">
             {/* Desktop Horizontal Likert Layout */}

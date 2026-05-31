@@ -65,10 +65,8 @@ export interface Question {
   id: number;
   dimension: CoreDimensionId | CollaborationDimensionId;
   direction: AllPolarityKey;
-  reverse?: boolean;
   text: string;
   programmerText?: string;
-  humorTip: string;
 }
 
 export type QuestionCategory = 'programmer' | 'general';

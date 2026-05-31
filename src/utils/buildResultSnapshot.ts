@@ -57,7 +57,7 @@ export function resolvePrimaryProfile({
   scoreMap,
   primaryArchetype,
 }: Pick<BuildResultSnapshotInput, 'scoreMap' | 'primaryArchetype'>): ResolvedPrimaryProfile {
-  const matchedMode: ModeKey = (scoreMap['solo_team'] ?? 12.5) >= 12.5 ? 'T' : 'S';
+  const matchedMode: ModeKey = (scoreMap['solo_team'] ?? 5) >= 5 ? 'T' : 'S';
   const profileId = buildProfileId(primaryArchetype.key as any, matchedMode);
   const profile = cognitiveProfiles[profileId] || buildFallbackProfile(profileId, matchedMode);
 
