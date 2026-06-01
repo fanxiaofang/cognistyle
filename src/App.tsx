@@ -13,7 +13,7 @@ import CognitiveHandbook from './components/CognitiveHandbook';
 import DualReportPage from './pages/DualReportPage';
 import PublicSharePage from './pages/PublicSharePage';
 import DualHistoryPage from './pages/DualHistoryPage';
-import { ChevronRight, BookOpen, History } from 'lucide-react';
+import { ChevronsRight, BookOpen, History } from 'lucide-react';
 
 type AppRoute =
   | { kind: 'main' }
@@ -353,9 +353,6 @@ export default function App() {
             <span className="text-xl sm:text-3xl font-black tracking-widest text-[#00f0ff] glow-cyan font-display uppercase leading-none">
               SECTOR 7
             </span>
-            <span className="text-xs sm:text-xs font-pixel text-[#ff007f] tracking-widest hidden sm:inline">
-              COGNITIVE PLACEMENT
-            </span>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -436,46 +433,45 @@ export default function App() {
               className="w-full max-w-lg mx-auto text-center"
             >
               {/* 世界观标签 */}
-              <div className="mb-4 sm:mb-6 inline-flex items-center gap-2 bg-black/85 border-2 border-[#ff007f] px-3 sm:px-4 py-1.5 text-xs sm:text-xs font-pixel font-bold text-[#ff007f] uppercase select-none shadow-[3px_3px_0px_#00f0ff]">
-                <span className="inline-block w-2 h-2 bg-[#39ff14] animate-pulse" />
-                2147 · 后企业时代 · 认知适配协议
+              <div className="mb-3 sm:mb-4 inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 text-[11px] sm:text-xs font-mono text-slate-500 select-none">
+                2147 · 后企业时代
               </div>
               
-              <h1 className="text-3xl sm:text-5xl font-black tracking-widest text-white mb-3 sm:mb-4 font-display uppercase leading-none">
+              <h1 className="text-xl sm:text-3xl font-black tracking-widest text-white mb-2 sm:mb-3 font-display uppercase leading-none">
                 接入{' '}
-                <span className="text-[#00f0ff] glow-cyan animate-pulse">
-                  职业分配系统
+                <span className="text-[#00f0ff]">
+                  认知适配协议
                 </span>
               </h1>
               
-              <p className="text-slate-400 text-[13px] sm:text-sm font-sans max-w-md mx-auto mb-8 sm:mb-12 leading-relaxed select-none">
-                第七区需要每一位公民找到最适合自己的位置。通过认知适配协议，测绘你的原生态思维底色，适配结果将关联第七区八大职能部门的职业定位。
+              <p className="text-slate-400 text-[13px] sm:text-sm font-sans max-w-md mx-auto mb-6 sm:mb-8 leading-relaxed select-none">
+                {/* 认知适配协议将测绘你的原生态思维底色，帮助你发现自己的认知偏好与思维模式。理解你的风格，是找到最适合位置的第一步。 */}
+                第七区需要每一位公民找到最适合自己的位置。通过认知适配协议，测绘你的原生态思维底色，适配结果将关联第七区八大职能部门的职业定位
               </p>
 
               {/* 单卡片 - 通用版独占 */}
               <div className="max-w-md mx-auto">
                 <button
                   onClick={handleStartTest}
-                  className="group w-full bg-[#070b19]/90 hover:bg-[#0c1229] border-4 border-[#ff007f] p-4 sm:p-6 md:p-8 shadow-[6px_6px_0px_0px_#00f0ff] active:translate-x-1 active:translate-y-1 active:shadow-[2px_2px_0px_0px_#00f0ff] hover:shadow-[8px_8px_0px_0px_#00f0ff] transition-all duration-150 flex flex-col justify-between text-left relative select-none cursor-pointer"
+                  className="group w-full bg-[#070b19]/90 hover:bg-[#0c1229] border border-white/10 p-4 sm:p-6 md:p-8 shadow-[6px_6px_0px_0px_#00f0ff] active:translate-x-1 active:translate-y-1 active:shadow-[2px_2px_0px_0px_#00f0ff] hover:shadow-[8px_8px_0px_0px_#00f0ff] transition-all duration-150 flex flex-col justify-between text-left relative select-none cursor-pointer"
                 >
                   <div className="absolute top-0 right-0 p-3">
-                    <span className="text-[11px] font-pixel px-2 py-0.5 bg-black border border-[#39ff14] text-[#39ff14] uppercase glow-green">
+                    <span className="text-[11px] font-pixel px-2 py-0.5 bg-black border border-[#39ff14]/60 text-[#39ff14]/80 uppercase">
                       标准局备案
                     </span>
                   </div>
 
-                  <div>
-                    <h3 className="text-xs sm:text-sm font-normal text-slate-500 mb-3 group-hover:text-[#ff007f] transition-colors font-display">
-                      通用认知适配
-                    </h3>
+                  <div className="flex items-center gap-2 text-base sm:text-lg font-mono text-[#00f0ff] mt-2 group-hover:translate-x-1.5 transition-transform tracking-wide">
+                    启动适配协议
+                    <ChevronsRight className="w-5 h-5 animate-pulse" />
                   </div>
-
-                  <div className="flex items-center gap-2 text-base sm:text-lg font-black font-pixel text-[#ff007f] mt-2 group-hover:translate-x-1.5 transition-transform tracking-widest">
-                    [ 启动适配协议 ]
-                    <ChevronRight className="w-6 h-6" />
-                  </div>
+                  <p className="text-[10px] sm:text-[11px] font-mono text-slate-600 mt-2 tracking-wider select-none text-right">
+                    约 3 分钟 · 20 题
+                  </p>
                 </button>
+
               </div>
+
               
               {/* 底部安全声明 - 世界观化
               <div className="mt-8 sm:mt-14 text-[11px] sm:text-xs font-pixel text-[#00f0ff]/60 tracking-widest uppercase flex items-center justify-center gap-2 bg-[#0c1229]/60 border border-[#00f0ff]/20 max-w-md mx-auto py-2.5 px-3 sm:px-4 select-none">

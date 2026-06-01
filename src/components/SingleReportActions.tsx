@@ -119,143 +119,171 @@ export default function SingleReportActions({
   };
 
   return (
-    <div className="w-full border-2 border-[#00f0ff]/60 bg-black/80 px-4 py-4 sm:px-5 sm:py-5 shadow-[4px_4px_0px_rgba(255,0,127,0.35)]">
-      <div className="flex flex-col gap-3 sm:gap-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-[11px] sm:text-xs font-pixel tracking-widest text-[#00f0ff] uppercase">
-              双人互补报告准备
-            </p>
-          </div>
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="w-full sm:w-auto px-5 py-3 rounded-none bg-black border-2 border-[#00f0ff] text-[#00f0ff] font-pixel text-xs sm:text-[13px] flex items-center justify-center gap-2 shadow-[4px_4px_0px_#050814] hover:shadow-[5px_5px_0px_#ff007f] disabled:opacity-60 disabled:cursor-not-allowed transition-all cursor-pointer min-h-[46px]"
-          >
-            {saving ? (
-              <LoaderCircle className="w-4 h-4 animate-spin" />
-            ) : (
-              <Save className="w-4 h-4" />
-            )}
-            <span>{saving ? '保存中...' : '保存并生成我的好友 ID'}</span>
-          </button>
+    <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 font-mono select-none">
+      {/* Action panel container */}
+      <div className="relative bg-[#050814]/95 border-2 border-[#00f0ff]/50 p-4 sm:p-6 md:p-8 shadow-[0_0_20px_rgba(0,240,255,0.12)] overflow-hidden">
+        {/* Grids / Lines decoration */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,240,255,0.03)_0%,rgba(0,0,0,0)_70%)] pointer-events-none" />
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#00f0ff] via-[#ff007f] to-[#ffe600]/80" />
+
+        {/* Section title */}
+        <div className="flex items-center gap-2 mb-6 border-b border-[#00f0ff]/20 pb-3">
+          <span className="w-2 h-2 bg-[#00f0ff] animate-pulse" />
+          <h3 className="text-xs sm:text-sm font-black text-[#00f0ff] uppercase tracking-widest font-display">
+            认知适配协作终端
+          </h3>
         </div>
 
-        {identity && (
-          <div className="border border-dashed border-[#39ff14]/40 bg-[#070b19] px-3 py-3 sm:px-4 sm:py-4">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-[11px] sm:text-xs font-pixel tracking-widest text-[#39ff14] uppercase">
-                  当前好友 ID
-                </p>
-                <p className="mt-1 break-all font-mono text-sm sm:text-base text-white">
-                  {identity.friendId}
-                </p>
-                <p className="mt-1 text-[11px] sm:text-xs text-slate-400 font-sans">
-                  有效期至 {expiresText || '已生成'}
-                </p>
-              </div>
-              <button
-                onClick={handleCopy}
-                className="w-full sm:w-auto px-4 py-2 rounded-none border border-[#39ff14] text-[#39ff14] bg-black font-pixel text-xs flex items-center justify-center gap-2 hover:bg-[#39ff14]/10 transition-colors cursor-pointer min-h-[40px]"
-              >
-                <Copy className="w-3.5 h-3.5" />
-                <span>{copied ? '已复制' : '复制 ID'}</span>
-              </button>
-            </div>
-          </div>
-        )}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 relative z-10">
 
-        <div className="border border-dashed border-[#ffe600]/35 bg-[#070b19] px-3 py-3 sm:px-4 sm:py-4">
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="w-3.5 h-3.5 text-[#ffe600] shrink-0" />
-            <p className="text-[11px] sm:text-xs text-slate-400 font-sans">
-              friendId 用于生成互补报告，删除凭证仅保存在当前设备。
-            </p>
-          </div>
-        </div>
-
-        <div className="border border-dashed border-[#00f0ff]/35 bg-[#070b19] px-3 py-3 sm:px-4 sm:py-4">
-          <div className="flex flex-col gap-3">
-            <label className="block text-[11px] sm:text-xs font-pixel tracking-widest text-[#00f0ff] uppercase">
-              输入好友 ID
-            </label>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
-              <input
-                value={targetFriendId}
-                onChange={(event) => setTargetFriendId(event.target.value)}
-                placeholder="例如 abc123xyz789"
-                className="flex-1 w-full rounded-none border-2 border-[#00f0ff]/60 bg-black px-3 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-[#00f0ff] font-mono"
-              />
-              <button
-                onClick={handleOpenDualReport}
-                className="w-full sm:w-auto px-5 py-3 rounded-none border-2 border-[#ffe600] bg-black text-[#ffe600] font-pixel text-xs sm:text-[13px] flex items-center justify-center gap-2 hover:bg-[#ffe600]/10 transition-colors cursor-pointer min-h-[46px]"
-              >
-                <ArrowRight className="w-4 h-4" />
-                <span>生成认知互补度报告</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {identity && (
-          <div className="border border-dashed border-[#ff007f]/35 bg-[#070b19] px-3 py-3 sm:px-4 sm:py-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-[11px] sm:text-xs font-pixel tracking-widest text-[#ff007f] uppercase">
-                  删除我的结果
-                </p>
-                <p className="mt-1 text-[11px] sm:text-xs leading-relaxed text-slate-400 font-sans">
-                  删除后旧好友 ID 立即失效。
-                </p>
-              </div>
-              <div className="flex w-full sm:w-auto gap-2">
-                {!confirmDelete ? (
-                  <button
-                    onClick={() => {
-                      setConfirmDelete(true);
-                      setSaveError(null);
-                      setSaveMessage(null);
-                    }}
-                    className="w-full sm:w-auto px-4 py-2 rounded-none border border-[#ff007f] text-[#ff007f] bg-black font-pixel text-xs flex items-center justify-center gap-2 hover:bg-[#ff007f]/10 transition-colors cursor-pointer min-h-[40px]"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                    <span>删除我的结果</span>
-                  </button>
-                ) : (
-                  <>
-                    <button
-                      onClick={() => setConfirmDelete(false)}
-                      className="w-full sm:w-auto px-4 py-2 rounded-none border border-slate-500 text-slate-300 bg-black font-pixel text-xs hover:bg-slate-500/10 transition-colors cursor-pointer min-h-[40px]"
-                    >
-                      取消
-                    </button>
-                    <button
-                      onClick={handleDelete}
-                      disabled={deleting}
-                      className="w-full sm:w-auto px-4 py-2 rounded-none border border-[#ff007f] text-[#ff007f] bg-black font-pixel text-xs flex items-center justify-center gap-2 hover:bg-[#ff007f]/10 disabled:opacity-60 disabled:cursor-not-allowed transition-colors cursor-pointer min-h-[40px]"
-                    >
-                      {deleting ? <LoaderCircle className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
-                      <span>{deleting ? '删除中...' : '确认删除'}</span>
-                    </button>
-                  </>
+          {/* Card 1: My Identity (我的身份凭证) */}
+          <div className="border border-[#00f0ff]/25 bg-black/40 p-4 flex flex-col justify-between">
+            <div>
+              <div className="flex justify-between items-baseline mb-3">
+                <h4 className="text-xs font-pixel text-[#00f0ff] uppercase tracking-wider">
+                  [ 第一步：你的身份识别码 ]
+                </h4>
+                {identity && (
+                  <span className="text-[10px] text-slate-500 font-sans">
+                    有效期: 7天
+                  </span>
                 )}
               </div>
+
+              {!identity ? (
+                <div className="space-y-3">
+                  <p className="text-xs text-slate-400 leading-relaxed font-sans">
+                    将当前的测评结果保存至云端，系统将为当前浏览器生成一个专属的认知 ID。
+                  </p>
+                  <button
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="w-full px-4 py-3 rounded-none bg-black border border-[#00f0ff] text-[#00f0ff] font-pixel text-xs flex items-center justify-center gap-2 hover:bg-[#00f0ff]/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer min-h-[44px]"
+                  >
+                    {saving ? (
+                      <LoaderCircle className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Save className="w-4 h-4" />
+                    )}
+                    <span>{saving ? '正在写入云端...' : '保存并生成我的好友 ID'}</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="bg-[#070b19]/80 border border-[#39ff14]/30 px-3 py-3 relative">
+                    <span className="absolute -top-1.5 left-2 px-1 text-[8px] font-pixel text-[#39ff14] bg-[#050814]">
+                      MY COGNITIVE ID
+                    </span>
+                    <p className="font-mono text-sm sm:text-base text-white tracking-widest break-all pt-1 select-all selection:bg-[#39ff14]/30">
+                      {identity.friendId}
+                    </p>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleCopy}
+                      className="flex-1 px-3 py-2 rounded-none border border-[#39ff14] text-[#39ff14] bg-black font-pixel text-xs flex items-center justify-center gap-1.5 hover:bg-[#39ff14]/10 transition-colors cursor-pointer min-h-[38px]"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>{copied ? '已复制' : '复制我的 ID'}</span>
+                    </button>
+
+                    {/* Delete entry */}
+                    {!confirmDelete ? (
+                      <button
+                        onClick={() => {
+                          setConfirmDelete(true);
+                          setSaveError(null);
+                          setSaveMessage(null);
+                        }}
+                        className="px-3 py-2 rounded-none border border-[#ff007f]/40 text-[#ff007f]/60 bg-black font-pixel text-xs flex items-center justify-center gap-1.5 hover:border-[#ff007f] hover:text-[#ff007f] transition-colors cursor-pointer min-h-[38px]"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    ) : (
+                      <div className="flex gap-1 flex-1">
+                        <button
+                          onClick={() => setConfirmDelete(false)}
+                          className="flex-1 px-2 py-1 border border-slate-700 text-slate-400 bg-black font-pixel text-[10px] hover:bg-slate-800 transition-colors cursor-pointer"
+                        >
+                          取消
+                        </button>
+                        <button
+                          onClick={handleDelete}
+                          disabled={deleting}
+                          className="flex-1 px-2 py-1 border border-[#ff007f] text-[#ff007f] bg-[#ff007f]/10 font-pixel text-[10px] hover:bg-[#ff007f]/20 transition-colors cursor-pointer"
+                        >
+                          {deleting ? '...' : '确认'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
+
+            <div className="mt-4 border-t border-[#00f0ff]/10 pt-3 flex items-start gap-1.5">
+              <AlertTriangle className="w-3.5 h-3.5 text-[#ffe600] shrink-0 mt-0.5" />
+              <p className="text-[10px] text-slate-500 leading-normal font-sans">
+                好友 ID 用于配对生成互补度报告。删除凭证仅保存在本地设备。
+              </p>
+            </div>
+          </div>
+
+          {/* Card 2: Dual Connection (输入好友配对) */}
+          <div className="border border-[#00f0ff]/25 bg-black/40 p-4 flex flex-col justify-between">
+            <div className="space-y-4">
+              <h4 className="text-xs font-pixel text-[#00f0ff] uppercase tracking-wider">
+                [ 第二步：开启认知同步 ]
+              </h4>
+
+              <p className="text-xs text-slate-400 leading-relaxed font-sans">
+                输入好友分享给你的认知 ID，系统将融合双方维度平衡指数进行契合度比对。
+              </p>
+
+              <div className="space-y-3">
+                <input
+                  value={targetFriendId}
+                  onChange={(event) => setTargetFriendId(event.target.value)}
+                  placeholder="请输入好友的 ID (例如 abc123xyz)"
+                  className="w-full rounded-none border border-[#00f0ff]/40 bg-[#070b19] px-3 py-2.5 text-xs sm:text-sm text-white outline-none placeholder:text-slate-650 focus:border-[#00f0ff] focus:shadow-[0_0_10px_rgba(0,240,255,0.1)] font-mono transition-all"
+                />
+
+                <button
+                  onClick={handleOpenDualReport}
+                  className="w-full px-5 py-3 rounded-none border border-[#ffe600] bg-black text-[#ffe600] font-pixel text-xs sm:text-[13px] flex items-center justify-center gap-2 hover:bg-[#ffe600]/10 transition-colors cursor-pointer min-h-[44px]"
+                >
+                  <ArrowRight className="w-4 h-4" />
+                  <span>生成认知互补度报告</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-4 border-t border-[#00f0ff]/10 pt-3">
+              <p className="text-[10px] text-slate-500 leading-normal font-sans">
+                注意：生成双人报告需要您先完成 Step 1 并拥有自己的好友 ID。
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Global Terminal Logs / Message boxes */}
+        {(saveMessage || saveError) && (
+          <div className="mt-4 relative z-10">
+            {saveMessage && (
+              <p className="text-[11px] sm:text-xs font-pixel text-[#39ff14] bg-black border border-[#39ff14]/50 px-3 py-2 text-center shadow-[0_0_8px_rgba(57,255,20,0.1)]">
+                &gt; {saveMessage}
+              </p>
+            )}
+            {saveError && (
+              <p className="text-[11px] sm:text-xs font-pixel text-[#ff007f] bg-black border border-[#ff007f]/50 px-3 py-2 text-center shadow-[0_0_8px_rgba(255,0,127,0.1)]">
+                &gt; SYSTEM ERROR: {saveError}
+              </p>
+            )}
           </div>
         )}
 
-        {saveMessage && (
-          <p className="text-[11px] sm:text-xs font-pixel text-[#39ff14] bg-black border border-[#39ff14] px-3 py-2 text-center">
-            {saveMessage}
-          </p>
-        )}
-
-        {saveError && (
-          <p className="text-[11px] sm:text-xs font-pixel text-[#ff007f] bg-black border border-[#ff007f] px-3 py-2 text-center">
-            {saveError}
-          </p>
-        )}
       </div>
     </div>
   );

@@ -54,7 +54,7 @@ const GUILDS: Guild[] = [
     icon: Compass,
     color: 'text-[#00f0ff]',
     borderColor: 'border-[#00f0ff]/70',
-    shadowColor: 'shadow-[3px_3px_0px_rgba(255,0,127,0.5)]',
+    shadowColor: 'shadow-[0_0_10px_rgba(0,240,255,0.25)]',
     glowClass: 'glow-cyan',
     description: '第七区总控中心与应急局的脊梁。他们用经过验证的标准协议搭建城市骨架——无论是灾区的临时秩序，还是城市网络的长期稳定。他们相信：秩序不是束缚，而是让系统在崩坏边缘仍能运转的底线。',
     members: [
@@ -63,7 +63,7 @@ const GUILDS: Guild[] = [
       { profileId: 'R-C-W-S', callSign: '孤星观测员', department: '总控中心', role: '塔楼守望' },
       { profileId: 'R-C-W-T', callSign: '监控指挥官', department: '总控中心', role: '系统调度' }
     ],
-    factionLore: '筑基者不追求惊艳，他们追求"明天醒来，城市还在"。当探路者在禁区点燃篝火时，是筑基者确保了电网没有过载；当炼金师推敲基因序列时，是筑基者守护着伦理协议的边界。他们是第七区最不被看见、却最不可或缺的阶层。',
+    factionLore: '筑基者不追求惊艳，他们追求"明天醒来，城市还在"。当探路者在禁区点燃篝火时，是筑基者确保了电网没有过载；当炼金师推敲基因序列时，是筑基者守护着伦理协议的边界。他们是第七区最不被看见、却最不可缺的阶层。',
     cognitiveEssence: '聚合 × 整体：用标准方案搭建宏观骨架'
   },
   {
@@ -73,7 +73,7 @@ const GUILDS: Guild[] = [
     icon: ShieldCheck,
     color: 'text-[#ffe600]',
     borderColor: 'border-[#ffe600]/70',
-    shadowColor: 'shadow-[3px_3px_0px_rgba(0,240,255,0.5)]',
+    shadowColor: 'shadow-[0_0_10px_rgba(255,230,0,0.25)]',
     glowClass: 'glow-yellow',
     description: '第七区医疗部与标准局的最后防线。他们深入微观细节，用严谨的规范确保每个单元无懈可击——从战地缝合的每一针，到城市底层协议的每一个参数。漏洞和瑕疵在他们眼中不是"可容忍的风险"，而是"必须消灭的敌人"。',
     members: [
@@ -92,7 +92,7 @@ const GUILDS: Guild[] = [
     icon: Cpu,
     color: 'text-[#39ff14]',
     borderColor: 'border-[#39ff14]/70',
-    shadowColor: 'shadow-[3px_3px_0px_rgba(255,0,127,0.5)]',
+    shadowColor: 'shadow-[0_0_10px_rgba(57,255,20,0.25)]',
     glowClass: 'glow-green',
     description: '第七区边界署与遗迹司的先驱。他们拒绝官方叙事的边界，在禁区与废墟中寻找被删除的真相。他们相信：最好的答案不在现有选项之中，而在"此处以下，尚未探索"的黑暗里。',
     members: [
@@ -111,7 +111,7 @@ const GUILDS: Guild[] = [
     icon: Binary,
     color: 'text-[#ff007f]',
     borderColor: 'border-[#ff007f]/70',
-    shadowColor: 'shadow-[3px_3px_0px_rgba(0,240,255,0.5)]',
+    shadowColor: 'shadow-[0_0_10px_rgba(255,0,127,0.25)]',
     glowClass: 'glow-magenta',
     description: '第七区黑市工坊与生科所的微观魔术师。他们在无人关注的角落里，用精巧的创新突破性能与逻辑的极限——从定制义体的微米级关节，到基因序列的精确编辑。他们的作品是孤品，也是艺术品。',
     members: [
@@ -127,7 +127,12 @@ const GUILDS: Guild[] = [
 
 export default function CognitiveHandbook({ onClose }: CognitiveHandbookProps) {
   const [activeGuild, setActiveGuild] = useState<string>('overlords');
-  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(() => {
+    if (typeof window !== 'undefined' && window.innerWidth >= 768) {
+      return GUILDS[0].members[0]?.profileId || null;
+    }
+    return null;
+  });
 
   const selectedGuild = GUILDS.find(g => g.id === activeGuild) || GUILDS[0];
 
@@ -142,7 +147,7 @@ export default function CognitiveHandbook({ onClose }: CognitiveHandbookProps) {
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
         transition={{ duration: 0.25 }}
-        className="relative w-full max-w-6xl h-dvh sm:h-[90vh] bg-[#050814] border-2 border-[#00f0ff]/80 shadow-[6px_6px_0px_rgba(255,0,127,0.6)] flex flex-col overflow-hidden"
+        className="relative w-full max-w-6xl h-dvh sm:h-[90vh] bg-[#050814] border-2 border-[#00f0ff]/80 shadow-[0_0_20px_rgba(0,240,255,0.15)] flex flex-col overflow-hidden"
       >
         {/* Terminal Header */}
         <div className="flex justify-between items-center bg-[#070b19] border-b-2 border-dashed border-[#00f0ff]/40 px-3 sm:px-5 py-3 sm:py-4">
@@ -172,7 +177,7 @@ export default function CognitiveHandbook({ onClose }: CognitiveHandbookProps) {
                 key={g.id}
                 onClick={() => {
                   setActiveGuild(g.id);
-                  setSelectedProfileId(null);
+                  setSelectedProfileId(typeof window !== 'undefined' && window.innerWidth >= 768 ? g.members[0]?.profileId || null : null);
                 }}
                 className={`py-2.5 sm:py-3.5 px-2 sm:px-3 flex flex-col items-center justify-center gap-0.5 sm:gap-1 border-r border-[#00f0ff]/10 text-center transition-all cursor-pointer relative min-h-[44px] sm:min-h-0
                   ${isActive 
@@ -332,17 +337,17 @@ export default function CognitiveHandbook({ onClose }: CognitiveHandbookProps) {
                       </div>
 
                       {/* Strengths & Weaknesses double column block */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6 pt-1 sm:pt-2">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 pt-1 sm:pt-2">
                         {/* Strengths */}
-                        <div className="bg-black border-2 border-[#122e23] p-3 sm:p-4">
-                          <h4 className="text-xs sm:text-[13px] font-pixel text-[#39ff14] flex items-center gap-1.5 mb-2 sm:mb-3 uppercase tracking-wider glow-green">
-                            <CheckCircle2 className="w-3 h-3 sm:w-4 sm:h-4 text-[#39ff14]" />
+                        <div className="bg-[#070b19]/30 border-2 border-[#122e23] p-4">
+                          <h4 className="text-xs sm:text-[13px] font-pixel text-[#39ff14] flex items-center gap-1.5 mb-3 uppercase tracking-wider glow-green">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-[#39ff14]" />
                             核心优势
                           </h4>
-                          <ul className="space-y-1 sm:space-y-1.5 font-sans mt-2 sm:mt-3">
+                          <ul className="space-y-2 font-sans mt-3">
                             {profile.workplaceEdge.filter(e => e.startsWith('优势：')).map((st, i) => (
-                              <li key={i} className="text-xs sm:text-[13px] leading-snug text-slate-400 flex items-start gap-1.5">
-                                <CornerDownRight className="w-2 h-2 sm:w-2.5 sm:h-2.5 text-[#39ff14] shrink-0 mt-0.5" />
+                              <li key={i} className="text-xs sm:text-[13px] leading-relaxed text-slate-300 flex items-start gap-1.5">
+                                <CornerDownRight className="w-3 h-3 text-[#39ff14] shrink-0 mt-1" />
                                 <span>{st.replace(/^优势：/, '')}</span>
                               </li>
                             ))}
@@ -350,15 +355,15 @@ export default function CognitiveHandbook({ onClose }: CognitiveHandbookProps) {
                         </div>
 
                         {/* Weaknesses */}
-                        <div className="bg-black border-2 border-[#2f2711] p-3 sm:p-4">
-                          <h4 className="text-xs sm:text-[13px] font-pixel text-[#ffe600] flex items-center gap-1.5 mb-2 sm:mb-3 uppercase tracking-wider glow-yellow font-bold">
-                            <AlertTriangle className="w-3 h-3 sm:w-4 sm:h-4 text-[#ffe600]" />
+                        <div className="bg-[#070b19]/30 border-2 border-[#2f2711] p-4">
+                          <h4 className="text-xs sm:text-[13px] font-pixel text-[#ffe600] flex items-center gap-1.5 mb-3 uppercase tracking-wider glow-yellow">
+                            <AlertTriangle className="w-3.5 h-3.5 text-[#ffe600]" />
                             潜在盲区
                           </h4>
-                          <ul className="space-y-1 sm:space-y-2 font-sans">
+                          <ul className="space-y-2 font-sans mt-3">
                             {profile.workplaceEdge.filter(e => e.startsWith('边界：')).map((we, i) => (
-                              <li key={i} className="text-xs sm:text-xs leading-relaxed text-slate-300 flex items-start gap-1.5 sm:gap-2">
-                                <CornerDownRight className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-[#ff007f] shrink-0 mt-0.5" />
+                              <li key={i} className="text-xs sm:text-[13px] leading-relaxed text-slate-300 flex items-start gap-1.5">
+                                <CornerDownRight className="w-3 h-3 text-[#ff007f] shrink-0 mt-1" />
                                 <span>{we.replace(/^边界：/, '')}</span>
                               </li>
                             ))}

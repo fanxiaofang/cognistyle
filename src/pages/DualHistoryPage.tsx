@@ -39,26 +39,31 @@ export default function DualHistoryPage({ onBack, onOpenReport }: DualHistoryPag
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto px-2 sm:px-4 py-4 sm:py-8">
-      <div className="bg-black border-2 border-[#00f0ff]/80 p-4 sm:p-6 md:p-8 shadow-[6px_6px_0px_rgba(255,0,127,0.45)]">
-        <div className="flex flex-col gap-4 sm:gap-5">
-          <div className="flex items-center justify-between flex-wrap gap-3">
+    <div className="w-full max-w-3xl mx-auto px-2 sm:px-4 py-4 sm:py-8 font-mono select-none">
+      <div className="relative bg-[#050814] border-2 border-[#00f0ff]/80 p-4 sm:p-6 md:p-8 shadow-[0_0_20px_rgba(0,240,255,0.15)] overflow-hidden">
+        {/* Background Decorative Laser Grids */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,240,255,0.04)_0%,rgba(0,0,0,0)_70%)] pointer-events-none" />
+        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#00f0ff] via-[#ff007f] to-[#ffe600]" />
+
+        <div className="flex flex-col gap-4">
+          {/* Terminal Header */}
+          <div className="flex justify-between items-center bg-[#070b19] border-b-2 border-dashed border-[#00f0ff]/40 -mx-4 sm:-mx-6 md:-mx-8 -mt-4 sm:-mt-6 md:-mt-8 px-4 sm:px-6 md:px-8 py-4 mb-2">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 border-2 border-[#ffe600] bg-black flex items-center justify-center">
+              <div className="w-8 h-8 border-2 border-[#ffe600] bg-black flex items-center justify-center shrink-0">
                 <Clock className="w-4 h-4 text-[#ffe600]" />
               </div>
               <div>
-                <p className="text-[11px] sm:text-xs font-pixel tracking-widest text-[#ffe600] uppercase">
+                <h2 className="text-sm sm:text-base font-black text-white tracking-widest font-display leading-none">
                   适配历史记录
-                </p>
-                <p className="text-[10px] text-slate-500 font-mono mt-0.5">
+                </h2>
+                <p className="text-[10px] text-slate-500 font-mono mt-1.5">
                   所有与你进行过认知互补测试的对象
                 </p>
               </div>
             </div>
             <button
               onClick={onBack}
-              className="px-4 py-2.5 rounded-none bg-black border-2 border-[#ff007f] text-[#ff007f] font-pixel text-xs flex items-center gap-2 shadow-[3px_3px_0px_#050814] hover:shadow-[4px_4px_0px_#00f0ff] transition-all cursor-pointer min-h-[44px]"
+              className="px-4 py-2 border-2 border-[#ff007f] hover:bg-[#ff007f] hover:text-white text-[#ff007f] bg-black font-pixel text-xs flex items-center gap-2 transition-colors pointer-events-auto cursor-pointer min-h-[44px]"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>返回</span>

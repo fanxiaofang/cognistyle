@@ -74,23 +74,22 @@ export default function ResultsDisplay({
 
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 py-4 sm:py-8">
+    <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 py-4 sm:py-8 select-none">
       {/* Result Card */}
-      <div className="bg-black border-2 border-[#00f0ff]/80 p-3 sm:p-6 md:p-10 shadow-[6px_6px_0px_rgba(255,0,127,0.6)] relative overflow-hidden font-mono min-w-0">
-        {/* Pixel laser bar */}
-        <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-[#00f0ff] via-[#ff007f] to-[#ffe600]" />
-        <div className="absolute -top-[400px] -right-[200px] w-[600px] h-[600px] bg-[#00f0ff]/5 rounded-none pointer-events-none" />
-        <div className="absolute -bottom-[400px] -left-[200px] w-[600px] h-[600px] bg-[#ff007f]/5 rounded-none pointer-events-none" />
+      <div className="relative bg-[#050814] border-2 border-[#00f0ff]/80 p-3 sm:p-6 md:p-10 shadow-[0_0_20px_rgba(0,240,255,0.15)] overflow-hidden font-mono min-w-0">
+        {/* Background Decorative Laser Grids */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,240,255,0.04)_0%,rgba(0,0,0,0)_70%)] pointer-events-none" />
+        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#00f0ff] via-[#ff007f] to-[#ffe600]" />
 
         {/* Upper Part: Bento Grid Layout */}
         <div className="mb-4 sm:mb-8">
           
           {/* Persona Descriptions */}
-          <div className="bg-black p-4 sm:p-6 md:p-8 border-2 border-[#00f0ff]/70 shadow-[4px_4px_0px_rgba(255,0,127,0.5)] flex flex-col justify-center relative select-none">
+          <div className="bg-black p-4 sm:p-6 md:p-8 border-2 border-[#00f0ff]/70 shadow-[3px_3px_0px_rgba(255,0,127,0.25)] flex flex-col justify-center relative select-none">
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 mb-4 sm:mb-8 z-10">
               <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 shrink-0">
                 {/* 主头像：正常 */}
-                <div className="relative w-24 h-24 sm:w-32 sm:h-32 border-4 border-[#ff007f] shadow-[5px_5px_0px_rgba(0,240,255,0.5)] bg-black flex items-center justify-center shrink-0">
+                <div className="relative w-24 h-24 sm:w-32 sm:h-32 border-2 border-[#ff007f]/70 shadow-[3px_3px_0px_rgba(0,240,255,0.3)] bg-black flex items-center justify-center shrink-0">
                   <PixelAvatar id={activeProfileId} size={100} />
                 </div>
               </div>
@@ -125,7 +124,7 @@ export default function ResultsDisplay({
               {/* <div className="text-xs sm:text-[13px] leading-relaxed text-slate-300 bg-[#070b19] p-3 sm:p-5 border-2 border-dashed border-[#ff007f]/45 z-10 font-sans shadow-inner break-words relative">
                 经系统深度扫描，你的核心形态为【<span className="text-[#00f0ff] font-bold glow-cyan">{profile.displayName}</span>】（{primaryArchetype.matchScore}% 共振）。你的副形态为【<span className="text-[#ff007f] font-bold glow-magenta">{otherProfile?.displayName || secondaryArchetype.key}</span>】（{secondaryArchetype.matchScore}% 共振）。
               </div> */}
-              <div className="text-xs sm:text-[13px] leading-relaxed text-slate-300 bg-[#070b19] p-3 sm:p-5 border-2 border-dashed border-[#ff007f]/45 z-10 font-sans shadow-inner break-words relative">
+              <div className="text-xs sm:text-[13px] leading-relaxed text-slate-300 bg-[#070b19] p-3 sm:p-5 border border-dashed border-[#ff007f]/25 z-10 font-sans shadow-inner break-words relative">
                 {activeProfile.essence}
               </div>
             </div>
@@ -147,7 +146,7 @@ export default function ResultsDisplay({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-6 mb-4 sm:mb-8 min-w-0">
           
           {/* Bento Card: Dimensional Details List */}
-          <div className="lg:col-span-12 xl:col-span-5 bg-black p-4 sm:p-6 border-2 border-[#00f0ff]/70 shadow-[4px_4px_0px_rgba(255,0,127,0.5)] flex flex-col justify-between select-none min-w-0">
+          <div className="lg:col-span-12 xl:col-span-5 bg-black p-4 sm:p-6 border-2 border-[#00f0ff]/70 shadow-[3px_3px_0px_rgba(255,0,127,0.25)] flex flex-col justify-between select-none min-w-0">
             <div>
               <h3 className="text-[13px] font-pixel text-[#00f0ff] tracking-widest uppercase mb-4 sm:mb-6 flex items-center gap-2 glow-cyan">
                 <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-[#00f0ff]" />
@@ -166,7 +165,7 @@ export default function ResultsDisplay({
                           {activeLabel} <span className="text-[#00f0ff] font-pixel text-xs sm:text-[13px] glow-cyan">{percentVal}%</span>    
                         </span>
                       </div>
-                      <div className="h-3 sm:h-4 w-full bg-black border border-[#00f0ff] p-0.5 shadow-[1.5px_1.5px_0px_#ff007f]">
+                      <div className="h-3 sm:h-4 w-full bg-black border border-[#00f0ff] p-0.5 shadow-[1px_1px_0px_rgba(255,0,127,0.4)]">
                         <div 
                           className={`h-full ${barColors[idx % barColors.length]} transition-all duration-1000 ease-out`}
                           style={{ width: `${percentVal}%` }}
@@ -180,7 +179,7 @@ export default function ResultsDisplay({
           </div>
 
           {/* Bento Card: Strengths & Weaknesses */}
-          <div className="lg:col-span-12 xl:col-span-7 bg-black p-4 sm:p-6 md:p-8 border-2 border-[#ff007f]/70 shadow-[4px_4px_0px_rgba(0,240,255,0.5)] select-none min-w-0">
+          <div className="lg:col-span-12 xl:col-span-7 bg-black p-4 sm:p-6 md:p-8 border border-[#ff007f]/40 shadow-[3px_3px_0px_rgba(0,240,255,0.3)] select-none min-w-0">
             <div className="flex flex-col gap-4 sm:gap-6">
               {/* Added Section: Cognitive Pattern [认知模式] */}
               {activeProfile.cognitivePattern && (

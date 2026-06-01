@@ -95,8 +95,12 @@ export default function PublicSharePage({ token, onBack }: PublicSharePageProps)
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-2 sm:px-4 py-4 sm:py-8">
-      <div className="bg-black border-2 border-[#00f0ff]/80 p-4 sm:p-6 md:p-8 shadow-[6px_6px_0px_rgba(255,0,127,0.45)]">
+    <div className="w-full max-w-5xl mx-auto px-2 sm:px-4 py-4 sm:py-8 select-none">
+      <div className="relative bg-[#050814] border-2 border-[#00f0ff]/80 p-4 sm:p-6 md:p-8 shadow-[0_0_20px_rgba(0,240,255,0.15)] overflow-hidden">
+        {/* Background Decorative Laser Grids */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,240,255,0.04)_0%,rgba(0,0,0,0)_70%)] pointer-events-none" />
+        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#00f0ff] via-[#ff007f] to-[#ffe600]" />
+
         <div className="flex flex-col gap-4 sm:gap-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
