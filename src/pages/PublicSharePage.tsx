@@ -73,7 +73,7 @@ export default function PublicSharePage({ token, onBack }: PublicSharePageProps)
 
     if (!target) return;
 
-    addDualReportHistory({
+    addDualReportHistory(myFriendId, {
       targetFriendId: target.friendId,
       targetProfileId: target.profileId,
       targetDisplayName: target.displayName,

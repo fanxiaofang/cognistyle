@@ -76,7 +76,7 @@ export type Category = QuestionCategory;
 export interface QuestionBank {
   category: QuestionCategory;
   questions: Question[];
-  // 协作维度题目通过统计"是否提到团队/他人"间接计算，不直接作为Likert题
+  // 协作维度题目通过统计"是否提到团队"间接计算，不直接作为Likert题
   collaborationIndicators: number[];  // 题目ID列表，用于检测S/T倾向
 }
 

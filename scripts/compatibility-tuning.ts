@@ -234,9 +234,9 @@ function runDistributionSimulation(iterations = 50000) {
   console.log('\n=== 随机分布模拟 ===');
   console.log(`样本量: ${iterations}`);
   console.log(`平均分: ${(sum / iterations).toFixed(1)} | 最低分: ${min} | 最高分: ${max}`);
-  console.log(`0-34   探索磨合: ${percent(bins.low)}`);
-  console.log(`35-49  潜力搭档: ${percent(bins.basic)}`);
-  console.log(`50-64  良好协同: ${percent(bins.workable)}`);
+  console.log(`0-34   磨合: ${percent(bins.low)}`);
+  console.log(`35-49  可期: ${percent(bins.basic)}`);
+  console.log(`50-64  适配: ${percent(bins.workable)}`);
   console.log(`65-79  合拍: ${percent(bins.strong)}`);
   console.log(`80-100 王牌: ${percent(bins.excellent)}`);
 }

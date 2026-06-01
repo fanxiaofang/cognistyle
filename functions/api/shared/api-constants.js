@@ -3,17 +3,22 @@ export const API_VERSIONS = {
   SNAPSHOT_VERSION: 'snapshot-v1',
   COMPATIBILITY_REPORT_VERSION: 'compatibility-v1',
   PUBLIC_SHARE_VERSION: 'public-share-v1',
+  DUAL_HISTORY_VERSION: 'history-v1',
 };
 
 export const KV_KEY_PREFIXES = {
   RESULT: 'result:',
   SHARE: 'share:',
+  HISTORY: 'history:',
   RATE_LIMIT: {
     COMPATIBILITY: 'rate-limit:compatibility:',
     SHARE_REPORT: 'rate-limit:share-report:',
     SHARE_READ: 'rate-limit:share-read:',
     RESULTS: 'rate-limit:results:',
     RESULTS_DELETE: 'rate-limit:results-delete:',
+    HISTORY_READ: 'rate-limit:history-read:',
+    HISTORY_WRITE: 'rate-limit:history-write:',
+    HISTORY_DELETE: 'rate-limit:history-delete:',
   },
 };
 
@@ -24,6 +29,12 @@ export const DEFAULT_RATE_LIMIT = {
   SHARE_READ_MAX: 60,
   RESULTS_MAX: 10,
   RESULTS_DELETE_MAX: 5,
+  HISTORY_READ_MAX: 30,
+  HISTORY_WRITE_MAX: 10,
+  HISTORY_DELETE_MAX: 5,
+  MAX_HISTORY_ENTRIES: 50,
+  SYNC_QUEUE_MAX: 20,
+  SYNC_QUEUE_STALE_DAYS: 7,
 };
 
 export const TTL = {
@@ -47,7 +58,7 @@ export const VALIDATION_RULES = {
 export const COMMON_HEADERS = {
   'Content-Type': 'application/json',
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS, HEAD',
   'Access-Control-Allow-Headers': 'Content-Type',
   'X-Content-Type-Options': 'nosniff',
 };
@@ -55,7 +66,7 @@ export const COMMON_HEADERS = {
 export const COMMON_HEADERS_GET = {
   'Content-Type': 'application/json',
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, OPTIONS, HEAD',
   'Access-Control-Allow-Headers': 'Content-Type',
   'X-Content-Type-Options': 'nosniff',
 };

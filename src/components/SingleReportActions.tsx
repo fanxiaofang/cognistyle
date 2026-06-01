@@ -7,6 +7,8 @@ import {
   deleteResultSnapshot,
   getLocalResultIdentity,
   saveLocalResultIdentity,
+  ApiResultError,
+  checkFriendIdExists,
 } from '../services/resultSnapshotService';
 import { formatExpiry } from '../utils/format';
 
@@ -26,10 +28,36 @@ export default function SingleReportActions({
   const [copied, setCopied] = useState(false);
   const [targetFriendId, setTargetFriendId] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [forceClear, setForceClear] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [validating, setValidating] = useState(false);
 
   useEffect(() => {
-    setIdentity(getLocalResultIdentity());
+    const local = getLocalResultIdentity();
+    if (!local) {
+      setIdentity(null);
+      return;
+    }
+
+    if (Date.now() > local.expiresAt) {
+      clearLocalResultIdentity();
+      setIdentity(null);
+      setSaveMessage('本地凭证已过期，请重新保存结果。');
+      return;
+    }
+
+    setIdentity(local);
+
+    setValidating(true);
+    checkFriendIdExists(local.friendId).then((exists) => {
+      if (!exists) {
+        clearLocalResultIdentity();
+        setIdentity(null);
+        setSaveMessage('云端记录已失效（可能已过期或被删除），请重新保存结果。');
+      }
+    }).finally(() => {
+      setValidating(false);
+    });
   }, []);
 
   const expiresText = useMemo(
@@ -44,12 +72,13 @@ export default function SingleReportActions({
       setSaveMessage(null);
       setCopied(false);
       setConfirmDelete(false);
+      setForceClear(false);
 
       const response = await createResultSnapshot(snapshotRequest);
       const nextIdentity = saveLocalResultIdentity(response);
 
       setIdentity(nextIdentity);
-      setSaveMessage('好友 ID 已生成并保存在当前设备。');
+      setSaveMessage('识别码已生成并保存在当前设备。');
     } catch (error) {
       setSaveError(error instanceof Error ? error.message : '结果保存失败，请稍后重试。');
     } finally {
@@ -64,7 +93,7 @@ export default function SingleReportActions({
       await navigator.clipboard.writeText(identity.friendId);
       setCopied(true);
     } catch {
-      setSaveError('复制失败，请手动记录你的好友 ID。');
+      setSaveError('复制失败，请手动记录你的识别码。');
     }
   };
 
@@ -72,12 +101,12 @@ export default function SingleReportActions({
     const nextTargetFriendId = targetFriendId.trim();
 
     if (!identity?.friendId) {
-      setSaveError('请先保存当前结果并生成自己的好友 ID。');
+      setSaveError('请先保存当前结果并生成自己的识别码。');
       return;
     }
 
     if (!nextTargetFriendId) {
-      setSaveError('请输入好友 ID。');
+      setSaveError('请输入好友识别码。');
       return;
     }
 
@@ -110,12 +139,33 @@ export default function SingleReportActions({
       setIdentity(null);
       setConfirmDelete(false);
       setCopied(false);
-      setSaveMessage('当前设备保存的结果已删除，旧好友 ID 已失效。');
+      setSaveMessage('当前设备保存的结果已删除，旧识别码已失效。');
     } catch (error) {
-      setSaveError(error instanceof Error ? error.message : '结果删除失败，请稍后重试。');
+      if (error instanceof ApiResultError && error.code === 'NOT_FOUND') {
+        clearLocalResultIdentity();
+        setIdentity(null);
+        setConfirmDelete(false);
+        setForceClear(false);
+        setCopied(false);
+        setSaveMessage('云端记录已过期或不存在，本地凭证已清除，可重新保存结果。');
+      } else {
+        const message = error instanceof Error ? error.message : '';
+        setSaveError(message || '结果删除失败，请稍后重试。');
+        setForceClear(true);
+      }
     } finally {
       setDeleting(false);
     }
+  };
+
+  const handleForceClear = () => {
+    clearLocalResultIdentity();
+    setIdentity(null);
+    setConfirmDelete(false);
+    setForceClear(false);
+    setCopied(false);
+    setSaveMessage('识别码已强制清除，可重新保存结果。');
+    setSaveError(null);
   };
 
   return (
@@ -141,7 +191,7 @@ export default function SingleReportActions({
             <div>
               <div className="flex justify-between items-baseline mb-3">
                 <h4 className="text-xs font-pixel text-[#00f0ff] uppercase tracking-wider">
-                  [ 第一步：你的身份识别码 ]
+                  [ 第一步：你的识别码 ]
                 </h4>
                 {identity && (
                   <span className="text-[10px] text-slate-500 font-sans">
@@ -150,11 +200,15 @@ export default function SingleReportActions({
                 )}
               </div>
 
-              {!identity ? (
+              {validating ? (
                 <div className="space-y-3">
-                  <p className="text-xs text-slate-400 leading-relaxed font-sans">
-                    将当前的测评结果保存至云端，系统将为当前浏览器生成一个专属的认知 ID。
-                  </p>
+                  <div className="flex items-center justify-center gap-2 py-4">
+                    <LoaderCircle className="w-4 h-4 text-[#00f0ff] animate-spin" />
+                    <span className="text-xs text-slate-400 font-sans">正在验证识别码...</span>
+                  </div>
+                </div>
+              ) : !identity ? (
+                <div className="space-y-3">
                   <button
                     onClick={handleSave}
                     disabled={saving}
@@ -165,15 +219,12 @@ export default function SingleReportActions({
                     ) : (
                       <Save className="w-4 h-4" />
                     )}
-                    <span>{saving ? '正在写入云端...' : '保存并生成我的好友 ID'}</span>
+                    <span>{saving ? '正在写入云端...' : '保存并生成识别码'}</span>
                   </button>
                 </div>
               ) : (
                 <div className="space-y-4">
                   <div className="bg-[#070b19]/80 border border-[#39ff14]/30 px-3 py-3 relative">
-                    <span className="absolute -top-1.5 left-2 px-1 text-[8px] font-pixel text-[#39ff14] bg-[#050814]">
-                      MY COGNITIVE ID
-                    </span>
                     <p className="font-mono text-sm sm:text-base text-white tracking-widest break-all pt-1 select-all selection:bg-[#39ff14]/30">
                       {identity.friendId}
                     </p>
@@ -185,7 +236,7 @@ export default function SingleReportActions({
                       className="flex-1 px-3 py-2 rounded-none border border-[#39ff14] text-[#39ff14] bg-black font-pixel text-xs flex items-center justify-center gap-1.5 hover:bg-[#39ff14]/10 transition-colors cursor-pointer min-h-[38px]"
                     >
                       <Copy className="w-3.5 h-3.5" />
-                      <span>{copied ? '已复制' : '复制我的 ID'}</span>
+                      <span>{copied ? '已复制' : '复制识别码'}</span>
                     </button>
 
                     {/* Delete entry */}
@@ -193,6 +244,7 @@ export default function SingleReportActions({
                       <button
                         onClick={() => {
                           setConfirmDelete(true);
+                          setForceClear(false);
                           setSaveError(null);
                           setSaveMessage(null);
                         }}
@@ -201,20 +253,30 @@ export default function SingleReportActions({
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     ) : (
-                      <div className="flex gap-1 flex-1">
-                        <button
-                          onClick={() => setConfirmDelete(false)}
-                          className="flex-1 px-2 py-1 border border-slate-700 text-slate-400 bg-black font-pixel text-[10px] hover:bg-slate-800 transition-colors cursor-pointer"
-                        >
-                          取消
-                        </button>
-                        <button
-                          onClick={handleDelete}
-                          disabled={deleting}
-                          className="flex-1 px-2 py-1 border border-[#ff007f] text-[#ff007f] bg-[#ff007f]/10 font-pixel text-[10px] hover:bg-[#ff007f]/20 transition-colors cursor-pointer"
-                        >
-                          {deleting ? '...' : '确认'}
-                        </button>
+                      <div className="flex flex-col gap-1 flex-1">
+                        <div className="flex gap-1">
+                          <button
+                            onClick={() => { setConfirmDelete(false); setForceClear(false); }}
+                            className="flex-1 px-2 py-1 border border-slate-700 text-slate-400 bg-black font-pixel text-[10px] hover:bg-slate-800 transition-colors cursor-pointer"
+                          >
+                            取消
+                          </button>
+                          <button
+                            onClick={handleDelete}
+                            disabled={deleting}
+                            className="flex-1 px-2 py-1 border border-[#ff007f] text-[#ff007f] bg-[#ff007f]/10 font-pixel text-[10px] hover:bg-[#ff007f]/20 transition-colors cursor-pointer"
+                          >
+                            {deleting ? '...' : '确认'}
+                          </button>
+                        </div>
+                        {forceClear && (
+                          <button
+                            onClick={handleForceClear}
+                            className="px-2 py-1 border border-dashed border-[#ffe600] text-[#ffe600] bg-black font-pixel text-[9px] hover:bg-[#ffe600]/10 transition-colors cursor-pointer"
+                          >
+                            强制清除识别码（跳过云端）  
+                          </button>
+                        )}
                       </div>
                     )}
                   </div>
@@ -223,9 +285,9 @@ export default function SingleReportActions({
             </div>
 
             <div className="mt-4 border-t border-[#00f0ff]/10 pt-3 flex items-start gap-1.5">
-              <AlertTriangle className="w-3.5 h-3.5 text-[#ffe600] shrink-0 mt-0.5" />
+              {/* <AlertTriangle className="w-3.5 h-3.5 text-[#ffe600] shrink-0 mt-0.5" /> */}
               <p className="text-[10px] text-slate-500 leading-normal font-sans">
-                好友 ID 用于配对生成互补度报告。删除凭证仅保存在本地设备。
+                注意：识别码用于生成互补度报告。
               </p>
             </div>
           </div>
@@ -237,15 +299,11 @@ export default function SingleReportActions({
                 [ 第二步：开启认知同步 ]
               </h4>
 
-              <p className="text-xs text-slate-400 leading-relaxed font-sans">
-                输入好友分享给你的认知 ID，系统将融合双方维度平衡指数进行契合度比对。
-              </p>
-
               <div className="space-y-3">
                 <input
                   value={targetFriendId}
                   onChange={(event) => setTargetFriendId(event.target.value)}
-                  placeholder="请输入好友的 ID (例如 abc123xyz)"
+                  placeholder="请输入好友的识别码 (例如 abc123xyz)"
                   className="w-full rounded-none border border-[#00f0ff]/40 bg-[#070b19] px-3 py-2.5 text-xs sm:text-sm text-white outline-none placeholder:text-slate-650 focus:border-[#00f0ff] focus:shadow-[0_0_10px_rgba(0,240,255,0.1)] font-mono transition-all"
                 />
 
@@ -261,7 +319,7 @@ export default function SingleReportActions({
 
             <div className="mt-4 border-t border-[#00f0ff]/10 pt-3">
               <p className="text-[10px] text-slate-500 leading-normal font-sans">
-                注意：生成双人报告需要您先完成 Step 1 并拥有自己的好友 ID。
+                注意：生成双人报告需要您先完成 Step 1 ，并拥有好友的识别码。
               </p>
             </div>
           </div>

@@ -8,11 +8,20 @@ export const DUAL_REPORT_ENDPOINTS = {
   readPublicShare: '/api/share/:token',
 } as const;
 
+export const DUAL_HISTORY_ENDPOINTS = {
+  addOrUpdate: '/api/dual-history',
+  batch: '/api/dual-history/batch',
+  read: '/api/dual-history/',
+  delete: '/api/dual-history',
+  health: '/api/dual-history/health',
+} as const;
+
 export const DUAL_REPORT_VERSIONS = {
   questionVersion: 'questions-general-2026-06',
   snapshotVersion: 'snapshot-v1',
   compatibilityReportVersion: 'compatibility-v1',
   publicShareVersion: 'public-share-v1',
+  dualHistoryVersion: 'history-v1',
 } as const;
 
 export type NormalizedScoreKey =
@@ -274,3 +283,78 @@ export const PATTERN_BADGE_MAP: Record<CompatibilityPairPattern, PatternBadgeInf
     color: '#ff007f',
   },
 };
+
+export interface AddHistoryEntryRequest {
+  friendId: string;
+  version: 'history-v1';
+  entry: {
+    targetFriendId: string;
+    targetProfileId: ProfileId;
+    targetDisplayName: string;
+    targetCallSign: string;
+    targetDepartment: string;
+    overallScore: number;
+    pattern: CompatibilityPairPattern;
+    generatedAt: number;
+  };
+}
+
+export interface AddHistoryEntryResponse {
+  data: {
+    success: true;
+    syncedAt: number;
+    totalEntries: number;
+  };
+}
+
+export interface GetHistoryResponse {
+  data: {
+    friendId: string;
+    version: 'history-v1';
+    entries: Array<{
+      targetFriendId: string;
+      targetProfileId: ProfileId;
+      targetDisplayName: string;
+      targetCallSign: string;
+      targetDepartment: string;
+      overallScore: number;
+      pattern: CompatibilityPairPattern;
+      generatedAt: number;
+    }>;
+    fetchedAt: number;
+  };
+}
+
+export interface DeleteHistoryRequest {
+  friendId: string;
+  targetFriendId?: string;
+}
+
+export interface DeleteHistoryResponse {
+  data: {
+    success: true;
+    deleted: number;
+  };
+}
+
+export interface BatchHistoryEntryRequest {
+  friendId: string;
+  version: 'history-v1';
+  entries: Array<{
+    targetFriendId: string;
+    targetProfileId: ProfileId;
+    targetDisplayName: string;
+    targetCallSign: string;
+    targetDepartment: string;
+    overallScore: number;
+    pattern: CompatibilityPairPattern;
+    generatedAt: number;
+  }>;
+}
+
+export interface HistoryErrorResponse {
+  error: {
+    code: string;
+    message: string;
+  };
+}

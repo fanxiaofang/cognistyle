@@ -4,7 +4,7 @@ import PixelAvatar from '../components/PixelAvatar';
 import PatternBadgeIcon from '../components/PatternBadgeIcon';
 import type { CompatibilityReport } from '../contracts/dualReport';
 import { PATTERN_BADGE_MAP } from '../contracts/dualReport';
-import { getLocalResultIdentity } from '../services/resultSnapshotService';
+import { getLocalResultIdentity, clearLocalResultIdentity } from '../services/resultSnapshotService';
 import { createCompatibilityReport, createPublicShare } from '../services/compatibilityService';
 import { addDualReportHistory } from '../services/dualHistoryService';
 import { scoreTone } from '../utils/format';
@@ -34,7 +34,7 @@ export default function DualReportPage({ targetFriendId, onBack }: DualReportPag
 
   const loadReport = async () => {
     if (!targetFriendId) {
-      setError('缺少好友 ID，请从单人结果页重新进入。');
+      setError('缺少识别码，请从单人结果页重新进入。');
       return;
     }
 
@@ -43,7 +43,7 @@ export default function DualReportPage({ targetFriendId, onBack }: DualReportPag
 
     if (!localIdentity?.friendId) {
       setReport(null);
-      setError('当前设备还没有保存自己的好友 ID，请先完成测评并保存结果。');
+      setError('当前设备还没有保存自己的识别码，请先完成测评并保存结果。');
       return;
     }
 
@@ -58,7 +58,15 @@ export default function DualReportPage({ targetFriendId, onBack }: DualReportPag
       setReport(nextReport);
     } catch (err) {
       setReport(null);
-      setError(err instanceof Error ? err.message : '互补报告生成失败，请稍后重试。');
+      const message = err instanceof Error ? err.message : '';
+
+      if (message.includes('当前设备的结果未找到') || message.includes('结果快照')) {
+        clearLocalResultIdentity();
+        setHasLocalIdentity(false);
+        setError('你的云端结果已失效（可能已过期或服务重启后清除），请返回结果页重新保存。');
+      } else {
+        setError(message || '互补报告生成失败，请稍后重试。');
+      }
     } finally {
       setLoading(false);
     }
@@ -75,27 +83,32 @@ export default function DualReportPage({ targetFriendId, onBack }: DualReportPag
       ? report.pair.userA
       : report.pair.userB;
 
-    addDualReportHistory({
-      targetFriendId,
-      targetProfileId: targetUser.profileId,
-      targetDisplayName: targetUser.displayName,
-      targetCallSign: targetUser.callSign,
-      targetDepartment: targetUser.department,
-      overallScore: report.overall.score,
-      pattern: report.overall.pattern,
-      generatedAt: report.generatedAt,
-    });
+    const localIdentity = getLocalResultIdentity();
+    const myFriendId = localIdentity?.friendId;
+
+    if (myFriendId) {
+      addDualReportHistory(myFriendId, {
+        targetFriendId,
+        targetProfileId: targetUser.profileId,
+        targetDisplayName: targetUser.displayName,
+        targetCallSign: targetUser.callSign,
+        targetDepartment: targetUser.department,
+        overallScore: report.overall.score,
+        pattern: report.overall.pattern,
+        generatedAt: report.generatedAt,
+      });
+    }
   }, [report, targetFriendId]);
 
   const handleCreatePublicShare = async () => {
     if (!targetFriendId) {
-      setShareError('缺少好友 ID，无法生成公开分享。');
+      setShareError('缺少识别码，无法生成公开分享。');
       return;
     }
 
     const localIdentity = getLocalResultIdentity();
     if (!localIdentity?.friendId) {
-      setShareError('当前设备还没有保存自己的好友 ID，无法生成公开分享。');
+      setShareError('当前设备还没有保存自己的识别码，无法生成公开分享。');
       return;
     }
 
@@ -176,16 +189,26 @@ export default function DualReportPage({ targetFriendId, onBack }: DualReportPag
                   </p>
                   {!hasLocalIdentity && (
                     <p className="mt-2 text-[11px] sm:text-xs text-slate-400 font-sans">
-                      先返回完成测评并保存好友 ID，再重新进入 `/dual?friend=...` 链路。
+                      请返回结果页，点击"保存并生成我的识别码"后再试。
                     </p>
                   )}
-                  <button
-                    onClick={loadReport}
-                    className="mt-4 px-4 py-2 rounded-none border border-[#ff007f] text-[#ff007f] bg-black font-pixel text-xs flex items-center gap-2 hover:bg-[#ff007f]/10 transition-colors cursor-pointer"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" />
-                    <span>重新尝试</span>
-                  </button>
+                  {hasLocalIdentity ? (
+                    <button
+                      onClick={loadReport}
+                      className="mt-4 px-4 py-2 rounded-none border border-[#ff007f] text-[#ff007f] bg-black font-pixel text-xs flex items-center gap-2 hover:bg-[#ff007f]/10 transition-colors cursor-pointer"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      <span>重新尝试</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={onBack}
+                      className="mt-4 px-4 py-2 rounded-none border border-[#ff007f] text-[#ff007f] bg-black font-pixel text-xs flex items-center gap-2 hover:bg-[#ff007f]/10 transition-colors cursor-pointer"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      <span>返回结果页</span>
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -225,18 +248,6 @@ export default function DualReportPage({ targetFriendId, onBack }: DualReportPag
                       不是判断合不合，而是找到什么场景协作最省力
                     </p>
 
-                    {/* <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(
-                          `${badge.label} · ${report.overall.score}分\n"${report.overall.shareCaption}"\n\n${window.location.href}`
-                        ).catch(() => {});
-                      }}
-                      className="mt-5 px-4 py-2 rounded-none border font-pixel text-xs flex items-center gap-1.5 mx-auto hover:opacity-80 transition-opacity cursor-pointer"
-                      style={{ borderColor: badge.color, color: badge.color }}
-                    >
-                      <Copy className="w-3.5 h-3.5" />
-                      <span>复制朋友圈文案</span>
-                    </button> */}
                   </div>
                 );
               })()}

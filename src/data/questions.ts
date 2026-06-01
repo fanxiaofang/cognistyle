@@ -70,8 +70,8 @@ export const dimensionMeta: Record<string, DimensionMetaItem> = {
     rightPolarity: {
       key: 'team',
       label: '共生协调者 (协同型)',
-      description: '高度重视团队契合度与他人反馈，擅于利用团队讨论、结对协作或高频对齐优化产出。',
-      programmerDescription: '高度重视团队契合度与他人反馈，擅于利用 Code Review、结对编程或高频对齐优化产出。'
+      description: '高度重视团队契合度与她/他人反馈，擅于利用团队讨论、结对协作或高频对齐优化产出。',
+      programmerDescription: '高度重视团队契合度与她/他人反馈，擅于利用 Code Review、结对编程或高频对齐优化产出。'
     }
   },
 };
@@ -245,7 +245,7 @@ export const questionsGeneral: Question[] = [
     id: 17,
     dimension: "convergent_divergent",
     direction: "convergent",
-    text: "只要有一个已经被验证过的可行方案，我绝不会再花时间去想其他没用的可能性。",
+    text: "只要有一个已经被验证过的可行方案，我绝不会再花时间去想其他的可能性。",
   },
   {
     id: 9,

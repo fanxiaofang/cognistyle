@@ -11,6 +11,15 @@ import {
 
 const LOCAL_IDENTITY_STORAGE_KEY = 'cognistyle_result_identity_v1';
 
+export class ApiResultError extends Error {
+  code: string;
+  constructor(message: string, code: string) {
+    super(message);
+    this.name = 'ApiResultError';
+    this.code = code;
+  }
+}
+
 function isApiErrorResponse(value: unknown): value is ApiErrorResponse {
   return !!value && typeof value === 'object' && 'error' in value;
 }
@@ -69,10 +78,10 @@ export async function deleteResultSnapshot(
   const data = await response.json().catch(() => null);
   if (!response.ok) {
     if (isApiErrorResponse(data)) {
-      throw new Error(data.error);
+      throw new ApiResultError(data.error, data.code);
     }
 
-    throw new Error('结果删除失败，请稍后重试。');
+    throw new ApiResultError('结果删除失败，请稍后重试。', 'UNKNOWN');
   }
 
   return data as DeleteResultSnapshotResponse;
@@ -92,11 +101,23 @@ export async function createResultSnapshot(
   const data = await response.json().catch(() => null);
   if (!response.ok) {
     if (isApiErrorResponse(data)) {
-      throw new Error(data.error);
+      throw new ApiResultError(data.error, data.code);
     }
 
-    throw new Error('结果保存失败，请稍后重试。');
+    throw new ApiResultError('结果保存失败，请稍后重试。', 'UNKNOWN');
   }
 
   return data as CreateResultSnapshotResponse;
+}
+
+export async function checkFriendIdExists(friendId: string): Promise<boolean> {
+  try {
+    const response = await fetch(
+      `${DUAL_REPORT_ENDPOINTS.createSnapshot}/${encodeURIComponent(friendId)}`,
+      { method: 'HEAD', signal: AbortSignal.timeout(5000) }
+    );
+    return response.ok;
+  } catch {
+    return false;
+  }
 }

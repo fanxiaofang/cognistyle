@@ -10,6 +10,14 @@ export function scoreTone(score: number): string {
   return 'text-[#ff007f] border-[#ff007f]/40';
 }
 
+export function ratingLabel(score: number): string {
+  if (score >= 80) return '王牌';
+  if (score >= 65) return '合拍';
+  if (score >= 50) return '适配';
+  if (score >= 35) return '可期';
+  return '磨合';
+}
+
 export function formatExpiry(expiresAt: number): string {
   try {
     return new Intl.DateTimeFormat('zh-CN', {
