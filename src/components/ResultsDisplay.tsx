@@ -14,7 +14,8 @@ import {
   CheckCircle2, 
   CornerDownRight, 
   RefreshCw,
-  Repeat
+  Repeat,
+  Link,
 } from 'lucide-react';
 import { buildResultSnapshot, resolvePrimaryProfile } from '../utils/buildResultSnapshot';
 
@@ -42,6 +43,7 @@ export default function ResultsDisplay({
   onOpenDualReport,
 }: ResultsDisplayProps) {
   const [showOtherMode, setShowOtherMode] = useState(false);
+  const [resultLinkCopied, setResultLinkCopied] = useState(false);
 
   const { matchedMode, profileId: profileKey, profile } = resolvePrimaryProfile({
     scoreMap,
@@ -71,6 +73,16 @@ export default function ResultsDisplay({
   const activeArchetypeParts = activeArchetypeKey.split('-');
   const guildKey = `${activeArchetypeParts[1]}-${activeArchetypeParts[2]}`;
   const guildInfo = guildEssenceMap[guildKey];
+
+  const handleCopyResultLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setResultLinkCopied(true);
+      setTimeout(() => setResultLinkCopied(false), 3000);
+    } catch {
+      // silently fail, user can use browser address bar
+    }
+  };
 
 
   return (
@@ -154,7 +166,13 @@ export default function ResultsDisplay({
               </h3>
               <div className="space-y-3 sm:space-y-5">
                 {scores.map((score, idx) => {
-                  const barColors = ['bg-[#00f0ff]', 'bg-[#ff007f]', 'bg-[#39ff14]', 'bg-[#ffe600]'];
+                  const barColors = [
+                    { bg: 'bg-[#00f0ff]', glow: 'shadow-[0_0_8px_rgba(0,240,255,0.6)]' },
+                    { bg: 'bg-[#ff007f]', glow: 'shadow-[0_0_8px_rgba(255,0,127,0.6)]' },
+                    { bg: 'bg-[#39ff14]', glow: 'shadow-[0_0_8px_rgba(57,255,20,0.6)]' },
+                    { bg: 'bg-[#ffe600]', glow: 'shadow-[0_0_8px_rgba(255,230,0,0.6)]' }
+                  ];
+                  const barStyle = barColors[idx % barColors.length];
                   const percentVal = Math.round(Math.max(score.percentage, 100 - score.percentage));
                   const activeLabel = score.percentage >= 50 ? score.label.split('vs')[1].trim() : score.label.split('vs')[0].trim();
                   return (
@@ -165,11 +183,26 @@ export default function ResultsDisplay({
                           {activeLabel} <span className="text-[#00f0ff] font-pixel text-xs sm:text-[13px] glow-cyan">{percentVal}%</span>    
                         </span>
                       </div>
-                      <div className="h-3 sm:h-4 w-full bg-black border border-[#00f0ff] p-0.5 shadow-[1px_1px_0px_rgba(255,0,127,0.4)]">
+                      <div className="relative h-4 sm:h-5 w-full bg-black/80 border border-[#00f0ff]/30 p-[2px] shadow-inner">
                         <div 
-                          className={`h-full ${barColors[idx % barColors.length]} transition-all duration-1000 ease-out`}
+                          className={`h-full ${barStyle.bg} ${barStyle.glow} transition-all duration-1000 ease-out relative overflow-hidden`}
                           style={{ width: `${percentVal}%` }}
-                        />
+                        >
+                          {/* 扫描线效果 */}
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2s_ease-in-out_infinite]" />
+                          {/* 内部高光 */}
+                          <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent" />
+                        </div>
+                        {/* 刻度线 */}
+                        <div className="absolute inset-0 flex items-center pointer-events-none">
+                          {[25, 50, 75].map(mark => (
+                            <div 
+                              key={mark}
+                              className="absolute h-full w-[1px] bg-[#00f0ff]/20"
+                              style={{ left: `${mark}%` }}
+                            />
+                          ))}
+                        </div>
                       </div>
                     </div>
                   );
@@ -258,18 +291,19 @@ export default function ResultsDisplay({
 
               {/* 第二身份切换 */}
               {otherProfile && (
-                <button
-                  onClick={() => setShowOtherMode(!showOtherMode)}
-                  className="group relative w-full max-w-md px-5 py-4 rounded-none bg-gradient-to-r from-black via-[#0a0f1f] to-black border-2 border-[#ffe600]/80 text-[#ffe600] font-pixel text-sm flex items-center justify-center gap-3 shadow-[0_0_15px_rgba(255,230,0,0.2)] hover:shadow-[0_0_25px_rgba(255,230,0,0.4)] hover:border-[#ffe600] active:scale-[0.98] transition-all duration-300 cursor-pointer min-h-[52px] sm:min-h-0 overflow-hidden"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#ffe600]/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-                  <Repeat className="w-4 h-4 shrink-0" />
-                  <span className="text-left leading-tight tracking-wider">
-                    {showOtherMode
-                      ? <>返回主身份<span className="text-[#ff007f] font-bold">【{profile.displayName}】</span></>
-                      : <>发现你的第二身份<span className="text-[#00f0ff] font-bold">【{otherProfile.displayName}】</span></>}
-                  </span>
-                </button>
+                <div className="border-t border-dashed border-[#ffe600]/30 pt-4 sm:pt-6">
+                  <button
+                    onClick={() => setShowOtherMode(!showOtherMode)}
+                    className="group relative w-full px-4 sm:px-5 py-3 sm:py-3.5 rounded-none bg-black border-2 border-[#ffe600]/70 text-[#ffe600] font-sans text-xs sm:text-[13px] flex items-center justify-center gap-2.5 shadow-[0_0_10px_rgba(255,230,0,0.15)] hover:shadow-[0_0_20px_rgba(255,230,0,0.3)] hover:border-[#ffe600] hover:bg-[#ffe600]/5 active:scale-[0.98] transition-all duration-200 cursor-pointer min-h-[44px] overflow-hidden"
+                  >
+                    <Repeat className="w-4 h-4 shrink-0" />
+                    <span className="leading-tight tracking-wide font-medium">
+                      {showOtherMode
+                        ? <>返回主身份 <span className="text-[#ff007f] font-bold">【{profile.displayName}】</span></>
+                        : <>发现第二身份 <span className="text-[#00f0ff] font-bold">【{otherProfile.displayName}】</span></>}
+                    </span>
+                  </button>
+                </div>
               )}
 
             </div>
@@ -279,25 +313,39 @@ export default function ResultsDisplay({
         </div>
       </div>
 
+
+
       {/* Sharing and Action controls */}
-      <div className="flex flex-col items-center gap-4 sm:gap-8 mt-4 sm:mt-8 relative z-20 font-mono select-none">
+      <div className="flex flex-col items-center gap-4 sm:gap-6 mt-4 sm:mt-8 relative z-20 font-mono select-none">
         <SingleReportActions
           snapshotRequest={snapshotRequest}
           onOpenDualReport={onOpenDualReport}
         />
 
+        {/* 收藏测评结果提示 */}
+        {resultLinkCopied && (
+          <div className="w-full max-w-2xl text-xs sm:text-[13px] text-[#39ff14] bg-black border border-[#39ff14]/50 px-4 py-3 text-center shadow-[0_0_10px_rgba(57,255,20,0.15)] font-sans">
+            <CheckCircle2 className="w-4 h-4 inline-block mr-2" />
+            结果链接已复制，可粘贴到微信收藏、文件传输助手或浏览器书签中保存
+          </div>
+        )}
 
-
-
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
-
+        {/* 操作按钮组 */}
+        <div className="w-full max-w-2xl flex flex-col sm:flex-row items-stretch gap-3 sm:gap-4">
+          <button
+            onClick={handleCopyResultLink}
+            className="flex-1 px-5 py-3 rounded-none border border-dashed border-[#00f0ff]/50 bg-[#050814] text-[#00f0ff] text-xs sm:text-[13px] flex items-center justify-center gap-2 hover:bg-[#00f0ff]/10 hover:border-[#00f0ff]/70 transition-all cursor-pointer min-h-[44px] font-sans"
+          >
+            <Link className="w-4 h-4 shrink-0" />
+            <span className="whitespace-nowrap">复制我的测评结果链接</span>
+          </button>
 
           <button
             onClick={onReset}
-            className="w-full sm:w-auto px-6 sm:px-7 py-3.5 sm:py-4 rounded-none bg-black border-4 border-[#ff007f] text-[#ff007f] font-pixel text-xs sm:text-[13px] flex items-center justify-center gap-2 shadow-[5px_5px_0px_#050814] hover:shadow-[7px_7px_0px_#00f0ff] active:translate-x-1 active:translate-y-1 transition-all duration-100 select-none cursor-pointer tracking-wider font-bold min-h-[48px] sm:min-h-0"   
+            className="flex-1 px-5 py-3 rounded-none border border-dashed border-[#ff007f]/50 bg-[#050814] text-[#ff007f] text-xs sm:text-[13px] flex items-center justify-center gap-2 hover:bg-[#ff007f]/10 hover:border-[#ff007f]/70 transition-all cursor-pointer min-h-[44px] font-sans"
           >
-            <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            <span>重新测量</span>
+            <RefreshCw className="w-4 h-4 shrink-0" />
+            <span className="whitespace-nowrap">重新测量</span>
           </button>
         </div>
       </div>

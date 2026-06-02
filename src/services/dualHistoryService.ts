@@ -288,6 +288,11 @@ export function isOnlineMode(): boolean {
   return !isOfflineMode;
 }
 
+export function getCachedHistoryFriendId(): string | null {
+  const meta = getCacheMeta();
+  return meta?.friendId || null;
+}
+
 export async function getDualReportHistory(
   friendId: string,
   options?: { forceRefresh?: boolean }

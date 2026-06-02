@@ -11,6 +11,7 @@ import {
   isOnlineMode,
   migrateLocalHistoryToServer,
   shouldMigrate,
+  getCachedHistoryFriendId,
 } from '../services/dualHistoryService';
 import { getLocalResultIdentity } from '../services/resultSnapshotService';
 import { formatDate, ratingLabel, scoreTone } from '../utils/format';
@@ -29,7 +30,7 @@ export default function DualHistoryPage({ onBack, onOpenReport }: DualHistoryPag
   const [migrateProgress, setMigrateProgress] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  const friendId = getLocalResultIdentity()?.friendId || '';
+  const friendId = getLocalResultIdentity()?.friendId || getCachedHistoryFriendId() || '';
 
   const loadHistory = useCallback(async () => {
     if (!friendId) {
@@ -178,10 +179,10 @@ export default function DualHistoryPage({ onBack, onOpenReport }: DualHistoryPag
             <div className="border border-dashed border-[#00f0ff]/40 bg-[#070b19] px-4 py-10 text-center">
               <Users className="w-10 h-10 mx-auto text-slate-600" />
               <p className="mt-4 text-sm text-slate-400 font-sans">
-                暂无适配记录
+                当前设备未找到身份凭证
               </p>
               <p className="mt-1 text-xs text-slate-500 font-mono">
-                完成测评保存结果后，输入好友的识别码，即可生成双人互补报告，记录将自动出现在这里。
+                请返回完成测评并保存结果后，历史记录将自动关联。
               </p>
             </div>
           )}

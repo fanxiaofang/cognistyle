@@ -110,14 +110,18 @@ export async function createResultSnapshot(
   return data as CreateResultSnapshotResponse;
 }
 
-export async function checkFriendIdExists(friendId: string): Promise<boolean> {
+export type FriendIdCheckResult = 'ok' | 'notFound' | 'error';
+
+export async function checkFriendIdExists(friendId: string): Promise<FriendIdCheckResult> {
   try {
     const response = await fetch(
       `${DUAL_REPORT_ENDPOINTS.createSnapshot}/${encodeURIComponent(friendId)}`,
       { method: 'HEAD', signal: AbortSignal.timeout(5000) }
     );
-    return response.ok;
+    if (response.ok) return 'ok';
+    if (response.status === 404) return 'notFound';
+    return 'error';
   } catch {
-    return false;
+    return 'error';
   }
 }

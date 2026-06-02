@@ -8,7 +8,6 @@ import {
   getLocalResultIdentity,
   saveLocalResultIdentity,
   ApiResultError,
-  checkFriendIdExists,
 } from '../services/resultSnapshotService';
 import { formatExpiry } from '../utils/format';
 
@@ -30,7 +29,6 @@ export default function SingleReportActions({
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [forceClear, setForceClear] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [validating, setValidating] = useState(false);
 
   useEffect(() => {
     const local = getLocalResultIdentity();
@@ -42,22 +40,11 @@ export default function SingleReportActions({
     if (Date.now() > local.expiresAt) {
       clearLocalResultIdentity();
       setIdentity(null);
-      setSaveMessage('本地凭证已过期，请重新保存结果。');
+      setSaveMessage('云端记录已过期（90 天有效期），请重新保存结果。');
       return;
     }
 
     setIdentity(local);
-
-    setValidating(true);
-    checkFriendIdExists(local.friendId).then((exists) => {
-      if (!exists) {
-        clearLocalResultIdentity();
-        setIdentity(null);
-        setSaveMessage('云端记录已失效（可能已过期或被删除），请重新保存结果。');
-      }
-    }).finally(() => {
-      setValidating(false);
-    });
   }, []);
 
   const expiresText = useMemo(
@@ -200,14 +187,7 @@ export default function SingleReportActions({
                 )}
               </div>
 
-              {validating ? (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-center gap-2 py-4">
-                    <LoaderCircle className="w-4 h-4 text-[#00f0ff] animate-spin" />
-                    <span className="text-xs text-slate-400 font-sans">正在验证识别码...</span>
-                  </div>
-                </div>
-              ) : !identity ? (
+              {!identity ? (
                 <div className="space-y-3">
                   <button
                     onClick={handleSave}

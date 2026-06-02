@@ -31,6 +31,7 @@ CogniStyle 是一个沉浸式赛博朋克主题的在线认知风格测评系统
 - **像素风头像**：每个身份配备独特的 SVG 像素角色
 
 <img src="doc/singleTest.png" alt="单人结果页" width="600" />
+<img src="doc/syncConsole.png" alt="认知适配协作终端" width="600" />
 
 ### 双人互补报告
 - **双人认知配对**：输入好友的识别码，生成双方认知互补度分析报告

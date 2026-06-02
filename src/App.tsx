@@ -346,29 +346,47 @@ export default function App() {
       {/* Header section - 第七区世界观 */}
       <header className="w-full max-w-5xl mx-auto px-3 sm:px-6 py-4 sm:py-6 flex items-center justify-between select-none relative z-10 gap-3 sm:gap-4">
         <div className="flex items-center gap-3 sm:gap-4">
-          <div className="w-8 h-8 sm:w-9 sm:h-9 bg-[#ff007f] border-2 border-white flex items-center justify-center font-bold text-white text-xs sm:text-sm shadow-[3px_3px_0px_#00f0ff] font-pixel animate-pulse shrink-0">
-            7
+          {/* Logo Badge */}
+          <div className="relative group">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-[#ff007f] to-[#ff007f]/80 border-2 border-[#00f0ff] flex items-center justify-center font-bold text-white text-base sm:text-xl shadow-[4px_4px_0px_rgba(0,240,255,0.6)] font-pixel shrink-0 relative overflow-hidden">
+              <span className="relative z-10">7</span>
+              {/* Animated pulse effect */}
+              <div className="absolute inset-0 bg-[#00f0ff]/20 animate-pulse" />
+            </div>
+            {/* Glow effect on hover */}
+            <div className="absolute inset-0 bg-[#ff007f] blur-lg opacity-0 group-hover:opacity-30 transition-opacity duration-300" />
           </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-xl sm:text-3xl font-black tracking-widest text-[#00f0ff] glow-cyan font-display uppercase leading-none">
-              SECTOR 7
+
+          {/* Title Section */}
+          <div className="flex flex-col justify-center">
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl sm:text-3xl md:text-4xl font-black tracking-widest text-[#00f0ff] glow-cyan font-display uppercase leading-none">
+                SECTOR 7
+              </span>
+            </div>
+            <span className="text-[10px] sm:text-[11px] font-mono text-[#ffe600]/70 tracking-wider mt-0.5 uppercase">
+              Cognitive Adaptation Protocol
             </span>
           </div>
         </div>
-        <div className="flex items-center gap-3">
+
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2 sm:gap-3">
           <button
             onClick={handleOpenHistory}
-            className="flex items-center gap-1.5 px-3 py-2 sm:py-1.5 border-2 border-[#ffe600] bg-black text-[#ffe600] font-pixel text-xs sm:text-xs hover:bg-[#ffe600]/10 focus:outline-none transition-all cursor-pointer shadow-[2.5px_2.5px_0px_#00f0ff] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0px_#00f0ff] min-h-[40px] sm:min-h-0"
+            className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 border border-[#ffe600]/60 bg-black/80 text-[#ffe600] font-sans text-xs sm:text-[13px] hover:bg-[#ffe600]/10 hover:border-[#ffe600] focus:outline-none transition-all cursor-pointer shadow-[0_0_8px_rgba(255,230,0,0.2)] hover:shadow-[0_0_15px_rgba(255,230,0,0.4)] active:scale-95 min-h-[40px] sm:min-h-0 font-medium"
           >
-            <History className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-            <span>测试历史</span>
+            <History className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+            <span className="hidden sm:inline">测试历史</span>
+            <span className="sm:hidden">历史</span>
           </button>
           <button
             onClick={() => setShowHandbook(true)}
-            className="flex items-center gap-1.5 px-3 py-2 sm:py-1.5 border-2 border-[#39ff14] bg-black text-[#39ff14] font-pixel text-xs sm:text-xs hover:bg-[#39ff14]/15 focus:outline-none transition-all cursor-pointer shadow-[2.5px_2.5px_0px_#00f0ff] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0px_#00f0ff] min-h-[40px] sm:min-h-0"
+            className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 border border-[#39ff14]/60 bg-black/80 text-[#39ff14] font-sans text-xs sm:text-[13px] hover:bg-[#39ff14]/10 hover:border-[#39ff14] focus:outline-none transition-all cursor-pointer shadow-[0_0_8px_rgba(57,255,20,0.2)] hover:shadow-[0_0_15px_rgba(57,255,20,0.4)] active:scale-95 min-h-[40px] sm:min-h-0 font-medium"
           >
-            <BookOpen className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-            <span>职业图鉴</span>
+            <BookOpen className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+            <span className="hidden sm:inline">职业图鉴</span>
+            <span className="sm:hidden">图鉴</span>
           </button>
         </div>
       </header>
