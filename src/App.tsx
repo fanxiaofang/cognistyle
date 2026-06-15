@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Category, UserAnswers, DimensionScore, AllDimensionId, AllPolarityKey, ARCHETYPE_KEYS } from './types';
+import { Category, UserAnswers, DimensionScore, AllDimensionId, AllPolarityKey, ArchetypeKey, ARCHETYPE_KEYS, MODE_KEYS, ModeKey } from './types';
 import { questionsGeneral, dimensionMeta } from './data/questions';
 import QuestionCard from './components/QuestionCard';
 import ResultsDisplay from './components/ResultsDisplay';
@@ -149,7 +149,7 @@ export default function App() {
     setView('test');
   };
 
-  // 3. Selection mapping handlers
+  // 3. Selection mapping handlers (store UI value 1-5, convert to bipolar in scoring)
   const handleSelectAnswer = (value: number) => {
     const currentQuestion = questions[currentQuestionIdx];
     setAnswers(prev => ({
@@ -241,88 +241,124 @@ export default function App() {
     setRoute({ kind: 'history' });
   };
 
-  // 4. Score Math calculations
-  // Dimensions order maps questions exactly
-  const getResultsData = (): { scoreMap: Record<string, number>; scores: (DimensionScore & { percentage: number })[]; primaryArchetype: { key: string; matchScore: number }; secondaryArchetype: { key: string; matchScore: number } } => {
-    const scoreMap: Record<string, number> = {};
-    const dimQuestionsCount: Record<string, number> = {};
+  // 4. Single-person scoring engine (Bipolar -2~+2 scale → per-dimension percentage + archetype matching)
+  const getResultsData = (): {
+    scoreMap: Record<string, number>;
+    scores: (DimensionScore & { percentage: number })[];
+    primaryArchetype: { key: string; matchScore: number };
+    secondaryArchetype: { key: string; matchScore: number };
+    styleLabel: { polarity: string; strength: ReturnType<typeof computeStrength> };
+  } => {
+    const dimScores: Record<string, number> = {};   // dimRawScore = Σ(-2~+2)
+    const dimCounts: Record<string, number> = {};    // N per dimension
 
+    // === Phase 1: per-question raw score (UI 1-4 bipolar, 1-5 Likert → bipolar -2 to +2) ===
     questions.forEach(q => {
-      const qid = q.id;
-      const userAns = answers[qid] ?? 3;
-      const meta = dimensionMeta[q.dimension];
-
-      let points = 0;
-      if (q.direction === meta.rightPolarity.key) {
-        points = (userAns - 1) * 1.25;
+      const dim = q.dimension;
+      const isBipolar = !!(q.leftText && q.rightText);
+      const uiValue = answers[q.id];
+      let raw: number;
+      if (uiValue == null) {
+        raw = 0; // unanswered → neutral
+      } else if (isBipolar) {
+        raw = uiValue <= 2 ? uiValue - 3 : uiValue - 2; // 1→-2, 2→-1, 3→+1, 4→+2
       } else {
-        points = (5 - userAns) * 1.25;
+        raw = uiValue - 3; // Likert 1→-2, 2→-1, 3→0, 4→+1, 5→+2
       }
-
-      scoreMap[q.dimension] = (scoreMap[q.dimension] ?? 0) + points;
-      dimQuestionsCount[q.dimension] = (dimQuestionsCount[q.dimension] ?? 0) + 1;
+      dimScores[dim] = (dimScores[dim] ?? 0) + raw;
+      dimCounts[dim] = (dimCounts[dim] ?? 0) + 1;
     });
 
-    const computeStrength = (normalized: number): 'slight' | 'moderate' | 'strong' => {
-      const dominance = Math.abs(normalized - 50);
-      if (dominance > 25) return 'strong';
-      if (dominance > 10) return 'moderate';
-      return 'slight';
+    // === Phase 2: percentage normalization (0~100) ===
+    // percentage = (dimRawScore + 2*N) / (4*N) * 100
+    const coreDimIds: string[] = ['fieldIndepend_fieldDepend', 'wholistic_analytic', 'exploratory_directed'];
+    const labelDimId = 'impulsive_reflective';
+
+    const computeStrength = (percentage: number): 'balanced' | 'moderate' | 'strong' => {
+      const distance = Math.abs(percentage - 50);
+      if (distance <= 10) return 'balanced';
+      if (distance <= 25) return 'moderate';
+      return 'strong';
     };
 
-    const scores = Object.entries(dimensionMeta)
-      .filter(([id]) => dimQuestionsCount[id] > 0)
-      .map(([id, meta]) => {
-        const count = dimQuestionsCount[id];
-        const maxScore = count * 5;
-        const rawScore = scoreMap[id] ?? (maxScore / 2);
-        const percentage = maxScore > 0 ? (rawScore / maxScore) * 100 : 50;
-        const normalizedScore = Math.round(percentage);
-        const isRightActive = percentage >= 50;
-        const polarity = (isRightActive ? meta.rightPolarity.key : meta.leftPolarity.key) as AllPolarityKey;
+    const computePolarity = (percentage: number, leftKey: string, rightKey: string): string => {
+      if (percentage <= 44) return leftKey;
+      if (percentage >= 56) return rightKey;
+      // 45~55 balanced zone — return the closer one
+      return percentage >= 50 ? rightKey : leftKey;
+    };
 
-        return {
-          id: id as AllDimensionId,
-          label: meta.label,
-          rawScore,
-          normalizedScore,
-          polarity,
-          strength: computeStrength(normalizedScore),
-          percentage,
-        };
-      });
+    const buildDimScore = (id: string, meta: { leftPolarity: { key: string }; rightPolarity: { key: string }; label: string }, count: number) => {
+      const dimRawScore = dimScores[id] ?? 0;
+      const percentage = count > 0
+        ? ((dimRawScore + 2 * count) / (4 * count)) * 100
+        : 50;
+      const clampedPercentage = Math.round(Math.min(100, Math.max(0, percentage)));
+      const polarity = computePolarity(clampedPercentage, meta.leftPolarity.key, meta.rightPolarity.key);
 
-    const archetypeMatches = ARCHETYPE_KEYS.map(key => {
-      const parts = key.split('-');
-      const expectedPolars = [
-        parts[0] === 'I' ? 0 : 100,
-        parts[1] === 'C' ? 0 : 100,
-        parts[2] === 'W' ? 0 : 100,
-      ];
-      
-      const getNormalized = (id: string) => {
-        const s = scores.find(s => s.id === id);
-        return s ? s.normalizedScore : 50;
+      return {
+        id: id as AllDimensionId,
+        label: meta.label,
+        rawScore: dimRawScore,
+        percentage: clampedPercentage,
+        normalizedScore: clampedPercentage,  // keep for backward compat
+        polarity: polarity as AllPolarityKey,
+        strength: computeStrength(clampedPercentage),
       };
+    };
 
-      const actualPercents = [
-        getNormalized('impulsive_reflective'),
-        getNormalized('convergent_divergent'),
-        getNormalized('wholistic_analytic'),
-      ];
-      
-      const distance = Math.sqrt(
-        expectedPolars.reduce((sum, target, idx) => sum + Math.pow(target - actualPercents[idx], 2), 0)
-      );
-      
+    const scores: (DimensionScore & { percentage: number })[] = [];
+    const allDimIds = [...coreDimIds, labelDimId];
+    allDimIds.forEach(id => {
+      const meta = dimensionMeta[id];
+      const count = dimCounts[id] ?? 0;
+      if (meta && count > 0) {
+        scores.push(buildDimScore(id, meta, count));
+      }
+    });
+
+    // === Phase 3: archetype matching (3-core-dim Euclidean distance) ===
+    const archetypeCoordMap: Record<string, [number, number, number]> = {
+      'FI-D-W': [0, 100, 0],
+      'FI-D-A': [0, 100, 100],
+      'FD-D-W': [100, 100, 0],
+      'FD-D-A': [100, 100, 100],
+      'FI-E-W': [0, 0, 0],
+      'FI-E-A': [0, 0, 100],
+      'FD-E-W': [100, 0, 0],
+      'FD-E-A': [100, 0, 100],
+    };
+
+    const getPercentage = (id: string) => {
+      const s = scores.find(s => s.id === id);
+      return s ? s.percentage : 50;
+    };
+
+    const userCoords: [number, number, number] = [
+      getPercentage('fieldIndepend_fieldDepend'),  // x: 0=FI, 100=FD
+      getPercentage('exploratory_directed'),        // y: 0=E, 100=D
+      getPercentage('wholistic_analytic'),           // z: 0=W, 100=A
+    ];
+
+    const archetypeMatches = (Object.keys(archetypeCoordMap) as ArchetypeKey[]).map(key => {
+      const [tx, ty, tz] = archetypeCoordMap[key];
+      const [ux, uy, uz] = userCoords;
+      const distance = Math.sqrt((tx - ux) ** 2 + (ty - uy) ** 2 + (tz - uz) ** 2);
       const matchScore = Math.max(0, Math.round(100 - (distance / 173.2) * 100));
       return { key, matchScore };
     }).sort((a, b) => b.matchScore - a.matchScore);
 
-    const primaryArchetype = archetypeMatches[0] || { key: 'I-C-W', matchScore: 100 };
-    const secondaryArchetype = archetypeMatches[1] || { key: 'I-C-A', matchScore: 80 };
+    const primaryArchetype = archetypeMatches[0] || { key: ARCHETYPE_KEYS[0], matchScore: 100 };
+    const secondaryArchetype = archetypeMatches[1] || { key: ARCHETYPE_KEYS[1], matchScore: 80 };
 
-    return { scoreMap, scores, primaryArchetype, secondaryArchetype };
+    // === Phase 4: style label (impulsive / reflective) ===
+    const styleScore = scores.find(s => s.id === labelDimId);
+    const styleLabel = {
+      polarity: styleScore?.polarity ?? 'impulsive',
+      strength: styleScore?.strength ?? ('balanced' as const),
+    };
+
+    return { scoreMap: dimScores, scores, primaryArchetype, secondaryArchetype, styleLabel };
   };
 
   const { scoreMap, scores, primaryArchetype, secondaryArchetype } = view === 'result' ? getResultsData() : { scoreMap: {}, scores: [], primaryArchetype: {key:'', matchScore:0}, secondaryArchetype: {key:'', matchScore:0} };
@@ -484,7 +520,7 @@ export default function App() {
                     <ChevronsRight className="w-5 h-5 animate-pulse" />
                   </div>
                   <p className="text-[10px] sm:text-[11px] font-mono text-slate-600 mt-2 tracking-wider select-none text-right">
-                    约 3 分钟 · 20 题
+                    约 3 分钟 · 16 题
                   </p>
                 </button>
 

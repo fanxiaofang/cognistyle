@@ -1,11 +1,12 @@
 import { buildCompatibilityReport } from '../functions/api/compatibility-report.js';
 import { dimensionMeta, questionsGeneral } from '../src/data/questions';
 
+// v5.6: 4 维 = 3 核心(F/V/D) + 1 风格(R)
 type NormalizedScores = {
-  impulsiveReflective: number;
-  convergentDivergent: number;
+  fieldIndependFieldDepend: number;
   wholisticAnalytic: number;
-  soloTeam: number;
+  exploratoryDirected: number;
+  impulsiveReflective: number;
 };
 
 type SnapshotLike = {
@@ -49,112 +50,123 @@ function makeSnapshot(
   };
 }
 
+// v6.1: 分数区间标签
 function scoreLabel(score: number) {
-  if (score >= 80) return '王牌';
-  if (score >= 65) return '合拍';
-  if (score >= 50) return '适配';
-  if (score >= 35) return '可期';
-  return '磨合';
+  if (score >= 80) return '默契';
+  if (score >= 65) return '共振';
+  if (score >= 50) return '互补';
+  if (score >= 35) return '探索';
+  return '挑战';
 }
 
 const fixedSamples: FixedSample[] = [
   {
     name: 'homogeneous-clone',
-    description: '完全相似型：验证同质组合是否被压出 workable 主峰。',
-    a: makeSnapshot('clone-a', 'I-C-W-T', {
-      impulsiveReflective: 0.3,
-      convergentDivergent: 0.25,
+    description: '完全同质型（回声组）：验证 alignment bonus 是否将同质组合拉入中高分。',
+    a: makeSnapshot('clone-a', 'FI-D-W-I', {
+      fieldIndependFieldDepend: 0.30,
       wholisticAnalytic: 0.35,
-      soloTeam: 0.6,
+      exploratoryDirected: 0.25,
+      impulsiveReflective: 0.30,
     }),
-    b: makeSnapshot('clone-b', 'I-C-W-T', {
-      impulsiveReflective: 0.3,
-      convergentDivergent: 0.25,
+    b: makeSnapshot('clone-b', 'FI-D-W-I', {
+      fieldIndependFieldDepend: 0.30,
       wholisticAnalytic: 0.35,
-      soloTeam: 0.6,
+      exploratoryDirected: 0.25,
+      impulsiveReflective: 0.30,
     }),
   },
   {
     name: 'balanced-complement',
-    description: '适度互补型：验证策略/视野差异能否拉开到 50+。',
-    a: makeSnapshot('balance-a', 'I-C-W-T', {
-      impulsiveReflective: 0.32,
-      convergentDivergent: 0.2,
+    description: '适度互补型（经纬组）：验证盲区覆盖 + 认知互补能否打到高分。',
+    a: makeSnapshot('balance-a', 'FI-D-W-I', {
+      fieldIndependFieldDepend: 0.20,
       wholisticAnalytic: 0.28,
-      soloTeam: 0.55,
+      exploratoryDirected: 0.25,
+      impulsiveReflective: 0.32,
     }),
-    b: makeSnapshot('balance-b', 'R-D-A-T', {
-      impulsiveReflective: 0.67,
-      convergentDivergent: 0.7,
+    b: makeSnapshot('balance-b', 'FD-E-A-R', {
+      fieldIndependFieldDepend: 0.72,
       wholisticAnalytic: 0.72,
-      soloTeam: 0.48,
+      exploratoryDirected: 0.70,
+      impulsiveReflective: 0.67,
     }),
   },
   {
     name: 'high-complement-high-friction',
-    description: '高互补高摩擦型：验证中高差异不会被误判成高分。',
-    a: makeSnapshot('friction-a', 'I-C-W-S', {
-      impulsiveReflective: 0.15,
-      convergentDivergent: 0.15,
+    description: '高互补高摩擦型（化学反应组）：验证高差异不被误判成高分。',
+    a: makeSnapshot('friction-a', 'FI-E-A-I', {
+      fieldIndependFieldDepend: 0.15,
       wholisticAnalytic: 0.25,
-      soloTeam: 0.15,
+      exploratoryDirected: 0.15,
+      impulsiveReflective: 0.15,
     }),
-    b: makeSnapshot('friction-b', 'R-D-A-T', {
+    b: makeSnapshot('friction-b', 'FD-D-A-R', {
+      fieldIndependFieldDepend: 0.82,
+      wholisticAnalytic: 0.70,
+      exploratoryDirected: 0.78,
       impulsiveReflective: 0.82,
-      convergentDivergent: 0.78,
-      wholisticAnalytic: 0.7,
-      soloTeam: 0.82,
     }),
   },
   {
     name: 'extreme-opposition',
-    description: '极端对立型：验证强冲突是否稳定落入低分段。',
-    a: makeSnapshot('extreme-a', 'I-C-W-S', {
-      impulsiveReflective: 0.0,
-      convergentDivergent: 0.0,
+    description: '极端对立型（化学反应组）：验证强冲突是否稳定落入最低分。',
+    a: makeSnapshot('extreme-a', 'FI-D-W-I', {
+      fieldIndependFieldDepend: 0.0,
       wholisticAnalytic: 0.0,
-      soloTeam: 0.0,
+      exploratoryDirected: 0.0,
+      impulsiveReflective: 0.0,
     }),
-    b: makeSnapshot('extreme-b', 'R-D-A-T', {
-      impulsiveReflective: 1.0,
-      convergentDivergent: 1.0,
+    b: makeSnapshot('extreme-b', 'FD-E-A-R', {
+      fieldIndependFieldDepend: 1.0,
       wholisticAnalytic: 1.0,
-      soloTeam: 1.0,
+      exploratoryDirected: 1.0,
+      impulsiveReflective: 1.0,
     }),
   },
   {
     name: 'workable-borderline',
-    description: '临界中档型：验证 workable 是否只保留给少量边界组合。',
-    a: makeSnapshot('border-a', 'I-C-A-T', {
-      impulsiveReflective: 0.42,
-      convergentDivergent: 0.3,
+    description: '临界中档型（双星共轨组）：验证兜底组合是否合理。',
+    a: makeSnapshot('border-a', 'FI-D-A-I', {
+      fieldIndependFieldDepend: 0.42,
       wholisticAnalytic: 0.58,
-      soloTeam: 0.52,
+      exploratoryDirected: 0.30,
+      impulsiveReflective: 0.42,
     }),
-    b: makeSnapshot('border-b', 'R-C-W-T', {
-      impulsiveReflective: 0.6,
-      convergentDivergent: 0.26,
+    b: makeSnapshot('border-b', 'FI-D-W-R', {
+      fieldIndependFieldDepend: 0.58,
       wholisticAnalytic: 0.34,
-      soloTeam: 0.58,
+      exploratoryDirected: 0.26,
+      impulsiveReflective: 0.60,
     }),
   },
 ];
 
 function runFixedSamples() {
-  console.log('=== 固定样本验证 ===');
+  console.log('=== v6 固定样本验证 (含 P2 coverage 拆解) ===');
   for (const sample of fixedSamples) {
     const report = buildCompatibilityReport(sample.a as any, sample.b as any);
     console.log(`\n[${sample.name}] ${sample.description}`);
-    console.log(`总分 ${report.overall.score} (${scoreLabel(report.overall.score)})`);
+    console.log(`搭档指数 ${report.overall.score} (${scoreLabel(report.overall.score)}) | 模式: ${report.overall.pattern} | badge: ${report.overall.patternBadge.label}`);
     console.log(
-      `拆解: 认知 ${report.breakdown.cognitiveComplementarity}, 协作 ${report.breakdown.collaborationCompatibility}, 盲区 ${report.breakdown.blindSpotCoverage}, 风险 ${report.breakdown.frictionRisk}`
+      `拆解: 认知 ${report.breakdown.cognitiveComplementarity}, 盲区 ${report.breakdown.blindSpotCoverage}, 摩擦 ${report.breakdown.frictionRisk}, 节奏 ${report.breakdown.rhythmSynergy}`
     );
     console.log(
-      `维度: 节奏 ${report.dimensions.rhythm.score}/${report.dimensions.rhythm.delta}, 策略 ${report.dimensions.strategy.score}/${report.dimensions.strategy.delta}, 视野 ${report.dimensions.vision.score}/${report.dimensions.vision.delta}, 协作 ${report.dimensions.collaboration.score}/${report.dimensions.collaboration.delta}`
+      `维度: 场定位 ${report.dimensions.field.score}/${report.dimensions.field.delta}, 方向 ${report.dimensions.direction.score}/${report.dimensions.direction.delta}, 视野 ${report.dimensions.vision.score}/${report.dimensions.vision.delta}, 节奏 ${report.dimensions.rhythm.score}/${report.dimensions.rhythm.delta}`
     );
+    // P2 coverage 拆解
+    if (report._coverageDebug) {
+      console.log('coverage 拆解:');
+      for (const [key, dbg] of Object.entries(report._coverageDebug)) {
+        const d = dbg as { delta: number; oppositeSide: boolean; coveragePotential: number; strengthFactor: number; rawCoverage: number };
+        console.log(`  ${key}: Δ=${d.delta} oppSide=${d.oppositeSide} covPot=${d.coveragePotential} strF=${d.strengthFactor} raw=${d.rawCoverage}`);
+      }
+    }
   }
 }
 
+// v5.6: 将答题数据映射到新的四维归一化分数
+// 注意：questions.ts 中的 dimension ID 可能与 types.ts 不同，此处做兼容映射
 function buildNormalizedScoresFromAnswers(answers: AnswerMap): NormalizedScores {
   const scoreMap: Record<string, number> = {};
   const dimQuestionsCount: Record<string, number> = {};
@@ -162,29 +174,33 @@ function buildNormalizedScoresFromAnswers(answers: AnswerMap): NormalizedScores 
   questionsGeneral.forEach((question) => {
     const userAnswer = answers[question.id] ?? 3;
     const meta = dimensionMeta[question.dimension];
+    if (!meta) return; // skip unknown dimensions
 
     const points =
-      question.direction === meta.rightPolarity.key ? (userAnswer - 1) * 1.25 : (5 - userAnswer) * 1.25;
+      question.direction === meta.rightPolarity.key
+        ? (userAnswer - 1) * 1.25
+        : (5 - userAnswer) * 1.25;
 
     scoreMap[question.dimension] = (scoreMap[question.dimension] ?? 0) + points;
     dimQuestionsCount[question.dimension] = (dimQuestionsCount[question.dimension] ?? 0) + 1;
   });
 
-  const normalizedByDimension = Object.fromEntries(
-    Object.keys(dimQuestionsCount).map((dimensionId) => {
-      const count = dimQuestionsCount[dimensionId];
-      const maxScore = count * 5;
-      const rawScore = scoreMap[dimensionId] ?? maxScore / 2;
-      const percentage = maxScore > 0 ? (rawScore / maxScore) * 100 : 50;
-      return [dimensionId, Math.round(percentage) / 100];
-    })
-  );
+  const normalize = (dimensionId: string): number => {
+    const count = dimQuestionsCount[dimensionId] ?? 0;
+    if (count === 0) return 0.5;
+    const maxScore = count * 5;
+    const rawScore = scoreMap[dimensionId] ?? maxScore / 2;
+    const percentage = maxScore > 0 ? (rawScore / maxScore) * 100 : 50;
+    return Math.round(percentage) / 100;
+  };
 
   return {
-    impulsiveReflective: normalizedByDimension.impulsive_reflective ?? 0.5,
-    convergentDivergent: normalizedByDimension.convergent_divergent ?? 0.5,
-    wholisticAnalytic: normalizedByDimension.wholistic_analytic ?? 0.5,
-    soloTeam: normalizedByDimension.solo_team ?? 0.5,
+    // 核心三维
+    fieldIndependFieldDepend: normalize('fieldIndepend_fieldDepend'),
+    wholisticAnalytic: normalize('wholistic_analytic'),
+    exploratoryDirected: normalize('exploratory_directed'),
+    // 风格标签（节奏）
+    impulsiveReflective: normalize('impulsive_reflective'),
   };
 }
 
@@ -202,12 +218,32 @@ function randomSnapshot(id: string): SnapshotLike {
 
 function runDistributionSimulation(iterations = 50000) {
   const bins = {
-    low: 0,
-    basic: 0,
-    workable: 0,
-    strong: 0,
-    excellent: 0,
+    dynamic: 0,       // 0-39   挑战
+    exploratory: 0,   // 40-54  探索
+    complementary: 0, // 55-69  互补
+    synergistic: 0,   // 70-84  共振
+    harmonious: 0,    // 85-100 默契
   };
+  const patternBins = {
+    homogeneous: 0,
+    complementary: 0,
+    asymmetric: 0,
+    conflicting: 0,
+  };
+  // 子分监控：收集所有值用于统计
+  const subScores = {
+    cognitiveComplementarity: [] as number[],
+    blindSpotCoverage: [] as number[],
+    frictionRisk: [] as number[],
+    rhythmSynergy: [] as number[],
+  };
+  // P2 coverage 按维度拆解
+  const covDeltas: Record<string, number[]> = { field: [], vision: [], direction: [] };
+  const covPots: Record<string, number[]> = { field: [], vision: [], direction: [] };
+  const covStrF: Record<string, number[]> = { field: [], vision: [], direction: [] };
+  const covRaws: Record<string, number[]> = { field: [], vision: [], direction: [] };
+  let covOppSideCount = 0; // 同侧 vs 异侧计数
+  let covSameSideCount = 0;
   let min = 100;
   let max = 0;
   let sum = 0;
@@ -222,23 +258,78 @@ function runDistributionSimulation(iterations = 50000) {
     max = Math.max(max, score);
     sum += score;
 
-    if (score < 35) bins.low += 1;
-    else if (score < 50) bins.basic += 1;
-    else if (score < 65) bins.workable += 1;
-    else if (score < 80) bins.strong += 1;
-    else bins.excellent += 1;
+    if (score < 35) bins.dynamic += 1;
+    else if (score < 50) bins.exploratory += 1;
+    else if (score < 65) bins.complementary += 1;
+    else if (score < 80) bins.synergistic += 1;
+    else bins.harmonious += 1;
+
+    patternBins[report.overall.pattern as keyof typeof patternBins] += 1;
+
+    subScores.cognitiveComplementarity.push(report.breakdown.cognitiveComplementarity);
+    subScores.blindSpotCoverage.push(report.breakdown.blindSpotCoverage);
+    subScores.frictionRisk.push(report.breakdown.frictionRisk);
+    subScores.rhythmSynergy.push(report.breakdown.rhythmSynergy);
+
+    // P2: collect coverage dimension-level data
+    if (report._coverageDebug) {
+      for (const [key, dbg] of Object.entries(report._coverageDebug)) {
+        const d = dbg as { delta: number; oppositeSide: boolean; coveragePotential: number; strengthFactor: number; rawCoverage: number };
+        covDeltas[key]?.push(d.delta);
+        covPots[key]?.push(d.coveragePotential);
+        covStrF[key]?.push(d.strengthFactor);
+        covRaws[key]?.push(d.rawCoverage);
+        if (d.oppositeSide) covOppSideCount++; else covSameSideCount++;
+      }
+    }
   }
 
   const percent = (count: number) => `${((count / iterations) * 100).toFixed(1)}%`;
 
-  console.log('\n=== 随机分布模拟 ===');
+  console.log('\n=== v5.6 随机分布模拟 ===');
   console.log(`样本量: ${iterations}`);
   console.log(`平均分: ${(sum / iterations).toFixed(1)} | 最低分: ${min} | 最高分: ${max}`);
-  console.log(`0-34   磨合: ${percent(bins.low)}`);
-  console.log(`35-49  可期: ${percent(bins.basic)}`);
-  console.log(`50-64  适配: ${percent(bins.workable)}`);
-  console.log(`65-79  合拍: ${percent(bins.strong)}`);
-  console.log(`80-100 王牌: ${percent(bins.excellent)}`);
+  console.log(`0 - 34   挑战: ${percent(bins.dynamic)}`);
+  console.log(`35 - 49  探索: ${percent(bins.exploratory)}`);
+  console.log(`50 - 64  互补: ${percent(bins.complementary)}`);
+  console.log(`65 - 79  共振: ${percent(bins.synergistic)}`);
+  console.log(`80 - 100 默契: ${percent(bins.harmonious)}`);
+
+  console.log('\n--- Pattern 分布 ---');
+  console.log(`homogeneous:   ${percent(patternBins.homogeneous)}`);
+  console.log(`complementary: ${percent(patternBins.complementary)}`);
+  console.log(`asymmetric:    ${percent(patternBins.asymmetric)}`);
+  console.log(`conflicting:   ${percent(patternBins.conflicting)}`);
+
+  console.log('\n--- 子分监控 (mean / std / p10 / p50 / p90 / max) ---');
+  const stats = (label: string, arr: number[]) => {
+    const sorted = [...arr].sort((a, b) => a - b);
+    const n = sorted.length;
+    const mean = sorted.reduce((s, v) => s + v, 0) / n;
+    const variance = sorted.reduce((s, v) => s + (v - mean) ** 2, 0) / n;
+    const std = Math.sqrt(variance);
+    const p10 = sorted[Math.floor(n * 0.1)];
+    const p50 = sorted[Math.floor(n * 0.5)];
+    const p90 = sorted[Math.floor(n * 0.9)];
+    const maxVal = sorted[n - 1];
+    console.log(`${label.padEnd(28)} avg ${mean.toFixed(1)}  std ${std.toFixed(1)}  p10 ${p10}  p50 ${p50}  p90 ${p90}  max ${maxVal}`);
+  };
+  stats('cognitiveComplementarity', subScores.cognitiveComplementarity);
+  stats('blindSpotCoverage', subScores.blindSpotCoverage);
+  stats('frictionRisk', subScores.frictionRisk);
+  stats('rhythmSynergy', subScores.rhythmSynergy);
+
+  // P2: coverage 按维度拆解统计
+  console.log('\n--- P2 coverage 维度拆解 ---');
+  const dimNames: Record<string, string> = { field: '场定位', vision: '视野', direction: '方向' };
+  console.log(`  oppositeSide 异侧: ${covOppSideCount} (${((covOppSideCount / (iterations * 3)) * 100).toFixed(1)}%)  同侧: ${covSameSideCount} (${((covSameSideCount / (iterations * 3)) * 100).toFixed(1)}%)`);
+  for (const dim of ['field', 'vision', 'direction']) {
+    const label = dimNames[dim] || dim;
+    stats(`  ${label} delta`, covDeltas[dim]);
+    stats(`  ${label} covPot`, covPots[dim]);
+    stats(`  ${label} strF`, covStrF[dim]);
+    stats(`  ${label} raw`, covRaws[dim]);
+  }
 }
 
 runFixedSamples();

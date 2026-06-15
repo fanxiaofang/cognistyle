@@ -1,7 +1,7 @@
 export const API_VERSIONS = {
   QUESTION_VERSION: 'questions-general-2026-06',
   SNAPSHOT_VERSION: 'snapshot-v1',
-  COMPATIBILITY_REPORT_VERSION: 'compatibility-v1',
+  COMPATIBILITY_REPORT_VERSION: 'compatibility-v3',
   PUBLIC_SHARE_VERSION: 'public-share-v1',
   DUAL_HISTORY_VERSION: 'history-v1',
 };

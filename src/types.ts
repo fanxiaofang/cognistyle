@@ -4,18 +4,18 @@
  */
 
 // ============================================
-// 第一层：核心认知维度（3维，6极）
+// 第一层：核心认知维度（3维，6极）—— 决定认知原型
 // ============================================
 
 export type CoreDimensionId = 
-  | 'impulsive_reflective'      // 认知节奏：行动 vs 推演
-  | 'convergent_divergent'      // 信息策略：收敛 vs 探索
-  | 'wholistic_analytic';       // 视野焦点：全局 vs 局部
+  | 'fieldIndepend_fieldDepend'      // 场定位：场独立 vs 场依赖
+  | 'wholistic_analytic'            // 视野焦点：整体 vs 分析
+  | 'exploratory_directed';         // 认知取向：探索 vs 定向
 
 export type CorePolarityKey = 
-  | 'impulsive' | 'reflective' 
-  | 'convergent' | 'divergent' 
-  | 'wholistic' | 'analytic';
+  | 'fieldIndepend' | 'fieldDepend' 
+  | 'wholistic' | 'analytic' 
+  | 'exploratory' | 'directed';
 
 export interface CoreDimensionMetadata {
   id: CoreDimensionId;
@@ -23,50 +23,41 @@ export interface CoreDimensionMetadata {
   leftPolarity: { 
     key: CorePolarityKey; 
     label: string; 
-    description: string;  // 通用场景描述
-    programmerDescription: string;  // 程序员场景描述
+    description: string;
   };
   rightPolarity: { 
     key: CorePolarityKey; 
     label: string; 
     description: string;
-    programmerDescription: string;
   };
 }
 
 // ============================================
-// 第二层：协作偏好（1维，2极）—— 独立维度，非认知加工方式
+// 风格标签维度（1维，2极）—— 不参与原型判定
 // ============================================
 
-export type CollaborationDimensionId = 'solo_team';
+export type LabelDimensionId = 'impulsive_reflective';
 
-export type CollaborationPolarityKey = 'solo' | 'team';
-
-export interface CollaborationDimensionMetadata {
-  id: CollaborationDimensionId;
-  label: string;
-  soloLabel: string;   // 独立工作偏好
-  teamLabel: string;   // 协同工作偏好
-  description: string; // 说明这是"情境偏好"而非"人格特质"
-}
+export type LabelPolarityKey = 'impulsive' | 'reflective';
 
 // ============================================
 // 组合维度类型（用于测验计算）
 // ============================================
 
-export type AllDimensionId = CoreDimensionId | CollaborationDimensionId;
-export type AllPolarityKey = CorePolarityKey | CollaborationPolarityKey;
+export type AllDimensionId = CoreDimensionId | LabelDimensionId;
+export type AllPolarityKey = CorePolarityKey | LabelPolarityKey;
 
 // ============================================
-// 测验题目结构
+// 测验题目结构（双端五档量表）
 // ============================================
 
 export interface Question {
   id: number;
-  dimension: CoreDimensionId | CollaborationDimensionId;
-  direction: AllPolarityKey;
-  text: string;
-  programmerText?: string;
+  dimension: CoreDimensionId | LabelDimensionId;
+  prompt: string;
+  leftText: string;
+  rightText: string;
+  text?: string;
 }
 
 export type QuestionCategory = 'programmer' | 'general';
@@ -76,8 +67,6 @@ export type Category = QuestionCategory;
 export interface QuestionBank {
   category: QuestionCategory;
   questions: Question[];
-  // 协作维度题目通过统计"是否提到团队"间接计算，不直接作为Likert题
-  collaborationIndicators: number[];  // 题目ID列表，用于检测S/T倾向
 }
 
 // ============================================
@@ -85,95 +74,71 @@ export interface QuestionBank {
 // ============================================
 
 export interface UserAnswers {
-  [questionId: number]: number;  // 1-5 Likert得分
+  [questionId: number]: number;  // -2 ~ +2 双端五档量表
 }
 
 export interface DimensionScore {
   id: AllDimensionId;
   label: string;
-  rawScore: number;      // 原始总分（如10-50）
-  normalizedScore: number;  // 标准化到 0-100，指向Right/High极性
-  polarity: AllPolarityKey;   // 当前偏向的极性
-  strength: 'slight' | 'moderate' | 'strong';  // 倾向强度
+  rawScore: number;              // 原始总分（如 -12 ~ +12）
+  percentage: number;            // 百分比归一化 0 ~ 100
+  polarity: AllPolarityKey;      // 当前偏向的极性
+  strength: 'balanced' | 'moderate' | 'strong';  // 倾向强度（均衡/偏向/显著偏向）
 }
 
 // ============================================
-// 原型与职业系统（核心重构）
+// 原型与职业系统（8 原型 × 2 风格标签 = 16 职业子类型）
 // ============================================
 
-// 8个认知原型（3维组合）
+// 8个认知原型（3维笛卡尔积）
 export type ArchetypeKey = 
-  | 'I-C-W' | 'I-C-A' | 'I-D-W' | 'I-D-A'
-  | 'R-C-W' | 'R-C-A' | 'R-D-W' | 'R-D-A';
+  | 'FI-D-W' | 'FI-D-A' | 'FD-D-W' | 'FD-D-A'
+  | 'FI-E-W' | 'FI-E-A' | 'FD-E-W' | 'FD-E-A';
 
-// 2种协作模式
-export type ModeKey = 'S' | 'T';
+// 2种风格标签（冲动 / 反思）
+export type ModeKey = 'I' | 'R';
 
-// 16格完整ID
+// 16 职业子类型完整 ID
 export type ProfileId = `${ArchetypeKey}-${ModeKey}`;
 
 // 世界观部门（赛博朋克城市）
 export type DepartmentId = 
   | 'emergency'    // 应急局
+  | 'control'      // 中枢塔
   | 'frontier'     // 边界署
-  | 'medical'      // 医疗部
-  | 'workshop'     // 黑市工坊
-  | 'control'      // 总控中心
-  | 'standard'     // 标准局
   | 'relic'        // 遗迹司
+  | 'standard'     // 标准局
+  | 'lifeguard'    // 生命监察局
+  | 'workshop'     // 黑市工坊
   | 'biotech';     // 生科所
 
-// 视觉主题（用于16格差异化展示）
+// 行会
+export type GuildId = 'foundation' | 'sentry' | 'explorers' | 'alchemists';
+
+// 视觉主题
 export interface VisualTheme {
-  pose: string;           // 姿态描述
-  background: string;      // 场景背景
-  lighting: string;       // 光影氛围
-  atmosphere: string;     // 整体气氛
-  colorTone: string;       // 主色调（Tailwind类名）
-  accent: string;          // 强调色
-}
-
-// S/T模式特定配置
-export interface ModeConfig {
-  key: ModeKey;
-  name: string;            // 模式名称：独行者 / 连接者
-  visualModifier: {         // 基于原型视觉的差异化
-    lightingShift: string;  // 光影变化：冷→暖 / 静→动
-    poseShift: string;      // 姿态变化：俯身→站立 / 独坐→指挥
-    atmosphereShift: string; // 氛围变化：深夜→白昼 / 寂静→共振
-  };
-  collaborationTemplate: string;  // 协作建议模板
+  pose: string;
+  background: string;
+  lighting: string;
+  atmosphere: string;
+  colorTone: string;
+  accent: string;
 }
 
 // ============================================
-// 核心数据结构：8原型定义
-// ============================================
-
-export interface CognitiveArchetype {
-  key: ArchetypeKey;
-  profession: string;        // 职业名称：应急队长、城市游侠等
-  department: DepartmentId;
-  essence: string;           // 核心定义（8原型共享）
-  cognitivePattern: string[];  // 4条认知特征（对应I/R, C/D, W/A）
-  workplaceEdge: string[];     // 优势与边界（共享）
-  growthTip: string;          // 成长建议（共享）
-  visualBase: VisualTheme;    // 基础视觉（S/T在此基础上变异）
-}
-
-// ============================================
-// 展示层数据结构：16格形象
+// 展示层数据结构：16 职业子类型
 // ============================================
 
 export interface CognitiveProfile {
   id: ProfileId;
   archetype: ArchetypeKey;
+  profession: string;       // 职业名称：整合者、架构师、开拓者等
   mode: ModeKey;
   displayName: string;
-  callSign: string;
   department: string;
   rank: string;
+  callSign: string;
   avatar: string;
-  profession?: string;
   visual: VisualTheme;
   essence: string;
   cognitivePattern: string[];
@@ -189,8 +154,8 @@ export interface CognitiveProfile {
 
 export interface TestResult {
   // 维度得分
-  coreDimensions: DimensionScore[];           // I/R, C/D, W/A
-  collaborationPreference: DimensionScore;  // S/T
+  coreDimensions: DimensionScore[];       // 3 核心维
+  styleLabel: DimensionScore;             // 风格标签（冲动/反思）
   
   // 匹配结果
   matchedArchetype: ArchetypeKey;
@@ -203,8 +168,8 @@ export interface TestResult {
     matchScore: number;  // 0-100，该原型匹配度
   }[];
   
-  // 搭档推荐
-  complementaryProfiles: ProfileId[];  // 推荐互补类型
+  // 推荐最合适的搭档
+  complementaryProfiles: ProfileId[];
 }
 
 // ============================================
@@ -216,7 +181,7 @@ export type MethodType = 'code' | 'flow' | 'checklist' | 'diagram' | 'prototype'
 export interface ScenarioOption {
   label: string;
   polarity: AllPolarityKey;
-  archetypeMatch: ArchetypeKey[];  // 哪些原型倾向此选项
+  archetypeMatch: ArchetypeKey[];
   methodTitle: string;
   methodType: MethodType;
   methodContent: string;
@@ -225,39 +190,42 @@ export interface ScenarioOption {
 export interface InteractiveScenario {
   id: string;
   title: string;
-  context: string;           // 场景背景
+  context: string;
   question: string;
   options: ScenarioOption[];
 }
 
 // ============================================
-// 常量与工具类型
+// 常量
 // ============================================
 
 export const ARCHETYPE_KEYS: ArchetypeKey[] = [
-  'I-C-W', 'I-C-A', 'I-D-W', 'I-D-A',
-  'R-C-W', 'R-C-A', 'R-D-W', 'R-D-A'
+  'FI-D-W', 'FI-D-A', 'FD-D-W', 'FD-D-A',
+  'FI-E-W', 'FI-E-A', 'FD-E-W', 'FD-E-A'
 ];
 
-export const MODE_KEYS: ModeKey[] = ['S', 'T'];
+export const MODE_KEYS: ModeKey[] = ['I', 'R'];
 
 export const DEPARTMENT_LABELS: Record<DepartmentId, string> = {
   emergency: '应急局',
+  control: '中枢塔',
   frontier: '边界署',
-  medical: '医疗部',
-  workshop: '黑市工坊',
-  control: '总控中心',
-  standard: '标准局',
   relic: '遗迹司',
+  standard: '标准局',
+  lifeguard: '生命监察局',
+  workshop: '黑市工坊',
   biotech: '生科所'
 };
 
-// 辅助函数：从ID解析
+// ============================================
+// 辅助函数
+// ============================================
+
 export function parseProfileId(id: ProfileId): { archetype: ArchetypeKey; mode: ModeKey } {
-  const parts = id.split('-');
+  const lastDash = id.lastIndexOf('-');
   return {
-    archetype: `${parts[0]}-${parts[1]}-${parts[2]}` as ArchetypeKey,
-    mode: parts[3] as ModeKey
+    archetype: id.substring(0, lastDash) as ArchetypeKey,
+    mode: id.substring(lastDash + 1) as ModeKey
   };
 }
 

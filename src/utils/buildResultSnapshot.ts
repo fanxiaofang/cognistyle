@@ -58,7 +58,9 @@ export function resolvePrimaryProfile({
   scoreMap,
   primaryArchetype,
 }: Pick<BuildResultSnapshotInput, 'scoreMap' | 'primaryArchetype'>): ResolvedPrimaryProfile {
-  const matchedMode: ModeKey = (scoreMap['solo_team'] ?? 5) >= 5 ? 'T' : 'S';
+  // style label: impulsive_reflective dimension → I (impulsive) or R (reflective)
+  const styleRawScore = scoreMap['impulsive_reflective'] ?? 0;
+  const matchedMode: ModeKey = styleRawScore >= 0 ? 'R' : 'I';
   const profileId = buildProfileId(primaryArchetype.key as ArchetypeKey, matchedMode);
   const profile = cognitiveProfiles[profileId] || buildFallbackProfile(profileId, matchedMode);
 
@@ -78,10 +80,11 @@ function buildNormalizedScores(scores: ResultScoreLike[]): ResultSnapshotNormali
   const getScore = (id: string) => scores.find((item) => item.id === id)?.normalizedScore;
 
   return {
-    impulsiveReflective: clampNormalizedScore(getScore('impulsive_reflective')) ?? 0.5,
-    convergentDivergent: clampNormalizedScore(getScore('convergent_divergent')) ?? 0.5,
-    wholisticAnalytic: clampNormalizedScore(getScore('wholistic_analytic')) ?? 0.5,
-    soloTeam: clampNormalizedScore(getScore('solo_team')) ?? 0.5,
+    fieldIndependFieldDepend: clampNormalizedScore(getScore('fieldIndepend_fieldDepend')) ?? 0.5,
+    wholisticAnalytic:         clampNormalizedScore(getScore('wholistic_analytic')) ?? 0.5,
+    // 取反：percentage 方向是 0=E(探索)→100=D(定向)，而报告语义需要 0→1 表示更偏探索
+    exploratoryDirected:       clampNormalizedScore(100 - (getScore('exploratory_directed') ?? 50)) ?? 0.5,
+    impulsiveReflective:       clampNormalizedScore(getScore('impulsive_reflective')) ?? 0.5,
   };
 }
 

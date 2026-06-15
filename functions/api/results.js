@@ -122,6 +122,12 @@ export async function onRequest(context) {
     };
 
     stage = 'kv-put';
+    console.log('[results:save]', {
+      friendId,
+      profileId: record.profileId,
+      displayName: record.display?.displayName,
+      normalizedScores: record.normalizedScores,
+    });
     await kv.put(`${KV_KEY_PREFIXES.RESULT}${friendId}`, JSON.stringify(record), {
       expirationTtl: TTL.SNAPSHOT_SECONDS,
     });
@@ -195,10 +201,10 @@ function validateSnapshotPayload(payload) {
   }
 
   const requiredScoreKeys = [
-    'impulsiveReflective',
-    'convergentDivergent',
+    'fieldIndependFieldDepend',
     'wholisticAnalytic',
-    'soloTeam',
+    'exploratoryDirected',
+    'impulsiveReflective',
   ];
 
   for (const key of requiredScoreKeys) {

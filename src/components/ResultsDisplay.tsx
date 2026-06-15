@@ -64,10 +64,10 @@ export default function ResultsDisplay({
   const activeMatchScore = showOtherMode && otherProfile ? secondaryArchetype.matchScore : primaryArchetype.matchScore;
 
   const guildEssenceMap: Record<string, { essence: string; name: string; color: string; borderColor: string }> = {
-    'C-W': { essence: '聚合 × 整体：用标准方案搭建宏观骨架', name: '筑基者', color: 'text-[#00f0ff]', borderColor: 'border-l-[#00f0ff]' },
-    'C-A': { essence: '聚合 × 分析：用标准规范守护微观精度', name: '守门人', color: 'text-[#ffe600]', borderColor: 'border-l-[#ffe600]' },
-    'D-W': { essence: '发散 × 整体：用创新探索突破宏观边界', name: '探路者', color: 'text-[#39ff14]', borderColor: 'border-l-[#39ff14]' },
-    'D-A': { essence: '发散 × 分析：用创新突破微观极限', name: '炼金师', color: 'text-[#ff007f]', borderColor: 'border-l-[#ff007f]' },
+    'D-W': { essence: '定向 × 整体：构建清晰可执行的全局框架', name: '筑基者', color: 'text-[#00f0ff]', borderColor: 'border-l-[#00f0ff]' },
+    'D-A': { essence: '定向 × 分析：确保关键细节稳定可靠', name: '守门人', color: 'text-[#ffe600]', borderColor: 'border-l-[#ffe600]' },
+    'E-W': { essence: '探索 × 整体：持续拓展新的方向与可能', name: '探路者', color: 'text-[#39ff14]', borderColor: 'border-l-[#39ff14]' },
+    'E-A': { essence: '探索 × 分析：在细节试验中创造突破', name: '炼金师', color: 'text-[#ff007f]', borderColor: 'border-l-[#ff007f]' },
   };
   const activeArchetypeKey = showOtherMode && otherProfile ? secondaryArchetype.key : primaryArchetype.key;
   const activeArchetypeParts = activeArchetypeKey.split('-');
@@ -162,7 +162,7 @@ export default function ResultsDisplay({
             <div>
               <h3 className="text-[13px] font-pixel text-[#00f0ff] tracking-widest uppercase mb-4 sm:mb-6 flex items-center gap-2 glow-cyan">
                 <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-[#00f0ff]" />
-                维度平衡指数
+                 认知风格维度分布
               </h3>
               <div className="space-y-3 sm:space-y-5">
                 {scores.map((score, idx) => {
@@ -183,6 +183,9 @@ export default function ResultsDisplay({
                           {activeLabel} <span className="text-[#00f0ff] font-pixel text-xs sm:text-[13px] glow-cyan">{percentVal}%</span>    
                         </span>
                       </div>
+                      <p className="text-[10px] text-[#00f0ff]/60 font-mono tracking-wide ml-0.5">
+                        {{ 'fieldIndepend_fieldDepend': '我依据什么判断', 'wholistic_analytic': '我如何理解世界', 'exploratory_directed': '我如何寻找答案', 'impulsive_reflective': '我如何付诸行动' }[score.id]}
+                      </p>
                       <div className="relative h-4 sm:h-5 w-full bg-black/80 border border-[#00f0ff]/30 p-[2px] shadow-inner">
                         <div 
                           className={`h-full ${barStyle.bg} ${barStyle.glow} transition-all duration-1000 ease-out relative overflow-hidden`}
@@ -214,17 +217,17 @@ export default function ResultsDisplay({
           {/* Bento Card: Strengths & Weaknesses */}
           <div className="lg:col-span-12 xl:col-span-7 bg-black p-4 sm:p-6 md:p-8 border border-[#ff007f]/40 shadow-[3px_3px_0px_rgba(0,240,255,0.3)] select-none min-w-0">
             <div className="flex flex-col gap-4 sm:gap-6">
-              {/* Added Section: Cognitive Pattern [认知模式] */}
+              {/* Added Section: Cognitive Pattern [认知风格] */}
               {activeProfile.cognitivePattern && (
                 <div className="border-b border-dashed border-[#ff007f]/30 pb-4 sm:pb-6">
                   <h3 className="text-sm sm:text-base font-black text-[#00f0ff] flex items-center gap-2 mb-3 sm:mb-4 font-display uppercase tracking-widest glow-cyan">
                     <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-[#00f0ff]" />
-                    认知模式
+                    认知风格
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                     {activeProfile.cognitivePattern.map((trait, tIdx) => (
-                      <div key={tIdx} className="bg-[#ff007f]/5 border border-[#ff007f]/20 p-2.5 sm:p-3 h-full flex flex-col justify-between">
-                        <p className="text-xs sm:text-[13px] leading-relaxed text-slate-300 font-medium">
+                      <div key={tIdx} className="bg-[#ff007f]/5 border border-[#ff007f]/20 p-3 sm:p-3.5 h-full flex flex-col justify-between">
+                        <p className="text-xs sm:text-[13px] leading-relaxed sm:leading-loose text-slate-300 font-medium tracking-wide px-0.5">
                           {trait}
                         </p>
                       </div>
@@ -233,16 +236,16 @@ export default function ResultsDisplay({
                 </div>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 bg-transparent">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 bg-transparent">
                 {/* Strengths Column */}
                 <div>
                   <h3 className="text-sm sm:text-base font-black text-[#39ff14] flex items-center gap-2 mb-3 sm:mb-4 font-display uppercase tracking-widest glow-green">
                     <CheckCircle2 className="w-3 h-3 sm:w-4 sm:h-4 text-[#39ff14]" />
                     思维优势
                   </h3>
-                  <ul className="space-y-2 sm:space-y-3 font-sans">
+                  <ul className="space-y-2.5 sm:space-y-3 font-sans">
                     {activeProfile.workplaceEdge.filter(e => e.startsWith('优势：')).map((str, sIdx) => (
-                      <li key={sIdx} className="text-xs sm:text-[13px] leading-relaxed text-slate-300 flex items-start gap-2 sm:gap-2.5">
+                      <li key={sIdx} className="text-xs sm:text-[13px] leading-relaxed sm:leading-loose tracking-wide text-slate-300 flex items-start gap-2.5 sm:gap-3">
                         <CornerDownRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#00f0ff] shrink-0 mt-0.5" />
                         <span>{str.replace(/^优势：/, '')}</span>
                       </li>
@@ -256,9 +259,9 @@ export default function ResultsDisplay({
                     <AlertCircle className="w-3 h-3 sm:w-4 sm:h-4 text-[#ffe600]" />
                     潜在盲区
                   </h3>
-                  <ul className="space-y-2 sm:space-y-3 font-sans">
+                  <ul className="space-y-2.5 sm:space-y-3 font-sans">
                     {activeProfile.workplaceEdge.filter(e => e.startsWith('边界：')).map((weak, wIdx) => (
-                      <li key={wIdx} className="text-xs sm:text-[13px] leading-relaxed text-slate-300 flex items-start gap-2 sm:gap-2.5"> 
+                      <li key={wIdx} className="text-xs sm:text-[13px] leading-relaxed sm:leading-loose tracking-wide text-slate-300 flex items-start gap-2.5 sm:gap-3"> 
                         <CornerDownRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#ff007f] shrink-0 mt-0.5" />
                         <span>{weak.replace(/^边界：/, '')}</span>
                       </li>
@@ -273,7 +276,7 @@ export default function ResultsDisplay({
                   <CornerDownRight className="w-3 h-3 sm:w-4 sm:h-4 text-[#ffe600]" />
                   协作风格
                 </h3>
-                <p className="text-xs sm:text-[13px] leading-relaxed text-slate-300 bg-[#070b19] p-3 sm:p-4 border border-dashed border-[#ffe600]/30 font-sans break-words">
+                <p className="text-xs sm:text-[13px] leading-relaxed sm:leading-loose tracking-wide text-slate-300 bg-[#070b19] p-3 sm:p-4 border border-dashed border-[#ffe600]/30 font-sans break-words">
                   {activeProfile.collaboration}
                 </p>
               </div>
@@ -284,7 +287,7 @@ export default function ResultsDisplay({
                   <CornerDownRight className="w-3 h-3 sm:w-4 sm:h-4 text-[#39ff14]" />
                   成长建议
                 </h3>
-                <p className="text-xs sm:text-[13px] leading-relaxed text-slate-300 bg-[#070b19] p-3 sm:p-4 border border-dashed border-[#39ff14]/30 font-sans break-words">  
+                <p className="text-xs sm:text-[13px] leading-relaxed sm:leading-loose tracking-wide text-slate-300 bg-[#070b19] p-3 sm:p-4 border border-dashed border-[#39ff14]/30 font-sans break-words">  
                   {activeProfile.growthTip}
                 </p>
               </div>

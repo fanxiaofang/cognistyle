@@ -27,35 +27,33 @@ export default function QuestionCard({
   onPrev,
   onNext,
 }: QuestionCardProps) {
-  const options = [
-    { value: 1, label: '非常不同意', color: 'hover:bg-[#ff007f]/10 border-[#ff007f]/40 text-[#ff007f]/70 bg-transparent' },
-    { value: 2, label: '不同意', color: 'hover:bg-rose-500/10 border-rose-700/30 text-rose-400/70 bg-transparent' },
-    { value: 3, label: '中立', color: 'hover:bg-slate-500/10 border-slate-700/30 text-slate-400 bg-transparent' },
-    { value: 4, label: '同意', color: 'hover:bg-[#00f0ff]/10 border-[#00f0ff]/40 text-[#00f0ff]/70 bg-transparent' },
-    { value: 5, label: '非常同意', color: 'hover:bg-[#39ff14]/10 border-[#39ff14]/40 text-[#39ff14]/70 bg-transparent' },
-  ];
+  const isBipolar = !!(question.leftText && question.rightText);
 
-  const getSegmentStyle = (idx: number) => {
-    switch (idx) {
-      case 0:
-        return 'bg-gradient-to-r from-[#ff007f] to-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]';
-      case 1:
-        return 'bg-gradient-to-r from-rose-500 to-slate-500 shadow-[0_0_8px_rgba(148,163,184,0.4)]';
-      case 2:
-        return 'bg-gradient-to-r from-slate-500 to-[#00f0ff] shadow-[0_0_8px_rgba(0,240,255,0.5)]';
-      case 3:
-        return 'bg-gradient-to-r from-[#00f0ff] to-[#39ff14] shadow-[0_0_8px_rgba(57,255,20,0.5)]';
-      default:
-        return 'bg-slate-500';
-    }
-  };
+  // 4-option bipolar — no neutral, endpoints larger
+  const bipolarOptions = [
+    { value: 1, label: '强', color: '#0066ff' },
+    { value: 2, label: '偏', color: '#3388ff' },
+    { value: 3, label: '偏', color: '#00cccc' },
+    { value: 4, label: '强', color: '#00f0ff' },
+  ];
+  // Likert fallback (programmer version)
+  const likertOptions = [
+    { value: 1, label: '非常不同意', color: '#ff007f' },
+    { value: 2, label: '不同意', color: '#ff4488' },
+    { value: 3, label: '中立', color: '#666666' },
+    { value: 4, label: '同意', color: '#00cccc' },
+    { value: 5, label: '非常同意', color: '#00f0ff' },
+  ];
+  const options = isBipolar ? bipolarOptions : likertOptions;
 
   const progressPercent = ((currentIndex + 1) / totalQuestions) * 100;
 
+  const isEndpoint = (idx: number) => idx === 0 || idx === options.length - 1;
+
   return (
-    <div className="w-full max-w-2xl mx-auto px-2 sm:px-4 py-2 font-mono">
-      {/* Progress Bar Container */}
-      <div className="w-full h-2 sm:h-3 bg-black border border-[#00f0ff]/20 p-0.5 mb-2 overflow-hidden shadow-[0_0_5px_rgba(0,240,255,0.05)]">
+    <div className="w-full max-w-xl sm:max-w-2xl mx-auto px-3 sm:px-6 py-1.5 sm:py-4 font-mono">
+      {/* Progress Bar */}
+      <div className="w-full h-1.5 sm:h-2.5 bg-black border border-[#00f0ff]/20 p-px mb-2 sm:mb-3 overflow-hidden shadow-[0_0_5px_rgba(0,240,255,0.05)] shrink-0">
         <motion.div
           className="h-full bg-[#00f0ff] shadow-[0_0_8px_rgba(0,240,255,0.5)]"
           initial={{ width: 0 }}
@@ -64,14 +62,12 @@ export default function QuestionCard({
         />
       </div>
 
-      {/* Cyberpunk Progress Info */}
-      <div className="flex justify-center items-center text-xs text-slate-400 mb-4 px-1 select-none font-mono">
-        <div className="flex items-center gap-2 text-slate-400">
-          <span className="text-[#39ff14] font-bold glow-green">{currentIndex}/{totalQuestions}</span>
-        </div>
+      {/* Progress Info */}
+      <div className="flex justify-center text-[11px] sm:text-sm text-slate-400 mb-2 sm:mb-4 select-none font-mono shrink-0">
+        <span className="text-[#39ff14] font-bold glow-green">{currentIndex + 1}/{totalQuestions}</span>
       </div>
 
-      {/* Main Question Surface */}
+      {/* Main Card */}
       <AnimatePresence mode="wait">
         <motion.div
           key={question.id}
@@ -79,62 +75,90 @@ export default function QuestionCard({
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -20 }}
           transition={{ duration: 0.35, ease: 'easeInOut' }}
-          className="bg-[#070b19] border border-white/10 p-3 sm:p-5 md:p-6 shadow-[4px_4px_0px_0px_rgba(0,240,255,0.15)] relative select-none"
+          className="bg-[#070b19] border border-white/10 p-3 sm:p-6 md:p-8 shadow-[4px_4px_0px_0px_rgba(0,240,255,0.15)] relative select-none"
         >
           {/* Cyber Corners */}
-          <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-[#00f0ff]/70 pointer-events-none" />
-          <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-[#00f0ff]/70 pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-[#00f0ff]/70 pointer-events-none" />
-          <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-[#00f0ff]/70 pointer-events-none" />
+          <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-[#00f0ff]/70 pointer-events-none" />
+          <div className="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-[#00f0ff]/70 pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-[#00f0ff]/70 pointer-events-none" />
+          <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-[#00f0ff]/70 pointer-events-none" />
 
           {/* Question Text */}
-          <h2 className="text-base sm:text-lg md:text-xl font-mono font-bold leading-relaxed text-white mb-4 sm:mb-6 select-none flex items-start gap-2">
-            <span className="text-[#00f0ff] shrink-0 font-bold animate-pulse">&gt;</span>
-            <span>{question.text}</span>
+          <h2 className="text-sm sm:text-xl md:text-2xl font-mono font-bold leading-snug text-white mb-3 sm:mb-6 select-none flex items-start gap-1.5 sm:gap-2">
+            <span className="text-[#00f0ff] shrink-0 font-bold animate-pulse mt-0.5">&gt;</span>
+            <span>{question.prompt || question.text}</span>
           </h2>
 
-          {/* Likert Selection Nodes - Horizontal on desktop, Vertical/Adaptive on Mobile */}
-          <div className="mb-6 sm:mb-10">
-            {/* Desktop Horizontal Likert Layout */}
-            <div className="hidden sm:flex justify-between items-center relative py-6">
+          {/* ============================ Bipolar pole labels ============================ */}
+          {isBipolar ? (
+            /* ── Mobile: vertical stack ── */
+            <div className="sm:hidden mb-2 select-none">
+              <div className="mb-1.5">
+                <span className="text-[#0066ff] font-bold text-xs">← {question.leftText}</span>
+              </div>
+            </div>
+          ) : null}
+          {isBipolar ? (
+            /* ── Desktop: horizontal labels ── */
+            <div className="hidden sm:flex justify-between items-start gap-2 mb-4 sm:mb-5 select-none">
+              <span className="text-[#0066ff] font-bold text-sm sm:text-base leading-tight flex-1">
+                ← {question.leftText}
+              </span>
+              <span className="text-[#00f0ff] font-bold text-sm sm:text-base text-right leading-tight flex-1">
+                {question.rightText} →
+              </span>
+            </div>
+          ) : (
+            /* Non-bipolar: no pole labels */
+            <div className="mb-2" />
+          )}
+
+          {/* ============================ Scale ============================ */}
+          <div className={isBipolar ? 'mb-1.5 sm:mb-5' : 'mb-3 sm:mb-6'}>
+            {/* Dot track */}
+            <div className="flex items-center justify-center gap-0">
               {options.map((option, idx) => {
                 const isSelected = selectedAnswer === option.value;
-                const isNextActive = selectedAnswer !== undefined && selectedAnswer > option.value;
+                const isPast = selectedAnswer !== undefined && option.value < selectedAnswer;
+                const isLast = idx === options.length - 1;
+                const endpoint = isBipolar && isEndpoint(idx);
+                const dotSize = endpoint ? 'sm:w-7 sm:h-7 w-4 h-4' : 'sm:w-5 sm:h-5 w-3 h-3';
+
                 return (
                   <React.Fragment key={option.value}>
+                    {/* Dot button */}
                     <button
                       onClick={() => onSelectAnswer(option.value)}
-                      className="flex flex-col items-center relative z-10 group shrink-0"
-                      style={{ width: '80px' }}
+                      className="relative z-10 flex flex-col items-center group shrink-0 py-1.5 sm:py-3"
+                      style={{ width: isBipolar ? 'clamp(52px, 8vw, 80px)' : 'clamp(72px, 12vw, 100px)' }}
                     >
                       <div
-                        className={`w-10 h-10 rounded-none border flex items-center justify-center transition-all duration-150 -translate-y-4 font-mono text-[13px]
-                          ${isSelected
-                            ? 'bg-[#00f0ff]/20 border-[#00f0ff] text-[#00f0ff] scale-105 shadow-[0_0_10px_rgba(0,240,255,0.4)]'
-                            : `${option.color} scale-100 group-hover:scale-105`
-                          }`}
-                      >
-                        {option.value}
-                      </div>
-                      <span
-                        className={`text-[12px] font-mono transition-colors duration-150 absolute -bottom-1 whitespace-nowrap
-                          ${isSelected ? 'text-[#00f0ff] glow-cyan font-bold' : 'text-slate-500 group-hover:text-slate-300'}`}
-                      >
-                        {option.label}
-                      </span>
+                        className={`${dotSize} rounded-full transition-all duration-200`}
+                        style={{
+                          backgroundColor: isSelected ? option.color : isPast ? option.color + '88' : option.color + (endpoint ? '33' : '22'),
+                          boxShadow: isSelected
+                            ? `0 0 ${endpoint ? '14px' : '10px'} ${option.color}, 0 0 ${endpoint ? '24px' : '16px'} ${option.color}55`
+                            : 'none',
+                          transform: isSelected ? `scale(${endpoint ? 1.35 : 1.25})` : 'scale(1)',
+                          border: isSelected ? `2px solid ${option.color}` : isPast ? `1.5px solid ${option.color}55` : `1.5px solid ${option.color}${endpoint ? '66' : '44'}`,
+                        }}
+                      />
                     </button>
 
-                    {/* Connecting Line Segment (render after each option except the last one) */}
-                    {idx < options.length - 1 && (
-                      <div className="flex-1 h-0.5 -translate-y-4 relative flex items-center min-w-[20px] mx-1">
-                        {/* Background track */}
-                        <div className="w-full h-[1px] border-t border-dashed border-slate-700/40" />
-                        {/* Active glow track */}
+                    {/* Connecting line */}
+                    {!isLast && (
+                      <div className="flex-1 h-[4px] sm:h-[5px] relative" style={{ maxWidth: isBipolar ? 'clamp(48px, 8vw, 80px)' : 'clamp(88px, 12vw, 100px)' }}>
+                        <div className="absolute inset-0 rounded-full bg-slate-800" />
                         <motion.div
-                          className={`absolute left-0 right-0 h-[2px] origin-left ${getSegmentStyle(idx)}`}
-                          initial={{ scaleX: 0 }}
-                          animate={{ scaleX: isNextActive ? 1 : 0 }}
-                          transition={{ duration: 0.25, ease: 'easeInOut' }}
+                          className="absolute inset-y-0 left-0 rounded-full"
+                          style={{
+                            background: isBipolar
+                              ? `linear-gradient(to right, ${options[idx].color}, ${options[idx + 1].color})`
+                              : `linear-gradient(to right, ${options[idx].color}, ${options[idx + 1].color})`,
+                          }}
+                          initial={{ width: '0%' }}
+                          animate={{ width: isPast ? '100%' : '0%' }}
+                          transition={{ duration: 0.3, ease: 'easeOut' }}
                         />
                       </div>
                     )}
@@ -143,65 +167,41 @@ export default function QuestionCard({
               })}
             </div>
 
-            {/* Mobile Vertical List Layout */}
-            <div className="flex sm:hidden flex-col gap-2.5">
-              {options.map((option) => {
-                const isSelected = selectedAnswer === option.value;
-                return (
-                  <button
-                    key={option.value}
-                    onClick={() => onSelectAnswer(option.value)}
-                    className={`w-full p-3 rounded-none border flex items-center justify-between text-left transition-all duration-150 select-none min-h-[44px]
-                      ${isSelected
-                        ? 'bg-[#0c1229] border-[#00f0ff]/50 border-l-4 border-l-[#00f0ff] shadow-[inset_0_0_8px_rgba(0,240,255,0.15)]'
-                        : 'bg-transparent border-slate-800/50 hover:border-slate-600'
-                      }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className={`w-9 h-9 rounded-none border flex items-center justify-center font-mono text-[13px] shrink-0
-                        ${isSelected
-                          ? 'bg-[#00f0ff]/15 text-[#00f0ff] border-[#00f0ff]/50'
-                          : 'bg-transparent text-slate-500 border-slate-800/50'
-                        }`}
-                      >
-                        {option.value}
-                      </span>
-                      <span className={`text-[12px] font-mono ${isSelected ? 'text-[#00f0ff] glow-cyan font-bold' : 'text-slate-400'}`}>
-                        {option.label}
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
           </div>
 
-          {/* Navigation Lower Controls */}
-          <div className="flex justify-between items-center pt-3 sm:pt-4 border-t border-slate-800/50">
+          {/* ============================ Mobile right pole label ============================ */}
+          {isBipolar && (
+            <div className="sm:hidden mb-2 text-right select-none">
+              <span className="text-[#00f0ff] font-bold text-xs">{question.rightText} →</span>
+            </div>
+          )}
+
+          {/* Navigation */}
+          <div className="flex justify-between items-center pt-2 sm:pt-4 border-t border-slate-800/50">
             <button
               onClick={onPrev}
               disabled={currentIndex === 0}
-              className={`flex items-center gap-1.5 sm:gap-2 px-4 py-2.5 rounded-none text-xs font-mono uppercase transition-all duration-150 select-none border min-h-[44px] sm:min-h-0 group
+              className={`flex items-center gap-1 sm:gap-2 px-3 sm:px-5 py-2 sm:py-3 rounded-none text-[11px] sm:text-sm font-mono uppercase transition-all duration-150 select-none border min-h-[40px] sm:min-h-0
                  ${currentIndex === 0
                   ? 'border-slate-800 text-slate-600 bg-black/20 cursor-not-allowed'
-                  : 'border-slate-700 text-slate-300 hover:border-slate-400 hover:text-white hover:bg-slate-800/40 shadow-[0_0_4px_rgba(255,255,255,0.02)]'
+                  : 'border-slate-700 text-slate-300 hover:border-slate-400 hover:text-white hover:bg-slate-800/40'
                 }`}
             >
-              <ArrowLeft className="w-3.5 h-3.5 transition-transform duration-150 group-hover:-translate-x-0.5" />
-              PREV
+              <ArrowLeft className="w-3.5 h-3.5" />
+              上一题
             </button>
 
             <button
               onClick={onNext}
               disabled={selectedAnswer === undefined}
-              className={`flex items-center gap-1.5 sm:gap-2 px-4 sm:px-5 py-2.5 rounded-none text-xs font-mono uppercase transition-all duration-150 select-none border min-h-[44px] sm:min-h-0 group
+              className={`flex items-center gap-1 sm:gap-2 px-3 sm:px-5 py-2 sm:py-3 rounded-none text-[11px] sm:text-sm font-mono uppercase transition-all duration-150 select-none border min-h-[40px] sm:min-h-0
                 ${selectedAnswer === undefined
                   ? 'border-slate-800 text-slate-600 bg-black/20 cursor-not-allowed'
                   : 'border-[#00f0ff]/50 text-[#00f0ff] hover:bg-[#00f0ff] hover:text-black hover:border-[#00f0ff] hover:shadow-[0_0_15px_rgba(0,240,255,0.4)] shadow-[0_0_8px_rgba(0,240,255,0.1)]'
                 }`}
             >
-              NEXT
-              <ArrowRight className="w-3.5 h-3.5 transition-transform duration-150 group-hover:translate-x-0.5" />
+              下一题
+              <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
         </motion.div>

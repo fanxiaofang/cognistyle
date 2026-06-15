@@ -4,18 +4,19 @@
  */
 
 export function scoreTone(score: number): string {
-  if (score >= 75) return 'text-[#39ff14] border-[#39ff14]/40';
-  if (score >= 50) return 'text-[#00f0ff] border-[#00f0ff]/40';
-  if (score >= 35) return 'text-[#ffe600] border-[#ffe600]/40';
+  if (score >= 80) return 'text-[#39ff14] border-[#39ff14]/40';
+  if (score >= 65) return 'text-[#00f0ff] border-[#00f0ff]/40';
+  if (score >= 50) return 'text-[#ffe600] border-[#ffe600]/40';
+  if (score >= 35) return 'text-[#ffb800] border-[#ffb800]/40';
   return 'text-[#ff007f] border-[#ff007f]/40';
 }
 
 export function ratingLabel(score: number): string {
-  if (score >= 80) return '王牌';
-  if (score >= 65) return '合拍';
-  if (score >= 50) return '适配';
-  if (score >= 35) return '可期';
-  return '磨合';
+  if (score >= 80) return '默契';
+  if (score >= 65) return '共振';
+  if (score >= 50) return '互补';
+  if (score >= 35) return '探索';
+  return '挑战';
 }
 
 export function formatExpiry(expiresAt: number): string {

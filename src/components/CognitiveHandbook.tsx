@@ -56,15 +56,15 @@ const GUILDS: Guild[] = [
     borderColor: 'border-[#00f0ff]/70',
     shadowColor: 'shadow-[0_0_10px_rgba(0,240,255,0.25)]',
     glowClass: 'glow-cyan',
-    description: '第七区总控中心与应急局的脊梁。他们用经过验证的标准协议搭建城市骨架——无论是灾区的临时秩序，还是城市网络的长期稳定。他们相信：秩序不是束缚，而是让系统在崩坏边缘仍能运转的底线。',
+    description: '第七区中枢塔与应急局的脊梁。她们用经过验证的标准协议搭建城市骨架——无论是灾区的临时秩序，还是城市网络的长期稳定。她们相信：秩序不是束缚，而是让系统在崩坏边缘仍能运转的底线。',
     members: [
-      { profileId: 'I-C-W-S', callSign: '先遣机师', department: '应急局', role: '单兵特勤' },
-      { profileId: 'I-C-W-T', callSign: '应急指挥官', department: '应急局', role: '前线指挥' },
-      { profileId: 'R-C-W-S', callSign: '孤星观测员', department: '总控中心', role: '塔楼守望' },
-      { profileId: 'R-C-W-T', callSign: '监控指挥官', department: '总控中心', role: '系统调度' }
+      { profileId: 'FD-D-W-I', callSign: '战地联络官', department: '应急局', role: '单兵特勤' },
+      { profileId: 'FD-D-W-R', callSign: '应急指挥官', department: '应急局', role: '前线指挥' },
+      { profileId: 'FI-D-W-I', callSign: '孤星观测员', department: '中枢塔', role: '塔楼守望' },
+      { profileId: 'FI-D-W-R', callSign: '中枢架构师', department: '中枢塔', role: '系统调度' }
     ],
-    factionLore: '筑基者不追求惊艳，他们追求"明天醒来，城市还在"。当探路者在禁区点燃篝火时，是筑基者确保了电网没有过载；当炼金师推敲基因序列时，是筑基者守护着伦理协议的边界。他们是第七区最不被看见、却最不可缺的阶层。',
-    cognitiveEssence: '聚合 × 整体：用标准方案搭建宏观骨架'
+    factionLore: '筑基者不追求惊艳，她们追求"明天醒来，城市还在"。当探路者在禁区点燃篝火时，是筑基者确保了电网没有过载；当炼金师推敲基因序列时，是筑基者守护着伦理协议的边界。她们是第七区最不被看见、却最不可缺的阶层。',
+    cognitiveEssence: '定向 × 整体：用标准方案搭建宏观骨架'
   },
   {
     id: 'sentry',
@@ -75,15 +75,15 @@ const GUILDS: Guild[] = [
     borderColor: 'border-[#ffe600]/70',
     shadowColor: 'shadow-[0_0_10px_rgba(255,230,0,0.25)]',
     glowClass: 'glow-yellow',
-    description: '第七区医疗部与标准局的最后防线。他们深入微观细节，用严谨的规范确保每个单元无懈可击——从战地缝合的每一针，到城市底层协议的每一个参数。漏洞和瑕疵在他们眼中不是"可容忍的风险"，而是"必须消灭的敌人"。',
+    description: '第七区标准局与生命监察局的最后防线。她们深入微观细节，用严谨的规范确保每个单元无懈可击——从底层协议的每一个参数，到城市生命体征的每一次脉动。漏洞和瑕疵在她们眼中不是"可容忍的风险"，而是"必须消灭的敌人"。',
     members: [
-      { profileId: 'I-C-A-S', callSign: '战地孤医', department: '医疗部', role: '前线速修' },
-      { profileId: 'I-C-A-T', callSign: '战地医官长', department: '医疗部', role: '总线协调' },
-      { profileId: 'R-C-A-S', callSign: '孤夜守灯人', department: '标准局', role: '调校师' },
-      { profileId: 'R-C-A-T', callSign: '质检指挥官', department: '标准局', role: '质检总长' }
+      { profileId: 'FD-D-A-I', callSign: '巡夜守灯人', department: '标准局', role: '调校师' },
+      { profileId: 'FD-D-A-R', callSign: '质检指挥官', department: '标准局', role: '质检总长' },
+      { profileId: 'FD-E-A-I', callSign: '生命哨兵', department: '生命监察局', role: '前线监测' },
+      { profileId: 'FD-E-A-R', callSign: '监察医官', department: '生命监察局', role: '总线协调' }
     ],
-    factionLore: '守门人的存在让第七区得以"精确运转"。他们不是规则的制定者，而是规则的校准仪。当筑基者搭建骨架时，守门人检查每一颗螺丝的扭矩；当探路者带回新发现时，守门人评估它是否会破坏现有系统的稳定性。他们常被误解为"保守"，但城市知道：没有他们，任何创新都是定时炸弹。',
-    cognitiveEssence: '聚合 × 分析：用标准规范守护微观精度'
+    factionLore: '守门人的存在让第七区得以"精确运转"。她们不是规则的制定者，而是规则的校准仪。当筑基者搭建骨架时，守门人检查每一颗螺丝的扭矩；当探路者带回新发现时，守门人评估它是否会破坏现有系统的稳定性。她们常被误解为"保守"，但城市知道：没有她们，任何创新都是定时炸弹。',
+    cognitiveEssence: '定向 × 分析：用标准规范守护微观精度'
   },
   {
     id: 'explorers',
@@ -94,15 +94,15 @@ const GUILDS: Guild[] = [
     borderColor: 'border-[#39ff14]/70',
     shadowColor: 'shadow-[0_0_10px_rgba(57,255,20,0.25)]',
     glowClass: 'glow-green',
-    description: '第七区边界署与遗迹司的先驱。他们拒绝官方叙事的边界，在禁区与废墟中寻找被删除的真相。他们相信：最好的答案不在现有选项之中，而在"此处以下，尚未探索"的黑暗里。',
+    description: '第七区边界署与遗迹司的先驱。她们拒绝官方叙事的边界，在禁区与废墟中寻找被删除的真相。她们相信：最好的答案不在现有选项之中，而在"此处以下，尚未探索"的黑暗里。',
     members: [
-      { profileId: 'I-D-W-S', callSign: '禁区游侠', department: '边界署', role: '独行勘探' },
-      { profileId: 'I-D-W-T', callSign: '拓荒领队', department: '边界署', role: '开拓小队' },
-      { profileId: 'R-D-W-S', callSign: '独行勘探员', department: '遗迹司', role: '废墟猎人' },
-      { profileId: 'R-D-W-T', callSign: '考古领队', department: '遗迹司', role: '发掘主管' }
+      { profileId: 'FI-E-W-I', callSign: '禁区游侠', department: '边界署', role: '独行勘探' },
+      { profileId: 'FI-E-W-R', callSign: '拓荒领队', department: '边界署', role: '开拓小队' },
+      { profileId: 'FD-E-W-I', callSign: '废土寻踪客', department: '遗迹司', role: '废墟猎人' },
+      { profileId: 'FD-E-W-R', callSign: '首席解码师', department: '遗迹司', role: '发掘主管' }
     ],
-    factionLore: '探路者是第七区的"未来债务"与"未来资产"。他们消耗大量资源探索可能一无所获的禁区，但每一次成功发现都可能改变城市的命运。筑基者视他们为"不稳定因素"，守门人视他们为"规范破坏者"，但所有人都知道：当现有系统走到尽头时，只有探路者能找到下一条路。',
-    cognitiveEssence: '发散 × 整体：用创新探索突破宏观边界'
+    factionLore: '探路者是第七区的"未来债务"与"未来资产"。她们消耗大量资源探索可能一无所获的禁区，但每一次成功发现都可能改变城市的命运。筑基者视她们为"不稳定因素"，守门人视她们为"规范破坏者"，但所有人都知道：当现有系统走到尽头时，只有探路者能找到下一条路。',
+    cognitiveEssence: '探索 × 整体：用创新探索突破宏观边界'
   },
   {
     id: 'alchemists',
@@ -113,15 +113,15 @@ const GUILDS: Guild[] = [
     borderColor: 'border-[#ff007f]/70',
     shadowColor: 'shadow-[0_0_10px_rgba(255,0,127,0.25)]',
     glowClass: 'glow-magenta',
-    description: '第七区黑市工坊与生科所的微观魔术师。他们在无人关注的角落里，用精巧的创新突破性能与逻辑的极限——从定制义体的微米级关节，到基因序列的精确编辑。他们的作品是孤品，也是艺术品。',
+    description: '第七区黑市工坊与生科所的微观魔术师。她们在无人关注的角落里，用精巧的创新突破性能与逻辑的极限——从定制义体的微米级关节，到基因序列的精确编辑。她们的作品是孤品，也是艺术品。',
     members: [
-      { profileId: 'I-D-A-S', callSign: '地下改装师', department: '黑市工坊', role: '独行技师' },
-      { profileId: 'I-D-A-T', callSign: '创意工坊主', department: '黑市工坊', role: '定制专家' },
-      { profileId: 'R-D-A-S', callSign: '碱基女巫', department: '生科所', role: '微观炼金' },
-      { profileId: 'R-D-A-T', callSign: '基因织匠', department: '生科所', role: '序列统筹' }
+      { profileId: 'FI-D-A-I', callSign: '地下改装师', department: '黑市工坊', role: '独行技师' },
+      { profileId: 'FI-D-A-R', callSign: '改装工坊主', department: '黑市工坊', role: '定制专家' },
+      { profileId: 'FI-E-A-I', callSign: '碱基女巫', department: '生科所', role: '微观炼金' },
+      { profileId: 'FI-E-A-R', callSign: '基因织匠', department: '生科所', role: '项目牵头' }
     ],
-    factionLore: '炼金师是第七区最矛盾的阶层。他们既被需要（没有他们，义体无法升级、基因病无法治愈），又被恐惧（他们的创新随时可能突破伦理边界）。筑基者试图用协议约束他们，守门人试图用标准检测他们，但炼金师知道：真正的突破，永远发生在标准制定之前。',
-    cognitiveEssence: '发散 × 分析：用创新突破微观极限'
+    factionLore: '炼金师是第七区最矛盾的阶层。她们既被需要（没有她们，义体无法升级、基因病无法治愈），又被恐惧（她们的创新随时可能突破伦理边界）。筑基者试图用协议约束她们，守门人试图用标准检测她们，但炼金师知道：真正的突破，永远发生在标准制定之前。',
+    cognitiveEssence: '探索 × 分析：用创新突破微观极限'
   }
 ];
 

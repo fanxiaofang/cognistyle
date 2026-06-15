@@ -131,10 +131,14 @@ async function sendWebResponse(webRes, expressRes) {
 
 /* ------- 函数加载与挂载 ------- */
 async function mountFunctions(app) {
+  // 注意: 修改 functions/ 代码后需重启 dev-server（Ctrl+C 重新运行）
+  // import() 的 ?t 参数只能刷新顶层模块，传递导入（如 config.js）仍走缓存
+  function freshImport(p) { return import(`${p}?t=${Date.now()}`); }
+
   /* POST /api/results */
   app.post('/api/results', async (req, res) => {
     try {
-      const mod = await import('./functions/api/results.js');
+      const mod = await freshImport('./functions/api/results.js');
       const webReq = toWebRequest(req);
       const ctx = { request: webReq, env: { RESULT_SNAPSHOT_KV: kv, MY_KV: kv } };
       const webRes = await mod.onRequest(ctx);
@@ -148,7 +152,7 @@ async function mountFunctions(app) {
   /* GET | HEAD /api/results/:friendId — 验证 friendId 是否仍有效 */
   app.get('/api/results/:friendId', async (req, res) => {
     try {
-      const mod = await import('./functions/api/results/[friendId].js');
+      const mod = await freshImport('./functions/api/results/[friendId].js');
       const webReq = toWebRequest(req);
       const ctx = {
         request: webReq,
@@ -165,7 +169,7 @@ async function mountFunctions(app) {
 
   app.head('/api/results/:friendId', async (req, res) => {
     try {
-      const mod = await import('./functions/api/results/[friendId].js');
+      const mod = await freshImport('./functions/api/results/[friendId].js');
       const webReq = toWebRequest(req);
       const ctx = {
         request: webReq,
@@ -189,7 +193,7 @@ async function mountFunctions(app) {
   /* POST /api/compatibility-report */
   app.post('/api/compatibility-report', async (req, res) => {
     try {
-      const mod = await import('./functions/api/compatibility-report.js');
+      const mod = await freshImport('./functions/api/compatibility-report.js');
       const webReq = toWebRequest(req);
       const ctx = { request: webReq, env: { RESULT_SNAPSHOT_KV: kv, MY_KV: kv } };
       const webRes = await mod.onRequest(ctx);
@@ -203,7 +207,7 @@ async function mountFunctions(app) {
   /* POST /api/results/delete */
   app.post('/api/results/delete', async (req, res) => {
     try {
-      const mod = await import('./functions/api/results/delete.js');
+      const mod = await freshImport('./functions/api/results/delete.js');
       const webReq = toWebRequest(req);
       const ctx = { request: webReq, env: { RESULT_SNAPSHOT_KV: kv, MY_KV: kv } };
       const webRes = await mod.onRequest(ctx);
@@ -217,7 +221,7 @@ async function mountFunctions(app) {
   /* POST /api/dual-history */
   app.post('/api/dual-history', async (req, res) => {
     try {
-      const mod = await import('./functions/api/dual-history.js');
+      const mod = await freshImport('./functions/api/dual-history.js');
       const webReq = toWebRequest(req);
       const ctx = { request: webReq, env: { RESULT_SNAPSHOT_KV: kv, MY_KV: kv } };
       const webRes = await mod.onRequest(ctx);
@@ -231,7 +235,7 @@ async function mountFunctions(app) {
   /* DELETE /api/dual-history */
   app.delete('/api/dual-history', async (req, res) => {
     try {
-      const mod = await import('./functions/api/dual-history.js');
+      const mod = await freshImport('./functions/api/dual-history.js');
       const webReq = toWebRequest(req);
       const ctx = { request: webReq, env: { RESULT_SNAPSHOT_KV: kv, MY_KV: kv } };
       const webRes = await mod.onRequest(ctx);
@@ -245,7 +249,7 @@ async function mountFunctions(app) {
   /* HEAD /api/dual-history/health */
   app.head('/api/dual-history/health', async (req, res) => {
     try {
-      const mod = await import('./functions/api/dual-history/health.js');
+      const mod = await freshImport('./functions/api/dual-history/health.js');
       const webReq = toWebRequest(req);
       const ctx = { request: webReq, env: { RESULT_SNAPSHOT_KV: kv, MY_KV: kv } };
       const webRes = await mod.onRequest(ctx);
@@ -265,7 +269,7 @@ async function mountFunctions(app) {
   /* GET /api/dual-history/:friendId */
   app.get('/api/dual-history/:friendId', async (req, res) => {
     try {
-      const mod = await import('./functions/api/dual-history/[friendId].js');
+      const mod = await freshImport('./functions/api/dual-history/[friendId].js');
       const webReq = toWebRequest(req);
       const ctx = {
         request: webReq,
@@ -283,7 +287,7 @@ async function mountFunctions(app) {
   /* POST /api/dual-history/batch */
   app.post('/api/dual-history/batch', async (req, res) => {
     try {
-      const mod = await import('./functions/api/dual-history/batch.js');
+      const mod = await freshImport('./functions/api/dual-history/batch.js');
       const webReq = toWebRequest(req);
       const ctx = { request: webReq, env: { RESULT_SNAPSHOT_KV: kv, MY_KV: kv } };
       const webRes = await mod.onRequest(ctx);
@@ -297,7 +301,7 @@ async function mountFunctions(app) {
   /* POST /api/share-report */
   app.post('/api/share-report', async (req, res) => {
     try {
-      const mod = await import('./functions/api/share-report.js');
+      const mod = await freshImport('./functions/api/share-report.js');
       const webReq = toWebRequest(req);
       const ctx = { request: webReq, env: { RESULT_SNAPSHOT_KV: kv, MY_KV: kv } };
       const webRes = await mod.onRequest(ctx);
@@ -311,7 +315,7 @@ async function mountFunctions(app) {
   /* GET /api/share/:token */
   app.get('/api/share/:token', async (req, res) => {
     try {
-      const mod = await import('./functions/api/share/[token].js');
+      const mod = await freshImport('./functions/api/share/[token].js');
       const webReq = toWebRequest(req);
       const ctx = {
         request: webReq,

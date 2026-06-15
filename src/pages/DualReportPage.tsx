@@ -3,7 +3,6 @@ import { AlertCircle, Copy, LoaderCircle, Radar, RefreshCw, ShieldAlert, Share2,
 import PixelAvatar from '../components/PixelAvatar';
 import PatternBadgeIcon from '../components/PatternBadgeIcon';
 import type { CompatibilityReport } from '../contracts/dualReport';
-import { PATTERN_BADGE_MAP } from '../contracts/dualReport';
 import { getLocalResultIdentity, clearLocalResultIdentity } from '../services/resultSnapshotService';
 import { createCompatibilityReport, createPublicShare } from '../services/compatibilityService';
 import { addDualReportHistory } from '../services/dualHistoryService';
@@ -217,7 +216,7 @@ export default function DualReportPage({ targetFriendId, onBack }: DualReportPag
           {!loading && report && (
             <div className="flex flex-col gap-4 sm:gap-6">
               {(() => {
-                const badge = PATTERN_BADGE_MAP[report.overall.pattern];
+                const badge = report.overall.patternBadge;
                 return (
                   <div className="text-center py-6 sm:py-10 border-2 bg-[#070b19]" style={{ borderColor: badge.color }}>
                     <div className="mb-3 flex justify-center">
@@ -233,20 +232,40 @@ export default function DualReportPage({ targetFriendId, onBack }: DualReportPag
                       &ldquo;{badge.tagline}&rdquo;
                     </p>
 
-                    <div className="mt-4 flex items-center justify-center gap-3">
-                      <span className={`text-2xl sm:text-3xl font-black font-display ${scoreTone(report.overall.score).split(' ')[0]}`}>
-                        {report.overall.score}
+                    <div className="mt-4 flex flex-col items-center gap-3">
+                      <span className={`text-xs sm:text-sm font-black font-pixel ${scoreTone(report.overall.score).split(' ')[0]}`}>
+                        搭档指数：{report.overall.score}
                       </span>
-                      <span className="text-xs font-pixel text-slate-500">/ 100</span>
-                      <span className="text-slate-600 mx-1">·</span>
-                      <span className={`text-xs font-pixel uppercase tracking-widest ${scoreTone(report.overall.score)}`}>
-                        {report.overall.rating}
-                      </span>
+                      {(() => {
+                        const tiers = ['挑战', '探索', '互补', '共振', '默契'] as const;
+                        const current = report.overall.rating;
+                        const idx = tiers.indexOf(current as (typeof tiers)[number]);
+                        return (
+                          <div className="flex items-center gap-1 sm:gap-2">
+                            {tiers.map((tier, i) => {
+                              const active = i === idx;
+                              return (
+                                <React.Fragment key={tier}>
+                                  {i > 0 && (
+                                    <span className="text-slate-700 font-pixel text-[10px] sm:text-xs">|</span>
+                                  )}
+                                  <span
+                                    className={[
+                                      'font-pixel tracking-widest transition-all',
+                                      active
+                                        ? `${scoreTone(report.overall.score).split(' ')[0]} text-xs sm:text-sm font-black`
+                                        : 'text-[10px] sm:text-xs text-slate-600 font-normal',
+                                    ].join(' ')}
+                                  >
+                                    {active ? `⭐${tier}` : tier}
+                                  </span>
+                                </React.Fragment>
+                              );
+                            })}
+                          </div>
+                        );
+                      })()}
                     </div>
-
-                    <p className="mt-3 text-[11px] sm:text-xs text-slate-500 font-sans px-6 max-w-xl mx-auto">
-                      不是判断合不合，而是找到什么场景协作最省力
-                    </p>
 
                   </div>
                 );
@@ -283,27 +302,31 @@ export default function DualReportPage({ targetFriendId, onBack }: DualReportPag
                     ))}
                   </div>
                   <div className="mt-5 border-t border-dashed border-[#00f0ff]/30 pt-4">
-                    <div className="grid grid-cols-2 gap-3 text-xs sm:text-[13px]">
-                      <div>
-                        <p className="text-slate-500">认知互补</p>
-                        <p className="text-[#00f0ff] font-bold">{report.breakdown.cognitiveComplementarity}</p>
-                      </div>
-                      <div>
-                        <p className="text-slate-500">协作兼容</p>
-                        <p className="text-[#00f0ff] font-bold">{report.breakdown.collaborationCompatibility}</p>
-                      </div>
-                      <div>
-                        <p className="text-slate-500">盲区覆盖</p>
-                        <p className="text-[#39ff14] font-bold">{report.breakdown.blindSpotCoverage}</p>
-                      </div>
-                      <div>
-                        <p className="text-slate-500">摩擦风险</p>
-                        <p className="text-[#ff007f] font-bold">{report.breakdown.frictionRisk}</p>
-                      </div>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-xs sm:text-[13px]">
+                      {[
+                        { key: 'cognitiveComplementarity' as const, label: '认知互补', color: 'text-[#00f0ff]' },
+                        { key: 'rhythmSynergy' as const, label: '节奏协同', color: 'text-[#00f0ff]' },
+                        { key: 'blindSpotCoverage' as const, label: '盲区覆盖', color: 'text-[#39ff14]' },
+                        { key: 'frictionRisk' as const, label: '摩擦风险', color: 'text-[#ff007f]' },
+                      ].map(({ key, label, color }) => {
+                        return (
+                        <div key={key}>
+                          <span className={`${color} font-bold`}>
+                            {label}（{report.breakdown[key]}）
+                          </span>
+                          {report.breakdownTooltips?.[key] && (
+                            <p className="mt-0.5 font-pixel tracking-widest text-[10px] sm:text-xs text-slate-500">
+                              {report.breakdownTooltips[key]}
+                            </p>
+                          )}
+                        </div>
+                      );
+                      })}
                     </div>
+
                   </div>
-                  <div className="mt-4">
-                    <p className="text-xs sm:text-[13px] leading-relaxed text-slate-300 font-sans">
+                  <div className="mt-4 border-l-[3px] border-[#ff007f]/70 pl-3 py-1">
+                    <p className="text-xs sm:text-[13px] leading-relaxed text-slate-200 font-sans font-semibold">
                       {report.overall.summary}
                     </p>
                   </div>
@@ -316,30 +339,35 @@ export default function DualReportPage({ targetFriendId, onBack }: DualReportPag
                   <div className="flex items-center gap-2">
                     <Radar className="w-4 h-4 text-[#00f0ff]" />
                     <p className="text-[11px] sm:text-xs font-pixel tracking-widest text-[#00f0ff] uppercase">
-                      四维拆解
+                      维度互补解析
                     </p>
                   </div>
                   <div className="mt-4 space-y-4">
                     {(() => {
-                      const dimList = [
-                        { key: 'rhythm', label: '节奏适配', dim: report.dimensions.rhythm },
-                        { key: 'strategy', label: '策略互补', dim: report.dimensions.strategy },
-                        { key: 'vision', label: '视野互补', dim: report.dimensions.vision },
-                        { key: 'collaboration', label: '协作兼容', dim: report.dimensions.collaboration },
-                      ];
+                      const dimList = Object.entries(report.dimensions).map(([key, dim]) => ({
+                        key,
+                        label: dim.shortLabel,
+                        description: dim.description,
+                        dim,
+                      }));
                       const highlights = dimList.filter((d) => d.dim.highlight);
                        const rest = dimList.filter((d) => !d.dim.highlight);
 
                       return (
                         <>
-                          {highlights.map(({ label, dim }) => (
+                          {highlights.map(({ label, description, dim }) => (
                             <div key={label} className="border-2 bg-black/60 px-3 py-3" style={{ borderColor: '#39ff14' }}>
                               <div className="flex items-center gap-2 mb-2">
                                 <Sparkles className="w-3 h-3 text-[#39ff14]" />
                                 <span className="text-[10px] font-pixel text-[#39ff14] uppercase tracking-widest">亮点维度</span>
                               </div>
                               <div className="flex items-center justify-between gap-3">
-                                <span className="text-xs sm:text-[13px] font-bold text-white">{label}</span>
+                                <div>
+                                  <span className="text-xs sm:text-[13px] font-bold text-white">{label}</span>
+                                  {description && (
+                                    <span className="ml-1.5 text-[10px] sm:text-[11px] text-slate-500 font-sans">({description})</span>
+                                  )}
+                                </div>
                                 <span className={`text-xs font-pixel ${scoreTone(dim.score).split(' ')[0]}`}>
                                   {dim.score}
                                 </span>
@@ -355,10 +383,15 @@ export default function DualReportPage({ targetFriendId, onBack }: DualReportPag
                               </p>
                             </div>
                           ))}
-                          {showAllDimensions && rest.map(({ label, dim }) => (
+                          {showAllDimensions && rest.map(({ label, description, dim }) => (
                             <div key={label} className="border border-dashed border-[#00f0ff]/20 bg-black/40 px-3 py-3">
                               <div className="flex items-center justify-between gap-3">
-                                <span className="text-xs sm:text-[13px] font-bold text-white">{label}</span>
+                                <div>
+                                  <span className="text-xs sm:text-[13px] font-bold text-white">{label}</span>
+                                  {description && (
+                                    <span className="ml-1.5 text-[10px] sm:text-[11px] text-slate-500 font-sans">({description})</span>
+                                  )}
+                                </div>
                                 <span className={`text-xs font-pixel ${scoreTone(dim.score).split(' ')[0]}`}>
                                   {dim.score}
                                 </span>
@@ -380,7 +413,7 @@ export default function DualReportPage({ targetFriendId, onBack }: DualReportPag
                               className="w-full py-2 border border-dashed border-[#00f0ff]/30 text-[#00f0ff] font-pixel text-xs flex items-center justify-center gap-1.5 hover:bg-[#00f0ff]/5 transition-colors cursor-pointer"
                             >
                               {showAllDimensions ? (
-                                <><ChevronUp className="w-3.5 h-3.5" />收起剩余 2 个维度</>
+                                <><ChevronUp className="w-3.5 h-3.5" />收起</>
                               ) : (
                                 <><ChevronDown className="w-3.5 h-3.5" />展开全部维度分析</>
                               )}
@@ -400,12 +433,12 @@ export default function DualReportPage({ targetFriendId, onBack }: DualReportPag
                     </p>
                   </div>
 
-                  <div className="mt-4 space-y-4 text-xs sm:text-[13px] font-sans">
+                  <div className="mt-4 space-y-5 text-xs sm:text-[13px] font-sans">
                     <section>
                       <p className="text-[#39ff14] font-bold mb-2">适合一起做</p>
-                      <ul className="space-y-2 text-slate-300">
+                      <ul className="space-y-3 text-slate-300">
                         {report.recommendations.bestFor.map((item) => (
-                          <li key={item}>- {item}</li>
+                          <li key={item} className="leading-relaxed sm:leading-loose tracking-wide pl-3 border-l-2 border-[#39ff14]/25">{item}</li>
                         ))}
                       </ul>
                     </section>
@@ -413,19 +446,19 @@ export default function DualReportPage({ targetFriendId, onBack }: DualReportPag
                     {showAllAdvice && (
                       <>
                         <section>
-                          <p className="text-[#ffe600] font-bold mb-2">优先规避</p>
-                          <ul className="space-y-2 text-slate-300">
+                          <p className="text-[#ffe600] font-bold mb-2">容易卡住的场景</p>
+                          <ul className="space-y-3 text-slate-300">
                             {report.recommendations.shouldAvoid.map((item) => (
-                              <li key={item}>- {item}</li>
+                              <li key={item} className="leading-relaxed sm:leading-loose tracking-wide pl-3 border-l-2 border-[#ffe600]/25">{item}</li>
                             ))}
                           </ul>
                         </section>
 
                         <section>
-                          <p className="text-[#00f0ff] font-bold mb-2">沟通建议</p>
-                          <ul className="space-y-2 text-slate-300">
+                          <p className="text-[#00f0ff] font-bold mb-2">协作默契指南</p>
+                          <ul className="space-y-3 text-slate-300">
                             {report.recommendations.communicationTips.map((item) => (
-                              <li key={item}>- {item}</li>
+                              <li key={item} className="leading-relaxed sm:leading-loose tracking-wide pl-3 border-l-2 border-[#00f0ff]/25">{item}</li>
                             ))}
                           </ul>
                         </section>
@@ -437,7 +470,7 @@ export default function DualReportPage({ targetFriendId, onBack }: DualReportPag
                       className="w-full py-2 border border-dashed border-[#ff007f]/30 text-[#ff007f] font-pixel text-xs flex items-center justify-center gap-1.5 hover:bg-[#ff007f]/5 transition-colors cursor-pointer"
                     >
                       {showAllAdvice ? (
-                        <><ChevronUp className="w-3.5 h-3.5" />收起更多行动建议</>
+                        <><ChevronUp className="w-3.5 h-3.5" />收起</>
                       ) : (
                         <><ChevronDown className="w-3.5 h-3.5" />展开更多行动建议</>
                       )}
@@ -446,11 +479,11 @@ export default function DualReportPage({ targetFriendId, onBack }: DualReportPag
                 </div>
               </div>
 
-              <div className="border-2 border-[#39ff14]/60 bg-[#070b19] p-4 sm:p-5">
+              <div className="border-2 border-[#39ff14]/60 bg-[#070b19] p-4 sm:p-5 pt-6 sm:pt-7">
                 <p className="text-[11px] sm:text-xs font-pixel tracking-widest text-[#39ff14] uppercase">
-                  第七区任务推荐
+                  适合一起挑战的任务
                 </p>
-                <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
                   {report.recommendations.missionSuggestions.map((mission) => (
                     <div
                       key={mission.name}
@@ -458,11 +491,22 @@ export default function DualReportPage({ targetFriendId, onBack }: DualReportPag
                     >
                       <p className="text-sm sm:text-base text-white font-bold">{mission.name}</p>
                       <p className="mt-1 text-[11px] sm:text-xs text-[#39ff14] font-pixel">
-                        {mission.department} · 拟合度 {mission.fitScore}
+                        {mission.department} · 协同度 {mission.fitScore}
                       </p>
-                      {mission.roleSplit && (
-                        <p className="mt-2 text-[11px] sm:text-xs leading-relaxed text-[#ffe600] font-sans font-bold">
-                          {mission.roleSplit}
+                      {mission.reason && (
+                        <p className="mt-2 text-[11px] sm:text-xs leading-relaxed sm:leading-loose tracking-wide text-slate-300 font-sans">
+                          {mission.reason}
+                        </p>
+                      )}
+                      {mission.role && (
+                        <p className="mt-2 text-[11px] sm:text-xs leading-relaxed sm:leading-loose tracking-wide text-[#ffe600] font-sans font-bold bg-[#ffe600]/5 px-2 py-1.5 rounded">
+                          {mission.role}
+                        </p>
+                      )}
+                      {mission.warning && (
+                        <p className="mt-2 text-[11px] sm:text-xs leading-relaxed sm:leading-loose tracking-wide text-[#ffb800]/80 font-sans flex items-start gap-1">
+                          <span className="shrink-0 mt-[0.5px]">⚠</span>
+                          <span>{mission.warning}</span>
                         </p>
                       )}
                     </div>

@@ -19,28 +19,30 @@ export const DUAL_HISTORY_ENDPOINTS = {
 export const DUAL_REPORT_VERSIONS = {
   questionVersion: 'questions-general-2026-06',
   snapshotVersion: 'snapshot-v1',
-  compatibilityReportVersion: 'compatibility-v1',
+  compatibilityReportVersion: 'compatibility-v3',
   publicShareVersion: 'public-share-v1',
   dualHistoryVersion: 'history-v1',
 } as const;
 
+// v5.6: 4 维 = 3 核心(F/V/D) + 1 风格(R)
 export type NormalizedScoreKey =
-  | 'impulsiveReflective'
-  | 'convergentDivergent'
-  | 'wholisticAnalytic'
-  | 'soloTeam';
+  | 'fieldIndependFieldDepend'   // F: 信息参照（场独立↔场依赖）
+  | 'wholisticAnalytic'          // V: 认知视角（整体↔分析）
+  | 'exploratoryDirected'        // D: 问题路径（探索↔定向）
+  | 'impulsiveReflective';       // R: 决策风格（冲动↔反思）
 
 export type CompatibilityDimensionKey =
-  | 'rhythm'
-  | 'strategy'
-  | 'vision'
-  | 'collaboration';
+  | 'field'      // F: 信息参照
+  | 'vision'     // V: 认知视角
+  | 'direction'  // D: 问题路径
+  | 'rhythm';    // R: 决策风格
 
 export type CompatibilityDimensionPattern =
   | 'similar'
   | 'opposite'
   | 'complementary'
   | 'moderate'
+  | 'polarized'
   | 'friction';
 
 export type CompatibilityPairPattern =
@@ -50,33 +52,33 @@ export type CompatibilityPairPattern =
   | 'conflicting';
 
 export const NORMALIZED_SCORE_SEMANTICS = {
-  impulsiveReflective: {
-    zero: 'impulsive',
-    one: 'reflective',
-    sourceDimensionId: 'impulsive_reflective',
-  },
-  convergentDivergent: {
-    zero: 'convergent',
-    one: 'divergent',
-    sourceDimensionId: 'convergent_divergent',
+  fieldIndependFieldDepend: {
+    zero: 'fieldIndepend',
+    one: 'fieldDepend',
+    sourceDimensionId: 'fieldIndepend_fieldDepend',
   },
   wholisticAnalytic: {
     zero: 'wholistic',
     one: 'analytic',
     sourceDimensionId: 'wholistic_analytic',
   },
-  soloTeam: {
-    zero: 'solo',
-    one: 'team',
-    sourceDimensionId: 'solo_team',
+  exploratoryDirected: {
+    zero: 'exploratory',
+    one: 'directed',
+    sourceDimensionId: 'exploratory_directed',
+  },
+  impulsiveReflective: {
+    zero: 'impulsive',
+    one: 'reflective',
+    sourceDimensionId: 'impulsive_reflective',
   },
 } as const;
 
 export interface ResultSnapshotNormalizedScores {
-  impulsiveReflective: number;
-  convergentDivergent: number;
+  fieldIndependFieldDepend: number;
   wholisticAnalytic: number;
-  soloTeam: number;
+  exploratoryDirected: number;
+  impulsiveReflective: number;
 }
 
 export interface SnapshotArchetypeMatch {
@@ -150,6 +152,8 @@ export interface CompatibilityDimensionResult {
   pattern: CompatibilityDimensionPattern;
   highlight: boolean;
   oneLiner: string;
+  shortLabel: string;
+  description: string;
 }
 
 export interface MissionSuggestion {
@@ -157,14 +161,15 @@ export interface MissionSuggestion {
   department: string;
   fitScore: number;
   reason: string;
-  roleSplit: string;
+  role: string;
+  warning: string;
 }
 
 export interface CompatibilityBreakdown {
   cognitiveComplementarity: number;
-  collaborationCompatibility: number;
   blindSpotCoverage: number;
   frictionRisk: number;
+  rhythmSynergy: number;
 }
 
 export interface CompatibilityReport {
@@ -179,10 +184,12 @@ export interface CompatibilityReport {
     score: number;
     rating: string;
     pattern: CompatibilityPairPattern;
+    patternBadge: PatternBadgeInfo;
     summary: string;
     shareCaption: string;
   };
   breakdown: CompatibilityBreakdown;
+  breakdownTooltips: Record<string, string>;
   dimensions: Record<CompatibilityDimensionKey, CompatibilityDimensionResult>;
   recommendations: {
     bestFor: string[];
@@ -220,6 +227,7 @@ export interface PublicCompatibilityReport {
   };
   overall: CompatibilityReport['overall'];
   breakdown: CompatibilityBreakdown;
+  breakdownTooltips: Record<string, string>;
   dimensions: CompatibilityReport['dimensions'];
   recommendations: CompatibilityReport['recommendations'];
 }
@@ -258,28 +266,33 @@ export const DUAL_REPORT_MODULE_BOUNDARIES = {
 export interface PatternBadgeInfo {
   label: string;
   tagline: string;
+  emoji: string;
   color: string;
 }
 
 export const PATTERN_BADGE_MAP: Record<CompatibilityPairPattern, PatternBadgeInfo> = {
   homogeneous: {
-    label: '镜像搭档',
-    tagline: '同款脑回路，同款盲区',
+    label: '回声组',
+    tagline: '默契天成，看世界的方式几乎一样',
+    emoji: '🪞',
     color: '#00f0ff',
   },
   complementary: {
-    label: '拼图搭档',
-    tagline: '各司所长，刚好补齐彼此缺口',
+    label: '经纬组',
+    tagline: '地图不会告诉你意义，但经纬一起，世界才可被定位',
+    emoji: '🧩',
     color: '#00e676',
   },
   asymmetric: {
-    label: '齿轮搭档',
-    tagline: '精准咬合，互相带动才能全速推进',
+    label: '双星共轨组',
+    tagline: '节奏不同，但能带着彼此往前转',
+    emoji: '⚙️',
     color: '#ffb800',
   },
   conflicting: {
-    label: '火花搭档',
-    tagline: '见面就吵，吵完就赢',
+    label: '化学反应组',
+    tagline: '碰撞不是结束，是反应开始。',
+    emoji: '⚡',
     color: '#ff007f',
   },
 };
