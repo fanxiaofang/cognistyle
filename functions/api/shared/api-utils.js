@@ -1,44 +1,45 @@
 import { DEFAULT_RATE_LIMIT } from './api-constants.js';
 
-const KNOWN_KV_BINDINGS = ['RESULT_SNAPSHOT_KV', 'MY_KV', 'KV', 'kv', 'KV_STORE', 'kv_store'];
+// EdgeOne Pages / Cloudflare Workers KV 绑定名称候选列表
+// 注意：此处只匹配已知命名，不做全局 fallback 扫描
+// 全局扫描可能误匹配非持久化的内存对象（如 polyfill、runtime 内部缓存），
+// 导致数据在函数实例回收后丢失
+const KNOWN_KV_BINDINGS = [
+  'RESULT_SNAPSHOT_KV',
+  'MY_KV',
+  'KV',           // EdgeOne Pages 默认绑定名
+  'kv',
+  'KV_STORE',
+  'kv_store',
+  'my_kv',        // EdgeOne Pages 文档示例变量名
+];
 
+/**
+ * 获取 KV 存储实例
+ *
+ * 查找顺序：
+ * 1. 先查 globalThis（某些平台将 KV 注入全局作用域）
+ * 2. 再查 env（Cloudflare Workers / EdgeOne Pages 标准方式）
+ *
+ * 返回值增加 .__source 标记，便于诊断线上实际使用的绑定名。
+ */
 export function getSnapshotKv(env) {
   for (const name of KNOWN_KV_BINDINGS) {
     const global = globalThis[name];
     if (global && typeof global.get === 'function' && typeof global.put === 'function') {
+      global.__source = `globalThis.${name}`;
       return global;
     }
     const candidate = env[name];
     if (candidate && typeof candidate.get === 'function' && typeof candidate.put === 'function') {
+      candidate.__source = `env.${name}`;
       return candidate;
     }
   }
 
-  const envKeys = Object.keys(env);
-  for (const key of envKeys) {
-    const candidate = env[key];
-    if (
-      candidate &&
-      typeof candidate === 'object' &&
-      typeof candidate.get === 'function' &&
-      typeof candidate.put === 'function'
-    ) {
-      return candidate;
-    }
-  }
-
-  for (const key of Object.keys(globalThis)) {
-    const candidate = globalThis[key];
-    if (
-      candidate &&
-      typeof candidate === 'object' &&
-      typeof candidate.get === 'function' &&
-      typeof candidate.put === 'function'
-    ) {
-      return candidate;
-    }
-  }
-
+  // 不再遍历 env / globalThis 的所有 key 做模糊匹配
+  // 此举在部分平台会误匹配到非持久化的内存对象（如 dev-server 的 MemoryKV），
+  // 导致线上数据"几小时后失效"
   return null;
 }
 

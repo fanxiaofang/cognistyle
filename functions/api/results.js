@@ -22,22 +22,21 @@ export async function onRequest(context) {
   const kv = getSnapshotKv(env);
 
   if (!kv) {
+    console.warn('[results] KV 存储未绑定，env keys:', envKeys.join(', '));
     return json(
       {
-        error: '结果存储未配置，请先绑定 KV。',
+        error: '结果存储未配置，请先在 EdgeOne Pages 控制台创建 KV 命名空间并绑定（变量名建议: KV）。',
         code: 'INTERNAL_ERROR',
         debug: {
           envKeys,
-          hasResultSnapshotKvOnEnv: !!env.RESULT_SNAPSHOT_KV,
-          hasMyKvOnEnv: !!env.MY_KV,
-          hasResultSnapshotKvOnGlobal: typeof globalThis.RESULT_SNAPSHOT_KV !== 'undefined',
-          hasMyKvOnGlobal: typeof globalThis.MY_KV !== 'undefined',
         },
       },
       COMMON_HEADERS,
       { status: 500 }
     );
   }
+
+  console.log('[results] KV 来源:', kv.__source || 'unknown');
 
   if (request.method === 'OPTIONS') {
     return new Response(null, { status: 204, headers: COMMON_HEADERS });

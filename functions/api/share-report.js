@@ -39,12 +39,15 @@ export async function onRequest(context) {
 
   const kv = getSnapshotKv(env);
   if (!kv) {
+    console.warn('[share-report] KV 存储未绑定');
     return json(
       { error: sharedCopy.errors.storageMissing, code: 'INTERNAL_ERROR' },
       COMMON_HEADERS,
       { status: 500 }
     );
   }
+
+  console.log('[share-report] KV 来源:', kv.__source || 'unknown');
 
   try {
     const clientIp = extractClientIp(request);

@@ -38,12 +38,15 @@ export async function onRequest(context) {
 
   const kv = getSnapshotKv(env);
   if (!kv) {
+    console.warn('[compatibility] KV 存储未绑定');
     return json(
       { error: copy.errors.storageMissing, code: 'INTERNAL_ERROR' },
       COMMON_HEADERS,
       { status: 500 }
     );
   }
+
+  console.log('[compatibility] KV 来源:', kv.__source || 'unknown');
 
   try {
     const clientIp = extractClientIp(request);
