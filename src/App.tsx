@@ -494,7 +494,7 @@ export default function App() {
               <h1 className="text-xl sm:text-3xl font-black tracking-widest text-white mb-2 sm:mb-3 font-display uppercase leading-none">
                 接入{' '}
                 <span className="text-[#00f0ff]">
-                  认知适配协议
+                  认知风格适配协议
                 </span>
               </h1>
               
@@ -572,6 +572,7 @@ export default function App() {
                 category="general"
                 primaryArchetype={primaryArchetype}
                 secondaryArchetype={secondaryArchetype}
+                answers={answers}
                 onReset={handleReset}
                 onOpenDualReport={handleOpenDualReport}
               />

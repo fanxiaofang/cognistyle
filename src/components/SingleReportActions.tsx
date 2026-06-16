@@ -167,7 +167,7 @@ export default function SingleReportActions({
         <div className="flex items-center gap-2 mb-6 border-b border-[#00f0ff]/20 pb-3">
           <span className="w-2 h-2 bg-[#00f0ff] animate-pulse" />
           <h3 className="text-xs sm:text-sm font-black text-[#00f0ff] uppercase tracking-widest font-display">
-            认知适配协作终端
+            认知风格适配协作终端
           </h3>
         </div>
 

@@ -5,7 +5,10 @@ import {
   type CreateCompatibilityReportRequest,
   type CreatePublicShareRequest,
   type CreatePublicShareResponse,
+  type FeedbackRating,
   type PublicCompatibilityReport,
+  type SubmitFeedbackRequest,
+  type SubmitFeedbackResponse,
 } from '../contracts/dualReport';
 
 const RETRY_DELAYS_MS = [1000, 2000, 4000];
@@ -69,6 +72,28 @@ export async function createCompatibilityReport(
   }
 
   throw lastError || new Error('互补报告生成失败，请稍后重试。');
+}
+
+export async function submitFeedback(
+  request: SubmitFeedbackRequest
+): Promise<SubmitFeedbackResponse> {
+  const response = await fetch(DUAL_REPORT_ENDPOINTS.submitFeedback, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => null);
+    if (isApiErrorResponse(data)) {
+      throw new Error(data.error);
+    }
+    throw new Error('反馈提交失败');
+  }
+
+  return response.json();
 }
 
 export async function createPublicShare(

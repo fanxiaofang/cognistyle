@@ -126,10 +126,25 @@ export async function onRequest(context) {
       profileId: record.profileId,
       displayName: record.display?.displayName,
       normalizedScores: record.normalizedScores,
+      hasRawAnswers: !!payload.rawAnswers,
     });
     await kv.put(`${KV_KEY_PREFIXES.RESULT}${friendId}`, JSON.stringify(record), {
       expirationTtl: TTL.SNAPSHOT_SECONDS,
     });
+
+    const analyticsRecord = {
+      friendId,
+      createdAt: now,
+      profileId: payload.profileId,
+      scores: payload.normalizedScores,
+      reportVersion: payload.snapshotVersion,
+      rawAnswers: payload.rawAnswers,
+    };
+    await kv.put(
+      `${KV_KEY_PREFIXES.ANALYTICS.SINGLE}${friendId}`,
+      JSON.stringify(analyticsRecord),
+      { expirationTtl: TTL.SNAPSHOT_SECONDS }
+    );
 
     return json(
       {

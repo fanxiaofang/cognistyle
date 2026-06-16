@@ -7,6 +7,7 @@ import {
   API_VERSIONS,
   KV_KEY_PREFIXES,
   DEFAULT_RATE_LIMIT,
+  TTL,
   VALIDATION_RULES,
   COMMON_HEADERS,
 } from './shared/api-constants.js';
@@ -14,6 +15,7 @@ import {
   getSnapshotKv,
   hitRateLimit,
   extractClientIp,
+  generateUrlSafeToken,
   json,
   safeParseJson,
   validateFriendIdFormat,
@@ -158,7 +160,29 @@ export async function onRequest(context) {
     }
 
     const report = buildCompatibilityReport(userA, userB);
-    return json(report, COMMON_HEADERS);
+    const reportId = generateUrlSafeToken(16);
+
+    kv.put(
+      `${KV_KEY_PREFIXES.ANALYTICS.DUAL}${reportId}`,
+      JSON.stringify({
+        reportId,
+        createdAt: Date.now(),
+        myFriendId: payload.myFriendId,
+        targetFriendId: payload.targetFriendId,
+        overall: report.overall.score,
+        pattern: report.overall.pattern,
+        breakdown: report.breakdown,
+        dimensionPatterns: Object.fromEntries(
+          Object.entries(report.dimensions).map(([key, dim]) => [key, dim.pattern])
+        ),
+        reportVersion: report.reportVersion,
+      }),
+      { expirationTtl: TTL.SNAPSHOT_SECONDS }
+    ).catch((err) => {
+      console.warn('[compatibility] analytics write failed:', err.message);
+    });
+
+    return json({ ...report, reportId }, COMMON_HEADERS);
   } catch (error) {
     return json(
       {

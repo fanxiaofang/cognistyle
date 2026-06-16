@@ -10,6 +10,11 @@ export const KV_KEY_PREFIXES = {
   RESULT: 'result:',
   SHARE: 'share:',
   HISTORY: 'history:',
+  ANALYTICS: {
+    SINGLE: 'analytics:single:',
+    DUAL: 'analytics:dual:',
+    FEEDBACK: 'analytics:feedback:',
+  },
   RATE_LIMIT: {
     COMPATIBILITY: 'rate-limit:compatibility:',
     SHARE_REPORT: 'rate-limit:share-report:',

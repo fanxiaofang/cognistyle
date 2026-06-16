@@ -6,6 +6,7 @@ export const DUAL_REPORT_ENDPOINTS = {
   deleteSnapshot: '/api/results/delete',
   createPublicShare: '/api/share-report',
   readPublicShare: '/api/share/:token',
+  submitFeedback: '/api/analytics/feedback',
 } as const;
 
 export const DUAL_HISTORY_ENDPOINTS = {
@@ -103,6 +104,7 @@ export interface CreateResultSnapshotRequest {
   secondaryArchetype: SnapshotArchetypeMatch;
   normalizedScores: ResultSnapshotNormalizedScores;
   display: ResultSnapshotDisplay;
+  rawAnswers?: Record<number, number>;
 }
 
 export interface CreateResultSnapshotResponse {
@@ -174,6 +176,7 @@ export interface CompatibilityBreakdown {
 
 export interface CompatibilityReport {
   reportVersion: typeof DUAL_REPORT_VERSIONS.compatibilityReportVersion;
+  reportId?: string;
   generatedAt: number;
   readingGuide: string;
   pair: {
@@ -268,6 +271,38 @@ export interface PatternBadgeInfo {
   tagline: string;
   emoji: string;
   color: string;
+}
+
+export type FeedbackRating = 'accurate' | 'neutral' | 'inaccurate';
+
+export interface SubmitFeedbackRequest {
+  reportId: string;
+  rating: FeedbackRating;
+}
+
+export interface SubmitFeedbackResponse {
+  success: true;
+}
+
+export interface AnalyticsTelemetry {
+  friendId: string;
+  createdAt: number;
+  profileId: ProfileId;
+  scores: ResultSnapshotNormalizedScores;
+  reportVersion: string;
+  rawAnswers?: Record<number, number>;
+}
+
+export interface DualAnalyticsTelemetry {
+  reportId: string;
+  createdAt: number;
+  myFriendId: string;
+  targetFriendId: string;
+  overall: number;
+  pattern: CompatibilityPairPattern;
+  breakdown: CompatibilityBreakdown;
+  dimensionPatterns: Partial<Record<CompatibilityDimensionKey, CompatibilityDimensionPattern>>;
+  reportVersion: string;
 }
 
 export const PATTERN_BADGE_MAP: Record<CompatibilityPairPattern, PatternBadgeInfo> = {

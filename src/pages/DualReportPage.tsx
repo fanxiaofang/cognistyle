@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { AlertCircle, Copy, LoaderCircle, Radar, RefreshCw, ShieldAlert, Share2, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
+import { AlertCircle, Copy, LoaderCircle, Radar, RefreshCw, ShieldAlert, Share2, ThumbsUp, Meh, ThumbsDown, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
 import PixelAvatar from '../components/PixelAvatar';
 import PatternBadgeIcon from '../components/PatternBadgeIcon';
 import type { CompatibilityReport } from '../contracts/dualReport';
 import { getLocalResultIdentity, clearLocalResultIdentity } from '../services/resultSnapshotService';
-import { createCompatibilityReport, createPublicShare } from '../services/compatibilityService';
+import { createCompatibilityReport, createPublicShare, submitFeedback } from '../services/compatibilityService';
 import { addDualReportHistory } from '../services/dualHistoryService';
 import { scoreTone } from '../utils/format';
 
@@ -24,6 +24,8 @@ export default function DualReportPage({ targetFriendId, onBack }: DualReportPag
   const [shareCopied, setShareCopied] = useState(false);
   const [showAllDimensions, setShowAllDimensions] = useState(false);
   const [showAllAdvice, setShowAllAdvice] = useState(false);
+  const [feedbackRating, setFeedbackRating] = useState<string | null>(null);
+  const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
 
   const fullShareUrl = shareUrl
     ? shareUrl.startsWith('/')
@@ -137,6 +139,25 @@ export default function DualReportPage({ targetFriendId, onBack }: DualReportPag
       setShareCopied(true);
     } catch {
       setShareError('复制分享链接失败，请手动复制。');
+    }
+  };
+
+  const handleFeedbackSubmit = async (rating: string) => {
+    if (!report?.reportId || feedbackRating) return;
+
+    setFeedbackRating(rating);
+    setFeedbackSubmitting(true);
+
+    const FEEDBACK_STORAGE_KEY = `cognistyle_feedback_${report.reportId}`;
+    localStorage.setItem(FEEDBACK_STORAGE_KEY, rating);
+
+    try {
+      await submitFeedback({ reportId: report.reportId, rating: rating as 'accurate' | 'neutral' | 'inaccurate' });
+    } catch {
+      localStorage.removeItem(FEEDBACK_STORAGE_KEY);
+      setFeedbackRating(null);
+    } finally {
+      setFeedbackSubmitting(false);
     }
   };
 
@@ -562,6 +583,49 @@ export default function DualReportPage({ targetFriendId, onBack }: DualReportPag
                   </p>
                 )}
               </div>
+
+              {report.reportId && (
+                <div className="border-2 border-[#39ff14]/40 bg-[#070b19] p-4 sm:p-5">
+                  <p className="text-[11px] sm:text-xs font-pixel tracking-widest text-[#39ff14] uppercase mb-3">
+                    这个结果像你们吗？
+                  </p>
+                  {feedbackRating ? (
+                    <p className="text-xs sm:text-sm text-[#39ff14] font-sans text-center py-2">
+                      ✓ 感谢反馈！{feedbackRating === 'accurate' ? '🎯' : feedbackRating === 'neutral' ? '🤔' : '💡'}
+                    </p>
+                  ) : (
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                      <button
+                        onClick={() => handleFeedbackSubmit('accurate')}
+                        disabled={feedbackSubmitting}
+                        className="flex-1 px-4 py-4 rounded-none border border-[#39ff14]/60 bg-black text-[#39ff14] font-pixel text-xs flex items-center justify-center gap-2 hover:bg-[#39ff14]/10 transition-colors cursor-pointer disabled:opacity-50 min-h-[48px]"
+                      >
+                        <ThumbsUp className="w-4 h-4" />
+                        <span>很准</span>
+                      </button>
+                      <button
+                        onClick={() => handleFeedbackSubmit('neutral')}
+                        disabled={feedbackSubmitting}
+                        className="flex-1 px-4 py-4 rounded-none border border-[#ffe600]/60 bg-black text-[#ffe600] font-pixel text-xs flex items-center justify-center gap-2 hover:bg-[#ffe600]/10 transition-colors cursor-pointer disabled:opacity-50 min-h-[48px]"
+                      >
+                        <Meh className="w-4 h-4" />
+                        <span>一般</span>
+                      </button>
+                      <button
+                        onClick={() => handleFeedbackSubmit('inaccurate')}
+                        disabled={feedbackSubmitting}
+                        className="flex-1 px-4 py-4 rounded-none border border-[#ff007f]/60 bg-black text-[#ff007f] font-pixel text-xs flex items-center justify-center gap-2 hover:bg-[#ff007f]/10 transition-colors cursor-pointer disabled:opacity-50 min-h-[48px]"
+                      >
+                        <ThumbsDown className="w-4 h-4" />
+                        <span>不像</span>
+                      </button>
+                    </div>
+                  )}
+                  <p className="mt-2 text-[10px] text-slate-500 text-center font-sans">
+                    匿名反馈，用于改进模型准确度
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </div>
