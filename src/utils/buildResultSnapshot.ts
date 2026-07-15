@@ -17,6 +17,7 @@ interface BuildResultSnapshotInput {
   primaryArchetype: SnapshotArchetypeMatch;
   secondaryArchetype: SnapshotArchetypeMatch;
   rawAnswers?: Record<number, number>;
+  analyticsConsent: boolean;
 }
 
 interface ResolvedPrimaryProfile {
@@ -96,6 +97,7 @@ export function buildResultSnapshot({
   primaryArchetype,
   secondaryArchetype,
   rawAnswers,
+  analyticsConsent,
 }: BuildResultSnapshotInput): CreateResultSnapshotRequest {
   const { profileId, profile } = resolvePrimaryProfile({ scoreMap, primaryArchetype });
 
@@ -115,5 +117,6 @@ export function buildResultSnapshot({
       avatar: profile.avatar,
     },
     rawAnswers,
+    analyticsConsent,
   };
 }

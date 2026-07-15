@@ -127,24 +127,32 @@ export async function onRequest(context) {
       displayName: record.display?.displayName,
       normalizedScores: record.normalizedScores,
       hasRawAnswers: !!payload.rawAnswers,
+      analyticsConsent: payload.analyticsConsent === true,
     });
     await kv.put(`${KV_KEY_PREFIXES.RESULT}${friendId}`, JSON.stringify(record), {
       expirationTtl: TTL.SNAPSHOT_SECONDS,
     });
 
-    const analyticsRecord = {
-      friendId,
-      createdAt: now,
-      profileId: payload.profileId,
-      scores: payload.normalizedScores,
-      reportVersion: payload.snapshotVersion,
-      rawAnswers: payload.rawAnswers,
-    };
-    await kv.put(
-      `${KV_KEY_PREFIXES.ANALYTICS.SINGLE}${friendId}`,
-      JSON.stringify(analyticsRecord),
-      { expirationTtl: TTL.SNAPSHOT_SECONDS }
-    );
+    // 仅在用户明确同意时写入 analytics 埋点（用于题目/评分分析优化）
+    // 不同意时仍保留 result:<friendId> 功能快照（用户凭 deleteToken 可自行删除）
+    if (payload.analyticsConsent === true) {
+      const analyticsRecord = {
+        friendId,
+        createdAt: now,
+        profileId: payload.profileId,
+        scores: payload.normalizedScores,
+        reportVersion: payload.snapshotVersion,
+        rawAnswers: payload.rawAnswers,
+        analyticsConsent: true,
+      };
+      await kv.put(
+        `${KV_KEY_PREFIXES.ANALYTICS.SINGLE}${friendId}`,
+        JSON.stringify(analyticsRecord),
+        { expirationTtl: TTL.SNAPSHOT_SECONDS }
+      );
+    } else {
+      console.log('[results:save] analytics skipped: consent=false', { friendId });
+    }
 
     return json(
       {

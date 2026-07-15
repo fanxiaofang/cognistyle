@@ -17,21 +17,6 @@ export type CorePolarityKey =
   | 'wholistic' | 'analytic' 
   | 'exploratory' | 'directed';
 
-export interface CoreDimensionMetadata {
-  id: CoreDimensionId;
-  label: string;
-  leftPolarity: { 
-    key: CorePolarityKey; 
-    label: string; 
-    description: string;
-  };
-  rightPolarity: { 
-    key: CorePolarityKey; 
-    label: string; 
-    description: string;
-  };
-}
-
 // ============================================
 // 风格标签维度（1维，2极）—— 不参与原型判定
 // ============================================
@@ -60,14 +45,7 @@ export interface Question {
   text?: string;
 }
 
-export type QuestionCategory = 'programmer' | 'general';
-
-export type Category = QuestionCategory;
-
-export interface QuestionBank {
-  category: QuestionCategory;
-  questions: Question[];
-}
+export type Category = 'programmer' | 'general';
 
 // ============================================
 // 用户作答与得分
@@ -102,18 +80,6 @@ export type ModeKey = 'I' | 'R';
 export type ProfileId = `${ArchetypeKey}-${ModeKey}`;
 
 // 世界观部门（赛博朋克城市）
-export type DepartmentId = 
-  | 'emergency'    // 应急局
-  | 'control'      // 中枢塔
-  | 'frontier'     // 边界署
-  | 'relic'        // 遗迹司
-  | 'standard'     // 标准局
-  | 'lifeguard'    // 生命监察局
-  | 'workshop'     // 黑市工坊
-  | 'biotech';     // 生科所
-
-// 行会
-export type GuildId = 'foundation' | 'sentry' | 'explorers' | 'alchemists';
 
 // 视觉主题
 export interface VisualTheme {
@@ -149,53 +115,6 @@ export interface CognitiveProfile {
 }
 
 // ============================================
-// 辅助类型：测验结果与报告
-// ============================================
-
-export interface TestResult {
-  // 维度得分
-  coreDimensions: DimensionScore[];       // 3 核心维
-  styleLabel: DimensionScore;             // 风格标签（冲动/反思）
-  
-  // 匹配结果
-  matchedArchetype: ArchetypeKey;
-  matchedMode: ModeKey;
-  profileId: ProfileId;
-  
-  // 连续谱信息（避免类型固化）
-  archetypeSpectrum: {
-    archetype: ArchetypeKey;
-    matchScore: number;  // 0-100，该原型匹配度
-  }[];
-  
-  // 推荐最合适的搭档
-  complementaryProfiles: ProfileId[];
-}
-
-// ============================================
-// 交互场景（用于结果页沉浸式体验）
-// ============================================
-
-export type MethodType = 'code' | 'flow' | 'checklist' | 'diagram' | 'prototype';
-
-export interface ScenarioOption {
-  label: string;
-  polarity: AllPolarityKey;
-  archetypeMatch: ArchetypeKey[];
-  methodTitle: string;
-  methodType: MethodType;
-  methodContent: string;
-}
-
-export interface InteractiveScenario {
-  id: string;
-  title: string;
-  context: string;
-  question: string;
-  options: ScenarioOption[];
-}
-
-// ============================================
 // 常量
 // ============================================
 
@@ -206,28 +125,9 @@ export const ARCHETYPE_KEYS: ArchetypeKey[] = [
 
 export const MODE_KEYS: ModeKey[] = ['I', 'R'];
 
-export const DEPARTMENT_LABELS: Record<DepartmentId, string> = {
-  emergency: '应急局',
-  control: '中枢塔',
-  frontier: '边界署',
-  relic: '遗迹司',
-  standard: '标准局',
-  lifeguard: '生命监察局',
-  workshop: '黑市工坊',
-  biotech: '生科所'
-};
-
 // ============================================
 // 辅助函数
 // ============================================
-
-export function parseProfileId(id: ProfileId): { archetype: ArchetypeKey; mode: ModeKey } {
-  const lastDash = id.lastIndexOf('-');
-  return {
-    archetype: id.substring(0, lastDash) as ArchetypeKey,
-    mode: id.substring(lastDash + 1) as ModeKey
-  };
-}
 
 export function buildProfileId(archetype: ArchetypeKey, mode: ModeKey): ProfileId {
   return `${archetype}-${mode}` as ProfileId;

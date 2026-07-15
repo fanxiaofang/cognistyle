@@ -38,11 +38,11 @@ export default function QuestionCard({
   ];
   // Likert fallback (programmer version)
   const likertOptions = [
-    { value: 1, label: '非常不同意', color: '#ff007f' },
-    { value: 2, label: '不同意', color: '#ff4488' },
+    { value: 1, label: '反对', color: '#ff007f' },
+    { value: 2, label: '倾向', color: '#ff4488' },
     { value: 3, label: '中立', color: '#666666' },
-    { value: 4, label: '同意', color: '#00cccc' },
-    { value: 5, label: '非常同意', color: '#00f0ff' },
+    { value: 4, label: '倾向', color: '#00cccc' },
+    { value: 5, label: '同意', color: '#00f0ff' },
   ];
   const options = isBipolar ? bipolarOptions : likertOptions;
 
@@ -84,8 +84,8 @@ export default function QuestionCard({
           <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-[#00f0ff]/70 pointer-events-none" />
 
           {/* Question Text */}
-          <h2 className="text-sm sm:text-xl md:text-2xl font-mono font-bold leading-snug text-white mb-3 sm:mb-6 select-none flex items-start gap-1.5 sm:gap-2">
-            <span className="text-[#00f0ff] shrink-0 font-bold animate-pulse mt-0.5">&gt;</span>
+          <h2 className="text-sm sm:text-xl md:text-2xl font-mono font-bold leading-snug text-white mb-3 sm:mb-6 select-none flex items-start gap-1.5 sm:gap-2 group/title">
+            <span className="text-[#00f0ff] shrink-0 font-bold mt-0.5 transition-opacity duration-300 group-hover/title:opacity-60">&gt;</span>
             <span>{question.prompt || question.text}</span>
           </h2>
 
@@ -116,49 +116,94 @@ export default function QuestionCard({
           {/* ============================ Scale ============================ */}
           <div className={isBipolar ? 'mb-1.5 sm:mb-5' : 'mb-3 sm:mb-6'}>
             {/* Dot track */}
-            <div className="flex items-center justify-center gap-0">
+            <div className="flex items-start justify-center gap-0">
               {options.map((option, idx) => {
                 const isSelected = selectedAnswer === option.value;
                 const isPast = selectedAnswer !== undefined && option.value < selectedAnswer;
                 const isLast = idx === options.length - 1;
                 const endpoint = isBipolar && isEndpoint(idx);
-                const dotSize = endpoint ? 'sm:w-7 sm:h-7 w-4 h-4' : 'sm:w-5 sm:h-5 w-3 h-3';
+                // 所有 dot 在 button 内居中 → button 尺寸 = 最大 dot 尺寸
+                const buttonSize = isBipolar ? 'w-4 h-4 sm:w-7 sm:h-7' : 'w-3 h-3 sm:w-5 sm:h-5';
+                const dotSize = endpoint ? 'w-3.5 h-3.5 sm:w-6 sm:h-6' : (isBipolar ? 'w-2.5 h-2.5 sm:w-4 sm:h-4' : 'w-2.5 h-2.5 sm:w-4 sm:h-4');
+                // rail 顶部偏移 = 圆点中心 = button 高度的一半
+                const railOffset = isBipolar ? 'mt-[8px] sm:mt-[14px]' : 'mt-[6px] sm:mt-[10px]';
 
                 return (
                   <React.Fragment key={option.value}>
-                    {/* Dot button */}
-                    <button
-                      onClick={() => onSelectAnswer(option.value)}
-                      className="relative z-10 flex flex-col items-center group shrink-0 py-1.5 sm:py-3"
-                      style={{ width: isBipolar ? 'clamp(52px, 8vw, 80px)' : 'clamp(72px, 12vw, 100px)' }}
+                    {/* Option column: button (dot) + label */}
+                    <div
+                      className="flex flex-col items-center shrink-0"
+                      style={{ width: isBipolar ? 'clamp(56px, 8vw, 84px)' : 'clamp(72px, 12vw, 100px)' }}
                     >
-                      <div
-                        className={`${dotSize} rounded-full transition-all duration-200`}
-                        style={{
-                          backgroundColor: isSelected ? option.color : isPast ? option.color + '88' : option.color + (endpoint ? '33' : '22'),
-                          boxShadow: isSelected
-                            ? `0 0 ${endpoint ? '14px' : '10px'} ${option.color}, 0 0 ${endpoint ? '24px' : '16px'} ${option.color}55`
-                            : 'none',
-                          transform: isSelected ? `scale(${endpoint ? 1.35 : 1.25})` : 'scale(1)',
-                          border: isSelected ? `2px solid ${option.color}` : isPast ? `1.5px solid ${option.color}55` : `1.5px solid ${option.color}${endpoint ? '66' : '44'}`,
-                        }}
-                      />
-                    </button>
-
-                    {/* Connecting line */}
-                    {!isLast && (
-                      <div className="flex-1 h-[4px] sm:h-[5px] relative" style={{ maxWidth: isBipolar ? 'clamp(48px, 8vw, 80px)' : 'clamp(88px, 12vw, 100px)' }}>
-                        <div className="absolute inset-0 rounded-full bg-slate-800" />
-                        <motion.div
-                          className="absolute inset-y-0 left-0 rounded-full"
+                      {/* Dot button */}
+                      <button
+                        onClick={() => onSelectAnswer(option.value)}
+                        aria-label={`选项 ${option.label}`}
+                        className={`${buttonSize} relative flex items-center justify-center rounded-full focus:outline-none group transition-transform duration-200 hover:scale-110`}
+                      >
+                        {/* Hover ring (around dot) */}
+                        {!isSelected && !isPast && (
+                          <span
+                            className="absolute inset-[-3px] sm:inset-[-4px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
+                            style={{
+                              boxShadow: `0 0 0 1.5px ${option.color}88, 0 0 12px ${option.color}55, inset 0 0 6px ${option.color}33`,
+                            }}
+                          />
+                        )}
+                        {/* The dot */}
+                        <div
+                          className={`${dotSize} rounded-full transition-all duration-200`}
                           style={{
-                            background: isBipolar
-                              ? `linear-gradient(to right, ${options[idx].color}, ${options[idx + 1].color})`
-                              : `linear-gradient(to right, ${options[idx].color}, ${options[idx + 1].color})`,
+                            backgroundColor: isSelected ? option.color : isPast ? option.color + 'aa' : option.color + (endpoint ? '60' : '40'),
+                            boxShadow: isSelected
+                              ? `0 0 ${endpoint ? '14px' : '10px'} ${option.color}, 0 0 ${endpoint ? '26px' : '18px'} ${option.color}55`
+                              : isPast
+                                ? `0 0 6px ${option.color}44`
+                                : 'none',
+                            transform: isSelected ? `scale(${endpoint ? 1.15 : 1.1})` : undefined,
+                            border: isSelected ? `2px solid ${option.color}` : isPast ? `1.5px solid ${option.color}88` : `1.5px solid ${option.color}${endpoint ? '99' : '66'}`,
+                          }}
+                        />
+                      </button>
+
+                      {/* Label below dot */}
+                      <span
+                        className="mt-1.5 sm:mt-2 text-[9px] sm:text-[10px] font-mono font-bold tracking-wider transition-all duration-200 select-none"
+                        style={{
+                          color: isSelected ? option.color : isPast ? option.color + 'cc' : 'rgba(148, 163, 184, 0.6)',
+                          textShadow: isSelected ? `0 0 8px ${option.color}aa, 0 0 14px ${option.color}55` : 'none',
+                          opacity: isSelected ? 1 : isPast ? 0.85 : 0.75,
+                        }}
+                      >
+                        {option.label}
+                      </span>
+                    </div>
+
+                    {/* Connecting rail (aligned to dot center) */}
+                    {!isLast && (
+                      <div
+                        className={`flex-1 self-start relative ${railOffset}`}
+                        style={{ maxWidth: isBipolar ? 'clamp(48px, 8vw, 80px)' : 'clamp(88px, 12vw, 100px)', height: '4px' }}
+                      >
+                        {/* Rail base (slightly thicker, subtle outer glow) */}
+                        <div
+                          className="absolute inset-0 rounded-full"
+                          style={{
+                            background: 'linear-gradient(to right, rgba(0,240,255,0.06), rgba(0,240,255,0.12), rgba(0,240,255,0.06))',
+                            border: '1px solid rgba(0, 240, 255, 0.1)',
+                            boxShadow: 'inset 0 0 4px rgba(0, 240, 255, 0.05)',
+                          }}
+                        />
+                        {/* Active fill (thicker, vibrant gradient) */}
+                        <motion.div
+                          className="absolute inset-0 rounded-full"
+                          style={{
+                            background: `linear-gradient(to right, ${options[idx].color}, ${options[idx + 1].color})`,
+                            boxShadow: `0 0 6px ${options[idx].color}88, 0 0 12px ${options[idx + 1].color}55`,
                           }}
                           initial={{ width: '0%' }}
                           animate={{ width: isPast ? '100%' : '0%' }}
-                          transition={{ duration: 0.3, ease: 'easeOut' }}
+                          transition={{ duration: 0.35, ease: 'easeOut' }}
                         />
                       </div>
                     )}

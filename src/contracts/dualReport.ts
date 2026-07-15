@@ -52,29 +52,6 @@ export type CompatibilityPairPattern =
   | 'asymmetric'
   | 'conflicting';
 
-export const NORMALIZED_SCORE_SEMANTICS = {
-  fieldIndependFieldDepend: {
-    zero: 'fieldIndepend',
-    one: 'fieldDepend',
-    sourceDimensionId: 'fieldIndepend_fieldDepend',
-  },
-  wholisticAnalytic: {
-    zero: 'wholistic',
-    one: 'analytic',
-    sourceDimensionId: 'wholistic_analytic',
-  },
-  exploratoryDirected: {
-    zero: 'exploratory',
-    one: 'directed',
-    sourceDimensionId: 'exploratory_directed',
-  },
-  impulsiveReflective: {
-    zero: 'impulsive',
-    one: 'reflective',
-    sourceDimensionId: 'impulsive_reflective',
-  },
-} as const;
-
 export interface ResultSnapshotNormalizedScores {
   fieldIndependFieldDepend: number;
   wholisticAnalytic: number;
@@ -105,18 +82,18 @@ export interface CreateResultSnapshotRequest {
   normalizedScores: ResultSnapshotNormalizedScores;
   display: ResultSnapshotDisplay;
   rawAnswers?: Record<number, number>;
+  /**
+   * 用户是否同意将答题数据用于题目/评分分析优化。
+   * - true: 后端写入 analytics:single:<friendId> 埋点（含 rawAnswers），用于离线分析
+   * - false: 后端跳过 analytics 写入，仅保留 result:<friendId> 功能快照
+   * 默认 true（用户在开始页可取消勾选）
+   */
+  analyticsConsent: boolean;
 }
 
 export interface CreateResultSnapshotResponse {
   friendId: string;
   deleteToken: string;
-  expiresAt: number;
-}
-
-export interface ResultSnapshotRecord extends CreateResultSnapshotRequest {
-  friendId: string;
-  deleteTokenHash: string;
-  createdAt: number;
   expiresAt: number;
 }
 
@@ -245,27 +222,6 @@ export interface ApiErrorResponse {
     | 'INTERNAL_ERROR';
 }
 
-export const DUAL_REPORT_MODULE_BOUNDARIES = {
-  singleReportActions: [
-    'save current single-result snapshot',
-    'show current friendId',
-    'accept target friendId input',
-    'start compatibility report flow',
-    'delete current snapshot',
-  ],
-  dualReportPage: [
-    'render compatibility report only',
-    'must not reuse second-profile toggle logic',
-    'read target friendId from route',
-    'request report from compatibility endpoint',
-  ],
-  publicSharePage: [
-    'render redacted public report',
-    'must not access local deleteToken',
-    'must not require local friendId',
-  ],
-} as const;
-
 export interface PatternBadgeInfo {
   label: string;
   tagline: string;
@@ -282,27 +238,6 @@ export interface SubmitFeedbackRequest {
 
 export interface SubmitFeedbackResponse {
   success: true;
-}
-
-export interface AnalyticsTelemetry {
-  friendId: string;
-  createdAt: number;
-  profileId: ProfileId;
-  scores: ResultSnapshotNormalizedScores;
-  reportVersion: string;
-  rawAnswers?: Record<number, number>;
-}
-
-export interface DualAnalyticsTelemetry {
-  reportId: string;
-  createdAt: number;
-  myFriendId: string;
-  targetFriendId: string;
-  overall: number;
-  pattern: CompatibilityPairPattern;
-  breakdown: CompatibilityBreakdown;
-  dimensionPatterns: Partial<Record<CompatibilityDimensionKey, CompatibilityDimensionPattern>>;
-  reportVersion: string;
 }
 
 export const PATTERN_BADGE_MAP: Record<CompatibilityPairPattern, PatternBadgeInfo> = {
@@ -398,11 +333,4 @@ export interface BatchHistoryEntryRequest {
     pattern: CompatibilityPairPattern;
     generatedAt: number;
   }>;
-}
-
-export interface HistoryErrorResponse {
-  error: {
-    code: string;
-    message: string;
-  };
 }

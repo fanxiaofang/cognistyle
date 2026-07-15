@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Category, UserAnswers, DimensionScore, AllDimensionId, AllPolarityKey, ArchetypeKey, ARCHETYPE_KEYS, MODE_KEYS, ModeKey } from './types';
 import { questionsGeneral, dimensionMeta } from './data/questions';
@@ -57,6 +57,23 @@ export default function App() {
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState<number>(0);
   const [answers, setAnswers] = useState<UserAnswers>({});
   const [showHandbook, setShowHandbook] = useState<boolean>(false);
+  // 答题数据用于题目/评分分析的同意状态（默认同意，可撤回）
+  const [analyticsConsent, setAnalyticsConsent] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('cognistyle_analytics_consent_v1') !== 'false';
+    } catch {
+      return true;
+    }
+  });
+
+  const handleToggleConsent = (next: boolean) => {
+    setAnalyticsConsent(next);
+    try {
+      localStorage.setItem('cognistyle_analytics_consent_v1', String(next));
+    } catch {
+      // localStorage 不可用时仅保留内存状态
+    }
+  };
 
   // 固定为通用版（隐藏程序员版）
   const activeCategory: Category = 'general';
@@ -499,7 +516,6 @@ export default function App() {
               </h1>
               
               <p className="text-slate-400 text-[13px] sm:text-sm font-sans max-w-md mx-auto mb-6 sm:mb-8 leading-relaxed select-none">
-                {/* 认知适配协议将测绘你的原生态思维底色，帮助你发现自己的认知偏好与思维模式。理解你的风格，是找到最适合位置的第一步。 */}
                 第七区需要每一位公民找到最适合自己的位置。通过认知适配协议，测绘你的原生态思维底色，适配结果将关联第七区八大职能部门的职业定位
               </p>
 
@@ -523,6 +539,24 @@ export default function App() {
                     约 3 分钟 · 16 题
                   </p>
                 </button>
+
+                {/* 数据使用同意复选框 */}
+                <label className="mt-3 flex items-start gap-2 px-1 cursor-pointer select-none group/consent">
+                  <span className="relative flex items-center justify-center w-4 h-4 mt-0.5 shrink-0 border border-[#00f0ff]/50 bg-[#070b19] group-hover/consent:border-[#00f0ff] transition-colors">
+                    {analyticsConsent && (
+                      <span className="w-2 h-2 bg-[#00f0ff] shadow-[0_0_4px_#00f0ff]" />
+                    )}
+                  </span>
+                  <input
+                    type="checkbox"
+                    checked={analyticsConsent}
+                    onChange={(e) => handleToggleConsent(e.target.checked)}
+                    className="sr-only"
+                  />
+                  <span className="text-[10px] sm:text-[11px] font-mono text-slate-500 leading-relaxed text-left group-hover/consent:text-slate-400 transition-colors">
+                    同意匿名收集答题数据用于题目与评分机制优化（不含姓名/邮箱等个人信息，可随时撤回）
+                  </span>
+                </label>
 
               </div>
 
@@ -573,6 +607,7 @@ export default function App() {
                 primaryArchetype={primaryArchetype}
                 secondaryArchetype={secondaryArchetype}
                 answers={answers}
+                analyticsConsent={analyticsConsent}
                 onReset={handleReset}
                 onOpenDualReport={handleOpenDualReport}
               />

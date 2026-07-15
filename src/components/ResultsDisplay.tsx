@@ -30,6 +30,7 @@ interface ResultsDisplayProps {
   primaryArchetype: { key: string; matchScore: number };
   secondaryArchetype: { key: string; matchScore: number };
   answers: Record<number, number>;
+  analyticsConsent: boolean;
   onReset: () => void;
   onOpenDualReport: (targetFriendId: string) => void;
 }
@@ -41,6 +42,7 @@ export default function ResultsDisplay({
   primaryArchetype,
   secondaryArchetype,
   answers,
+  analyticsConsent,
   onReset,
   onOpenDualReport,
 }: ResultsDisplayProps) {
@@ -60,6 +62,7 @@ export default function ResultsDisplay({
     primaryArchetype,
     secondaryArchetype,
     rawAnswers: answers,
+    analyticsConsent,
   });
 
   const activeProfile = showOtherMode && otherProfile ? otherProfile : profile;

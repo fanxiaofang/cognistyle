@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { AlertTriangle, ArrowRight, Copy, LoaderCircle, Save, Trash2 } from 'lucide-react';
+import { ArrowRight, Copy, LoaderCircle, Save, Trash2 } from 'lucide-react';
 import type { CreateResultSnapshotRequest, LocalResultIdentity } from '../contracts/dualReport';
 import {
   clearLocalResultIdentity,

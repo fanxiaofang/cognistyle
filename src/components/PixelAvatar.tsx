@@ -89,57 +89,56 @@ const AVATAR_VECTORS: Record<string, React.ReactNode> = {
   ),
 
   // ============================================
-  // 3. FD-E-A-I: 生命哨兵 · 生命监察局 (高洁赛博机能姬 · 柔美女性化版)
-  // 优化：收窄下颌线，增加兜帽内侧边长发修饰脸型，调大双眼并加入科技腮红，强化英气少女感
+  // 3. FD-E-A-I: 生命哨兵 · 生命监察局 (生命监察执行官 · 白银生命守卫)
+  // 优化：统一 FD 系列角色语言 — 删除圆形后脑，改为兜帽内层 + 银侧发 + 守灯人同款脸型
   // ============================================
   'FD-E-A-I': (
     <g>
-      {/* 1. 科技兜帽深色内衬与后脑基底 */}
-      <circle cx="32" cy="31" r="17" fill="#0b132b" />
+      {/* 1. 深色生命监察兜帽内层（替代圆形后脑，自然肩颈过渡） */}
+      <path
+        d="M16 34 C15 18 21 11 32 11 C43 11 49 18 48 34 V44 C44 48 20 48 16 44 Z"
+        fill="#0b132b"
+      />
 
-      {/* 2. 纤细修长的肤色脖颈（奠定柔美体态） */}
-      <path d="M29 39 H35 V48 H29 Z" fill="#ffe2ca" />
-      <path d="M29 39 H35 V41 H29 Z" fill="#ecd0b9" /> {/* 颈部阴影 */}
+      {/* 2. 白银侧发（守灯人同款语言） */}
+      <path d="M21 24 C19 31 20 39 23 43" fill="none" stroke="#e2e8f0" strokeWidth="3" strokeLinecap="round" />
+      <path d="M43 24 C45 31 44 39 41 43" fill="none" stroke="#e2e8f0" strokeWidth="3" strokeLinecap="round" />
 
-      {/* 3. 精致清秀的女性面部轮廓（向内收进 2px，下巴更尖更圆润） */}
-      <path d="M25 21 H39 V35 C39 39, 35 42, 32 42 C29 42, 25 39, 25 35 Z" fill="#ffe2ca" />
+      {/* 3. 高级女性脸型（与守灯人/质检总长同模板） */}
+      <path
+        d="M24 23 Q32 20 40 23 V36 C40 40 37 43 34 45 L32 46 L30 45 C27 43 24 40 24 36 Z"
+        fill="#ffe2ca"
+      />
 
-      {/* 4. 白银质感科技发型（齐刘海 + 新增包裹脸颊的少女长侧发） */}
-      {/* 主刘海 */}
-      <path d="M19 23 Q32 15, 45 23" fill="none" stroke="#e2e8f0" strokeWidth="3.2" strokeLinecap="round" />
-      {/* 两侧顺着兜帽垂落的知性长发束，完美修饰脸型 */}
-      <path d="M23 25 V36" stroke="#e2e8f0" strokeWidth="2" strokeLinecap="round" opacity="0.95" />
-      <path d="M41 25 V36" stroke="#e2e8f0" strokeWidth="2" strokeLinecap="round" opacity="0.95" />
+      {/* 4. 生命接口颈部 */}
+      <path d="M28 42 V49 H36 V42 Z" fill="#ffe2ca" />
+      <path d="M29 42 Q32 44 35 42 V45 Q32 47 29 45 Z" fill="#ecd0b9" />
 
-      {/* 5. 极轻微的科技全息腮红 (Cyber-Blush) */}
-      <circle cx="27.5" cy="35" r="1" fill="#00f5d4" opacity="0.2" />
-      <circle cx="36.5" cy="35" r="1" fill="#00f5d4" opacity="0.2" />
+      {/* 5. 生命状态扫描接口目镜（替代 VR 感矩形框） */}
+      <rect x="22" y="27" width="20" height="5" rx="2" fill="#07111f" />
+      <rect x="24" y="29" width="16" height="1.8" rx="1" fill="#00f5d4" opacity="0.8" />
+      <circle cx="27" cy="30" r="0.8" fill="#ffffff" />
+      <circle cx="37" cy="30" r="0.8" fill="#ffffff" />
 
-      {/* 6. 游刃有余的神秘自信浅笑 */}
-      <path d="M30.5 37.5 Q32 38.5, 33.5 37.5" fill="none" stroke="#4a5568" strokeWidth="1.2" strokeLinecap="round" />
+      {/* 6. 守护者平静微笑嘴角 */}
+      <path
+        d="M29.5 39 Q32 39.5 34.5 39"
+        fill="none"
+        stroke="#475569"
+        strokeWidth="1"
+        strokeLinecap="round"
+      />
 
-      {/* 7. 高精生命状态全息扫描矩阵目镜（略微调整比例，双眼更灵动） */}
-      {/* 扫描镜片主体 */}
-      <rect x="22" y="27" width="20" height="4.5" rx="1.5" fill="#00f5d4" opacity="0.3" stroke="#00f5d4" strokeWidth="0.8" />
-      {/* 精密全息十字准心 */}
-      <line x1="26.5" y1="26" x2="26.5" y2="32.5" stroke="#00f5d4" strokeWidth="0.6" opacity="0.8" />
-      <line x1="24" y1="29.2" x2="29" y2="29.2" stroke="#00f5d4" strokeWidth="0.6" opacity="0.8" />
-      <line x1="37.5" y1="26" x2="37.5" y2="32.5" stroke="#00f5d4" strokeWidth="0.6" opacity="0.8" />
-      <line x1="35" y1="29.2" x2="40" y2="29.2" stroke="#00f5d4" strokeWidth="0.6" opacity="0.8" />
-      {/* 核心瞳孔点 */}
-      <circle cx="26.5" cy="29.2" r="0.8" fill="#ffffff" />
-      <circle cx="37.5" cy="29.2" r="0.8" fill="#ffffff" />
-
-      {/* 8. 高科技机能防尘兜帽外壳 */}
+      {/* 7. 高科技机能防尘兜帽外壳（保留原版描边，与新内层形成双层兜帽） */}
       <path d="M15 35 C15 15, 22 11, 32 11 C42 11, 49 15, 49 35 C49 41, 46 45, 44 46 C39 40, 25 40, 20 46 C18 45, 15 41, 15 35" fill="none" stroke="#f8fafc" strokeWidth="3" strokeLinecap="round" />
       {/* 兜帽排能灯条 */}
       <path d="M18 20 C22 14, 42 14, 46 20" fill="none" stroke="#00f5d4" strokeWidth="0.8" opacity="0.5" />
 
-      {/* 9. 生命监察局高领披风大衣 */}
+      {/* 8. 生命监察局高领披风大衣 */}
       <path d="M18 51 L32 48 L46 51 V60 H18 Z" fill="#f8fafc" />
       {/* 科技深色内衬 */}
       <path d="M26 49 L32 52 L38 49 L36 47 L28 47 Z" fill="#0f172a" />
-      
+
       {/* 胸前生命总线核心脉冲徽章 */}
       <circle cx="32" cy="53" r="2.2" fill="#00f5d4" />
       <line x1="32" y1="51.5" x2="32" y2="54.5" stroke="#f8fafc" strokeWidth="0.8" />
@@ -150,55 +149,58 @@ const AVATAR_VECTORS: Record<string, React.ReactNode> = {
 
 
   // ============================================
-  // 4. FD-E-A-R: 监察医官 · 医疗部 · 总线协调 (干练高级知识分子版)
-  // 优化：拉出修长脖颈，统一医疗部薄荷绿/深板岩蓝冷色系，强化冷静、严谨、高级协调官气质
+  // 4. FD-E-A-R: 监察医官 · 医疗部 · 总线协调 (医疗系统首席协调官)
+  // 优化：统一 FD 系列角色语言 — 银灰短发 + 成熟医疗官脸型 + 医疗 HUD + 冷静嘴角
   // ============================================
   'FD-E-A-R': (
     <g>
-      {/* 知性利落的微翘短发 - 后脑 (Deep Intellect Brown) */}
-      {/* <path d="M16 26 C16 11, 48 11, 48 26 V35 H44 V26 C44 14, 20 14, 20 26 V35 H16 Z" fill="#4a2810" /> */}
-            <path d="M16 26 C16 11, 48 11, 48 26 V35 H44 V26 C44 14, 20 14, 20 26 V35 H16 Z" fill="#cbd5e1" />
+      {/* 1. 银灰短发升级（知性利落线条） */}
+      <path
+        d="M16 25 C16 12 48 10 48 23 C43 17 37 15 32 16 C24 17 20 22 20 29"
+        fill="none"
+        stroke="#cbd5e1"
+        strokeWidth="3.5"
+        strokeLinecap="round"
+      />
+      {/* side hair */}
+      <path d="M19 26 V39" stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round" />
+      <path d="M45 26 V39" stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round" />
 
-      {/* 纤细脖颈：彻底与衣服拉开距离，拒绝臃肿 */}
-      <path d="M28 41 H36 V49 H28 Z" fill="#ffe2ca" />
-      <path d="M28 41 H36 V43 H28 Z" fill="#ecd0b9" /> {/* 颈部阴影 */}
+      {/* 2. 成熟医疗官脸型（与 FD 系列同模板，下巴更稳） */}
+      <path
+        d="M24 22 Q32 20 40 22 V37 C40 41 37 44 34 46 L32 47 L30 46 C27 44 24 41 24 37 Z"
+        fill="#ffe2ca"
+      />
 
-      {/* 锐利精细的女性下颌轮廓 */}
-      <path d="M24 23 H40 V38 C40 42, 36 45, 32 45 C28 45, 24 42, 24 38 Z" fill="#ffe2ca" />
+      {/* 3. 颈部 */}
+      <path d="M28 42 V49 H36 V42 Z" fill="#ffe2ca" />
+      <path d="M29 42 Q32 44 35 42 V45 Q32 47 29 45 Z" fill="#ecd0b9" />
 
-      {/* 层次感侧发与空气刘海 */}
-      {/* <path d="M16 23 C16 12, 48 9, 48 21 C44 17, 33 14, 24 22 C21 24, 19 28, 19 32" fill="none" stroke="#5c3314" strokeWidth="3.2" strokeLinecap="round" />
-      <path d="M43 25 L45 33" stroke="#5c3314" strokeWidth="1.5" strokeLinecap="round" />  */}
-      <path d="M16 23 C16 12, 48 9, 48 21 C44 17, 33 14, 24 22 C21 24, 19 28, 19 32" fill="none" stroke="#cbd5e1" strokeWidth="3.2" strokeLinecap="round" />
-      <path d="M43 25 L45 33" stroke="#cbd5e1" strokeWidth="1.5" strokeLinecap="round" /> {/* 侧面垂发 */}
+      {/* 4. 医疗 HUD 眼镜（缩小镜框，告别学生感） */}
+      <circle cx="27" cy="31" r="3.8" fill="none" stroke="#00f5d4" strokeWidth="1" />
+      <circle cx="37" cy="31" r="3.8" fill="none" stroke="#00f5d4" strokeWidth="1" />
+      <line x1="30.8" y1="31" x2="33.2" y2="31" stroke="#00f5d4" strokeWidth="1" />
 
-      {/* 智慧浅笑 (反思型特有的睿智内敛) */}
-      <path d="M30 40 Q32 41.5, 34 40" fill="none" stroke="#5c3314" strokeWidth="1.2" strokeLinecap="round" />
+      {/* 5. 冷静协调官微笑嘴角 */}
+      <path
+        d="M29 40 Q32 40.5 35 40"
+        fill="none"
+        stroke="#475569"
+        strokeWidth="1"
+        strokeLinecap="round"
+      />
 
-      {/* 精密总线医疗监察镜 (圆形细框钛金/薄荷绿全息镜) */}
-      {/* 极细高级镜框 */}
-      <circle cx="26.5" cy="31.5" r="4.5" fill="none" stroke="#00f5d4" strokeWidth="1.2" />
-      <circle cx="37.5" cy="31.5" r="4.5" fill="none" stroke="#00f5d4" strokeWidth="1.2" />
-      <line x1="31" y1="31.5" x2="33" y2="31.5" stroke="#00f5d4" strokeWidth="1.2" />
-      {/* 薄荷绿全息微光镜片 */}
-      <circle cx="26.5" cy="31.5" r="3.5" fill="#00f5d4" opacity="0.15" />
-      <circle cx="37.5" cy="31.5" r="3.5" fill="#00f5d4" opacity="0.15" />
-      {/* 锐利冷峻的瞳孔 */}
-      <circle cx="26.5" cy="31.5" r="1" fill="#0f172a" />
-      <circle cx="37.5" cy="31.5" r="1" fill="#0f172a" />
-
-      {/* 医官高阶制服 (深板岩蓝外衣 + 洁白高立领衬衫) */}
-      {/* 外套主体 (下压至 Y:49 之后) */}
+      {/* 6. 医官高阶制服 (深板岩蓝外衣 + 洁白高立领衬衫) */}
       <path d="M18 51 L32 48 L46 51 V60 H18 Z" fill="#1e293b" />
       {/* 规范的洁白立领 (V-Neck Base) */}
       <path d="M26 49 L32 53 L38 49 L36 47 L28 47 Z" fill="#f8fafc" />
-      
-      {/* 总线协调官·全息十字胸章 (替代原本突兀的品红蝴蝶结) */}
+
+      {/* 总线协调官·全息十字胸章 */}
       <circle cx="32" cy="53" r="2.5" fill="#00f5d4" />
       <line x1="32" y1="51.5" x2="32" y2="54.5" stroke="#1e293b" strokeWidth="0.8" />
       <line x1="30.5" y1="53" x2="33.5" y2="53" stroke="#1e293b" strokeWidth="0.8" />
 
-      {/* 挂载式总线数据指示灯 (原绿色胸章精细化) */}
+      {/* 挂载式总线数据指示灯 */}
       <rect x="42" y="51" width="3" height="4" rx="0.5" fill="#334155" />
       <circle cx="43.5" cy="53" r="0.8" fill="#00f5d4" opacity="0.9" />
     </g>
@@ -463,21 +465,48 @@ const AVATAR_VECTORS: Record<string, React.ReactNode> = {
   // ============================================
   'FD-D-A-I': (
     <g>
-      {/* Graceful flowing silver hair surrounding face */}
-      <path d="M16 20 C16 10, 48 10, 48 20 V58 H44 V26 H20 V58 H16 Z" fill="#cbd5e1" />
-      {/* Face */}
-      <path d="M23 23 H41 V42 C41 47, 23 47, 23 42 Z" fill="#fff5eb" />
-      {/* GLOWING DETECTION SCOPE - replaces blindfold */}
-      <rect x="21" y="27" width="22" height="6.5" rx="1" fill="#090d16" />
-      <rect x="23" y="29" width="18" height="2.5" rx="0.5" fill="#00f0ff" opacity="0.6" />
+      {/* 1. Silver guardian flowing hair（披肩长发版） */}
+      <path
+        d="M16 22 C16 10 48 10 48 22 V57 H44 V32 C41 24 23 24 20 32 V57 H16 Z"
+        fill="#cbd5e1"
+      />
+      {/* 内侧银发高光 */}
+      <path d="M19 24 V54" stroke="#f1f5f9" strokeWidth="1" opacity="0.7" />
+      <path d="M45 24 V54" stroke="#f1f5f9" strokeWidth="1" opacity="0.7" />
+
+      {/* 2. Calm guardian face（柔和女性线条） */}
+      <path
+        d="M24 23 Q32 21 40 23 V39 C40 43 37 46 32 46 C27 46 24 43 24 39 Z"
+        fill="#fff5eb"
+      />
+
+      {/* 3. Elegant neck under silver hair（新增颈部） */}
+      <path d="M28 42 V50 H36 V42 Z" fill="#ffe2ca" />
+      {/* Neck shadow */}
+      <path
+        d="M28 42 Q32 45 36 42 V45 Q32 47 28 45 Z"
+        fill="#ecd0b9"
+      />
+
+      {/* 4. GLOWING DETECTION SCOPE - 夜间扫描仪 */}
+      <rect x="22" y="27" width="20" height="6" rx="2" fill="#090d16" />
+      <rect x="24" y="29" width="16" height="2" rx="1" fill="#00f0ff" opacity="0.75" />
       {/* Scanning line animation effect */}
-      <line x1="23" y1="30.5" x2="41" y2="30.5" stroke="#ffffff" strokeWidth="0.5" opacity="0.8" />
+      <line x1="24" y1="30" x2="40" y2="30" stroke="#ffffff" strokeWidth="0.5" opacity="0.8" />
       {/* Golden node at temple */}
       <circle cx="41" cy="30" r="1.5" fill="#ffe600" />
-      {/* Quiet meditative mouth line */}
-      <line x1="29" y1="38" x2="35" y2="38" stroke="#090d16" strokeWidth="1" strokeLinecap="round" />
-      {/* Silk High-collar cape layout with calibration pattern */}
-      <path d="M23 42 L32 46 L41 42" fill="none" stroke="#ff007f" strokeWidth="2.2" />
+
+      {/* 5. 平静观察的嘴角（替代机械直线） */}
+      <path
+        d="M29 39 Q32 39.5 35 39"
+        fill="none"
+        stroke="#090d16"
+        strokeWidth="1"
+        strokeLinecap="round"
+      />
+
+      {/* 6. Silk High-collar cape layout with calibration pattern */}
+      <path d="M25 47 L32 49 L39 47" fill="none" stroke="#ff007f" strokeWidth="2" strokeLinecap="round" />
       <path d="M15 52 L32 48 L49 52 V60 H15 Z" fill="#090d16" />
       <circle cx="32" cy="54" r="2.5" fill="#ff007f" />
       {/* Calibration grid pattern */}
@@ -497,12 +526,32 @@ const AVATAR_VECTORS: Record<string, React.ReactNode> = {
       {/* 1. 后脑发底（Silver Hair Base） */}
       <path d="M16 25 C16 11, 48 11, 48 25 V33 H16 Z" fill="#cbd5e1" />
 
-      {/* 2. 纤细修长的肤色脖颈（破除头身黏连） */}
-      <path d="M28 40 H36 V49 H28 Z" fill="#ffe2ca" />
-      <path d="M28 40 H36 V42 H28 Z" fill="#e2d4c9" /> {/* 颈部阴影 */}
+      {/* 2. 优雅修长但具有力量感的颈肩结构 */}
+      <path
+        d="M28 40 C28 44,27 46,25 48 L22 51 H42 L39 48 C37 46,36 44,36 40 Z"
+        fill="#ffe2ca"
+      />
 
-      {/* 3. 精致高冷的面部轮廓 */}
-      <path d="M24 22 H40 V36 C40 40, 36 43, 32 43 C28 43, 24 40, 24 36 Z" fill="#ffe2ca" />
+      {/* 颈部侧面阴影，增强立体感 */}
+      <path
+        d="M28 41 C30 44,34 44,36 41 V45 C33 47,30 47,28 45 Z"
+        fill="#d4bfb3"
+      />
+
+      {/* 锁骨高光 */}
+      <path
+        d="M27 48 Q32 50 37 48"
+        fill="none"
+        stroke="#ecd0b9"
+        strokeWidth="1"
+        opacity="0.8"
+      />
+
+      {/* 3. 冷峻质检总长脸型 */}
+      <path
+        d="M24 23 Q32 20 40 23 V35 C40 39 38 42 35 44 L32 46 L29 44 C26 42 24 39 24 35 Z"
+        fill="#ffe2ca"
+      />
 
       {/* 4. 白银长发延伸线（顺着脸颊利落垂落至肩膀，取代原有的圆球） */}
       <path d="M18 24 V44 C18 47, 15 49, 15 51" fill="none" stroke="#cbd5e1" strokeWidth="3.5" strokeLinecap="round" />
@@ -514,8 +563,14 @@ const AVATAR_VECTORS: Record<string, React.ReactNode> = {
       {/* 5. 白银质感刘海 */}
       <path d="M18 22 C20 12, 44 12, 46 22" fill="none" stroke="#e2e8f0" strokeWidth="3" strokeLinecap="round" />
 
-      {/* 6. 睿智且游刃有余的质检总长微笑 */}
-      <path d="M30 38 Q32 39.5, 34 38" fill="none" stroke="#475569" strokeWidth="1.2" strokeLinecap="round" />
+      {/* 6. 冷静掌控感的嘴角（替代温柔微笑） */}
+      <path
+        d="M29 39 Q32 38.5 35 39"
+        fill="none"
+        stroke="#475569"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+      />
 
       {/* 7. 高阶标准局威严大檐指挥帽 */}
       {/* 帽子主体 */}
@@ -528,11 +583,11 @@ const AVATAR_VECTORS: Record<string, React.ReactNode> = {
       <line x1="14" y1="18.5" x2="50" y2="18.5" stroke="#facc15" strokeWidth="1" />
 
       {/* 8. 标准局高精全息矩阵目镜 */}
-      <rect x="21" y="27" width="9" height="5" rx="1" fill="#00f5d4" opacity="0.3" stroke="#00f5d4" strokeWidth="1" />
-      <rect x="34" y="27" width="9" height="5" rx="1" fill="#00f5d4" opacity="0.3" stroke="#00f5d4" strokeWidth="1" />
-      <line x1="30" y1="29.5" x2="34" y2="29.5" stroke="#00f5d4" strokeWidth="1" opacity="0.8" />
-      <circle cx="25.5" cy="29.5" r="0.8" fill="#facc15" />
-      <circle cx="38.5" cy="29.5" r="0.8" fill="#facc15" />
+      <rect x="21" y="26" width="9" height="5" rx="1" fill="#00f5d4" opacity="0.3" stroke="#00f5d4" strokeWidth="1" />
+      <rect x="34" y="26" width="9" height="5" rx="1" fill="#00f5d4" opacity="0.3" stroke="#00f5d4" strokeWidth="1" />
+      <line x1="30" y1="28.5" x2="34" y2="28.5" stroke="#00f5d4" strokeWidth="1" opacity="0.8" />
+      <circle cx="25.5" cy="28.5" r="0.8" fill="#facc15" />
+      <circle cx="38.5" cy="28.5" r="0.8" fill="#facc15" />
 
       {/* 9. 质检总长铁血制服 */}
       <path d="M18 51 L32 48 L46 51 V60 H18 Z" fill="#0f172a" />
@@ -552,45 +607,6 @@ const AVATAR_VECTORS: Record<string, React.ReactNode> = {
       <line x1="48" y1="50.5" x2="45" y2="49.5" stroke="#0f172a" strokeWidth="0.8" />
     </g>
   ),
-
-
-  // // ============================================
-  // // 13. FD-E-W-I: 废土寻踪客 · 遗迹司 · 废墟猎人
-  // // 调整：太空盔→旧式防毒面具+探照灯，粉发→灰粉渐变
-  // // ============================================
-  // 'FD-E-W-I': (
-  //   <g>
-  //     {/* Soft Pink Bob Hair inside suit - DUSTY VARIANT */}
-  //     <path d="M20 25 C16 16, 48 16, 44 25" fill="none" stroke="#d8b4c4" strokeWidth="6" strokeLinecap="round" />
-  //     {/* Face */}
-  //     <path d="M24 24 H40 V42 C40 47, 24 47, 24 42 Z" fill="#ffe2ca" />
-  //     {/* Sparkling deep space gradient eyes - EXPLORATION GAZE */}
-  //     <circle cx="28" cy="32" r="2" fill="#00f0ff" />
-  //     <circle cx="36" cy="32" r="2" fill="#00f0ff" />
-  //     <polygon points="28,30 29,31 28,32 27,31" fill="#ffffff" />
-  //     <polygon points="36,30 37,31 36,32 35,31" fill="#ffffff" />
-  //     <path d="M29 37 Q32 39, 35 37" stroke="#ff007f" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-  //     {/* OLD-STYLE GAS MASK + HEADLAMP - replaces space helmet */}
-  //     <circle cx="32" cy="32" r="22.5" fill="none" stroke="#94a3b8" strokeWidth="2.2" opacity="0.8" />
-  //     {/* Headlamp */}
-  //     <circle cx="32" cy="12" r="3" fill="#ffe600" />
-  //     <line x1="32" y1="9" x2="32" y2="15" stroke="#ff6b00" strokeWidth="1" />
-  //     <line x1="29" y1="12" x2="35" y2="12" stroke="#ff6b00" strokeWidth="1" />
-  //     {/* Filter canisters */}
-  //     <circle cx="18" cy="38" r="3" fill="#64748b" />
-  //     <circle cx="46" cy="38" r="3" fill="#64748b" />
-  //     {/* Glossy light reflections arcs */}
-  //     <path d="M14 20 A 22 22 0 0 1 24 13" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" />
-  //     {/* Outer Star spark decal */}
-  //     <polygon points="46,18 48,20 46,22 44,20" fill="#ffe600" opacity="0.9" />
-  //     {/* Dusty exploration high-collar scarf */}
-  //     <rect x="23" y="47" width="18" height="4" fill="#78350f" rx="1.5" />
-  //     <path d="M14 54 L32 49 L50 54 V60 H14 Z" fill="#e2e8f0" />
-  //     {/* Dust/dirt overlay */}
-  //     <circle cx="26" cy="28" r="0.8" fill="#94a3b8" opacity="0.3" />
-  //     <circle cx="38" cy="30" r="0.6" fill="#94a3b8" opacity="0.2" />
-  //   </g>
-  // ),
 
   // ============================================
   // 13. FD-E-W-I: 废土寻踪客 · 遗迹司 · 废墟猎人 (重装防毒面具·硬核生化生存版)
@@ -654,36 +670,6 @@ const AVATAR_VECTORS: Record<string, React.ReactNode> = {
   ),
 
 
-
-  // // ============================================
-  // // 14. FD-E-W-R: 首席解码师 · 遗迹司 · 发掘主管
-  // // 调换：使用原R-C-W-T的不对称灰发+单片眼镜+深蓝高领
-  // // ============================================
-  // 'FD-E-W-R': (
-  //   <g>
-  //     {/* Asymmetric Sleek Grey Bob hairstyle - SCHOLAR VARIANT */}
-  //     <path d="M16 26 C16 11, 48 11, 48 26 V38 H44 V27 H20 V38 H16 Z" fill="#94a3b8" />
-  //     <path d="M16 26 L23 37" stroke="#94a3b8" strokeWidth="3" strokeLinecap="round" />
-  //     {/* Face */}
-  //     <path d="M22 23 H42 V43 C42 48, 22 48, 22 43 Z" fill="#ffe2ca" />
-  //     {/* Sophisticated round glass reading MONOCLE - scholar authority */}
-  //     <circle cx="28" cy="32" r="4.5" fill="none" stroke="#ffe600" strokeWidth="1.5" />
-  //     <line x1="28" y1="27" x2="32" y2="21" stroke="#ffe650" strokeWidth="1" />
-  //     <circle cx="28" cy="32" r="1" fill="#39ff14" />
-  //     {/* Soft calm eye */}
-  //     <line x1="34" y1="32" x2="38" y2="32" stroke="#1e293b" strokeWidth="2" strokeLinecap="round" />
-  //     {/* Calm wise smile */}
-  //     <path d="M28 38.5 Q32 40, 36 38.5" stroke="#94a3b8" strokeWidth="1.2" strokeLinecap="round" fill="none" />
-  //     {/* Sleek minimal navy blue high turtleneck style jacket with RELIC BADGE */}
-  //     <path d="M17 51 L32 46 L47 51 V60 H17 Z" fill="#1e293b" />
-  //     <path d="M29 46 L32 52 L35 46" fill="none" stroke="#ff007f" strokeWidth="1.5" />
-  //     {/* Relic司 badge */}
-  //     <circle cx="32" cy="54" r="2" fill="#d97706" />
-  //     <line x1="32" y1="52" x2="32" y2="56" stroke="#1e293b" strokeWidth="0.8" />
-  //     <line x1="30" y1="54" x2="34" y2="54" stroke="#1e293b" strokeWidth="0.8" />
-  //   </g>
-  // ),
-
   // ============================================
   // 14. FD-E-W-R: 首席解码师 · 遗迹司 · 历史推演 (呼号: 拼图 · 挺拔V领·彻底切除双下巴版)
   // ============================================
@@ -699,8 +685,15 @@ const AVATAR_VECTORS: Record<string, React.ReactNode> = {
       <path d="M20 20 L44 22 L44 24 L20 22 Z" fill="#fef08a" opacity="0.9" />
       <rect x="31" y="20.5" width="2" height="3" fill="#ca8a04" rx="0.3" />
 
-      {/* 3. 短款几何鹅蛋脸 (下沿最低点在 Y:42，下颌折角在 Y:40) */}
-      <path d="M22 24 H42 V40 Q32 46, 22 40 Z" fill="#ffe2ca" />
+      {/* 3. 短款鹅蛋脸（FD 系列统一模板：Q 弧顶 + L 下颌角 + 收尖下巴，压缩长度） */}
+      <path
+        d="M23 24 Q32 22 41 24 V36 C41 40 38 43 35 44 L32 45 L29 44 C26 43 23 40 23 36 Z"
+        fill="#ffe2ca"
+      />
+
+      {/* 3.5 颈部（脸底与衣领之间的自然过渡，破除"头插衣服"） */}
+      <path d="M28 43 V48 H36 V43 Z" fill="#ffe2ca" />
+      <path d="M29 43 Q32 45 35 43 V46 Q32 48 29 46 Z" fill="#ecd0b9" />
 
       {/* 4. 无色眼白纯粹黑曜石瞳孔 */}
       <circle cx="28" cy="32" r="1.6" fill="#1c1917" />
@@ -721,28 +714,42 @@ const AVATAR_VECTORS: Record<string, React.ReactNode> = {
       <path d="M34.5 36.5 Q35.5 39, 34 40.5" fill="none" stroke="#06b6d4" strokeWidth="0.6" strokeDasharray="1,1" opacity="0.7" />
       <path d="M37.5 36.5 Q38.5 38.5, 39 40" fill="none" stroke="#06b6d4" strokeWidth="0.6" strokeDasharray="1,1" opacity="0.5" />
 
-      {/* 7. 平静的理智抿嘴线 */}
-      <line x1="28.5" y1="38.5" x2="33.5" y2="38.5" stroke="#1c1917" strokeWidth="1.5" strokeLinecap="round" />
+      {/* 7. 平静的理智抿嘴线（下移至眼嘴合理间距） */}
+      <line x1="28.5" y1="39" x2="33.5" y2="39" stroke="#1c1917" strokeWidth="1.5" strokeLinecap="round" />
 
-      {/* 8. 立体三层服饰结构 */}
-      {/* 8a. 第一层：最内侧深色高领打底 */}
-      <path d="M26 42 L32 45 L38 42 V45 H26 Z" fill="#1c1917" />
-      
-      {/* 8b. 第二层：斜跨胸前的牛皮文献工具带 */}
-      <path d="M17 51 L26 45 L28 47 L19 53 Z" fill="#78350f" opacity="0.85" />
-      <circle cx="22" cy="49" r="0.5" fill="#f59e0b" />
+      {/* 8. 立体三层服饰结构（强化质感与流畅衔接） */}
+      {/* 8a. 第一层：最内侧深色高领打底（上移至颈部底，紧贴脸颈） */}
+      <path d="M26 48 L32 51 L38 48 V52 H26 Z" fill="#1c1917" />
+      {/* 高领高光（凸显针织质感） */}
+      <path d="M27 49 L32 51 L37 49" fill="none" stroke="#3f3f46" strokeWidth="0.5" opacity="0.7" />
 
-      {/* 8c. 第三层：风衣长袍主体 */}
-      <path d="M17 49 L32 45 L47 49 V60 H17 Z" fill="#3f6212" stroke="#f59e0b" strokeWidth="0.8" />
-      <rect x="31.2" y="45" width="1.6" height="15" fill="#1c1917" />
-      <circle cx="35" cy="50" r="0.6" fill="#f59e0b" />
-      <circle cx="35" cy="54" r="0.6" fill="#f59e0b" />
+      {/* 8b. 第二层：斜跨胸前的牛皮文献工具带（增加暗部阴影） */}
+      <path d="M17 53 L26 48 L28 50 L19 55 Z" fill="#78350f" opacity="0.9" />
+      {/* 工具带高光（皮革质感） */}
+      <path d="M18 54 L26 49.5" fill="none" stroke="#a16207" strokeWidth="0.5" opacity="0.8" />
+      <circle cx="22" cy="51" r="0.5" fill="#f59e0b" />
 
-      {/* 8d. 【核心重构】：向外、向下敞开的硬朗外翻立领 (最高点从 Y:44 大幅压低至 Y:47.5，彻底清除双下巴错觉) */}
-      {/* 左敞开立领 (起点让开中庭，直接从外侧斜向下切) */}
-      <path d="M17 49 L23 47.5 L24 53 Z" fill="#283d0b" stroke="#f59e0b" strokeWidth="0.8" strokeLinecap="round" />
+      {/* 8c. 第三层：风衣长袍主体（加深色底 + 高光层 + 描边） */}
+      <path d="M17 50 L32 46 L47 50 V60 H17 Z" fill="#3f6212" />
+      {/* 风衣右侧高光（凸显布料质感） */}
+      <path d="M33 47 L45 50 V60 H33 Z" fill="#4d7c0f" opacity="0.5" />
+      {/* 风衣左侧阴影 */}
+      <path d="M17 50 L31 46 L31 60 H17 Z" fill="#1a2e05" opacity="0.4" />
+      {/* 描边（统一外轮廓） */}
+      <path d="M17 50 L32 46 L47 50" fill="none" stroke="#f59e0b" strokeWidth="0.6" opacity="0.7" />
+      {/* 中缝拉链 */}
+      <rect x="31.2" y="46" width="1.6" height="14" fill="#1c1917" />
+      <circle cx="35" cy="51" r="0.6" fill="#f59e0b" />
+      <circle cx="35" cy="55" r="0.6" fill="#f59e0b" />
+
+      {/* 8d. 柔化外翻立领（Q 弧替代直线三角，与颈部流畅衔接） */}
+      {/* 左敞开立领 */}
+      <path d="M17 50 Q20 48 24 49 Q23 52 22 56 L17 53 Z" fill="#283d0b" stroke="#f59e0b" strokeWidth="0.6" strokeLinejoin="round" />
       {/* 右敞开立领 */}
-      <path d="M47 49 L41 47.5 L40 53 Z" fill="#283d0b" stroke="#f59e0b" strokeWidth="0.8" strokeLinecap="round" />
+      <path d="M47 50 Q44 48 40 49 Q41 52 42 56 L47 53 Z" fill="#283d0b" stroke="#f59e0b" strokeWidth="0.6" strokeLinejoin="round" />
+      {/* 立领内侧阴影（增强立体感） */}
+      <path d="M24 49 Q26 50 28 51" fill="none" stroke="#1a2e05" strokeWidth="0.5" opacity="0.6" />
+      <path d="M40 49 Q38 50 36 51" fill="none" stroke="#1a2e05" strokeWidth="0.5" opacity="0.6" />
     </g>
   ),
 
@@ -779,71 +786,6 @@ const AVATAR_VECTORS: Record<string, React.ReactNode> = {
       <path d="M30 46 Q32 45, 34 46 Q32 47, 30 46" stroke="#00f0ff" strokeWidth="0.8" fill="none" />
     </g>
   ),
-
-  // ============================================
-  // 16. FI-E-A-R: 基因织匠 · 生科所 · 项目牵头 (完整全息DNA矩阵眼镜·学术总监版)
-  // ============================================
-  // 'FI-E-A-R': (
-  //   <g>
-  //     {/* 1. 规整干净的齐短发 (科学论文 DNA 骨架深靛蓝: #1e3a8a) */}
-  //     <path d="M16 26 C16 11, 48 11, 48 26 V41 H44 V28 H20 V41 H16 Z" fill="#1e3a8a" />
-
-  //     {/* 2. 完美对齐系列比例的脸型 (下巴与头身比例保持极度舒适) */}
-  //     <path d="M22 24 H42 V44 C42 49, 22 49, 22 44 Z" fill="#fff5eb" />
-
-  //     {/* 3. 基础双眼位置 (作为全息眼镜内部的透视基准) */}
-  //     <circle cx="28" cy="32.5" r="1.6" fill="#0f172a" />
-  //     <circle cx="36" cy="32.5" r="1.6" fill="#0f172a" />
-
-  //     {/* 4. 【核心优化】：一体化高阶全息科研眼镜 (横跨面部，端庄大气) */}
-  //     {/* 4a. 完整全息透镜基底 (透亮荧光青) */}
-  //     <path d="M21 29 H43 V36 H21 Z" fill="#06b6d4" opacity="0.12" />
-  //     {/* 4b. 完整的一体化外框架线条 (绝对连贯，告别单眼补丁) */}
-  //     <path d="M21 29 H43 V36 H21 Z" fill="none" stroke="#06b6d4" strokeWidth="1" strokeLinecap="round" />
-  //     {/* 4c. 中央鼻梁连接桥 */}
-  //     <line x1="31" y1="31.5" x2="33" y2="31.5" stroke="#06b6d4" strokeWidth="1.2" />
-
-  //     {/* 4d. 左镜内部：DNA 碱基对配对梯级矩阵 (Weaving Mode) */}
-  //     {/* 碱基第1组：A-T结合链 */}
-  //     <line x1="23" y1="31" x2="25" y2="31" stroke="#06b6d4" strokeWidth="0.8" />
-  //     <line x1="25" y1="31" x2="27" y2="31" stroke="#f43f5e" strokeWidth="0.8" />
-  //     <circle cx="25" cy="31" r="0.3" fill="#ffffff" />
-  //     {/* 碱基第2组：G-C结合链 */}
-  //     <line x1="23" y1="32" x2="25.5" y2="32" stroke="#06b6d4" strokeWidth="0.8" />
-  //     <line x1="25.5" y1="32" x2="27" y2="32" stroke="#f43f5e" strokeWidth="0.8" />
-  //     <circle cx="25.5" cy="32" r="0.3" fill="#ffffff" />
-  //     {/* 碱基第3组：结合链 */}
-  //     <line x1="23" y1="33" x2="24.5" y2="33" stroke="#06b6d4" strokeWidth="0.8" />
-  //     <line x1="24.5" y1="33" x2="27" y2="33" stroke="#f43f5e" strokeWidth="0.8" />
-  //     <circle cx="24.5" cy="33" r="0.3" fill="#ffffff" />
-  //     {/* 碱基第4组：结合链 */}
-  //     <line x1="23" y1="34" x2="26" y2="34" stroke="#06b6d4" strokeWidth="0.8" />
-  //     <line x1="26" y1="34" x2="27" y2="34" stroke="#f43f5e" strokeWidth="0.8" />
-  //     <circle cx="26" cy="34" r="0.3" fill="#ffffff" />
-
-  //     {/* 4e. 右镜内部：精密基因序列锁定靶准星 (Target Lock) */}
-  //     <circle cx="36" cy="32.5" r="2.5" fill="none" stroke="#06b6d4" strokeWidth="0.6" strokeDasharray="1,1" />
-  //     <line x1="33" y1="32.5" x2="39" y2="32.5" stroke="#f43f5e" strokeWidth="0.6" opacity="0.8" />
-  //     <line x1="36" y1="29.5" x2="36" y2="35.5" stroke="#06b6d4" strokeWidth="0.6" opacity="0.8" />
-  //     {/* 核心微米级锁定发光点 */}
-  //     <circle cx="36" cy="32.5" r="0.5" fill="#f43f5e" />
-
-  //     {/* 5. 平静、从容的沉稳小嘴 (位置与系列完美对齐，展现项目总监的理智) */}
-  //     <line x1="28.5" y1="39.5" x2="33.5" y2="39.5" stroke="#0f172a" strokeWidth="1.5" strokeLinecap="round" />
-
-  //     {/* 6. 颈部：生科所高阶项目牵头人·教科书级双螺旋数据锁 */}
-  //     <path d="M30 45 Q32 44, 34 45 Q32 46, 30 45" stroke="#06b6d4" strokeWidth="0.8" fill="none" />
-  //     <path d="M30 46 Q32 45, 34 46 Q32 47, 30 46" stroke="#f43f5e" strokeWidth="0.8" fill="none" />
-
-  //     {/* 7. 服饰：生科所高级无菌防护大褂 (纯白无菌袍身 + 纳米灰硬朗翻领) */}
-  //     <path d="M17 50 L32 46 L47 50 V60 H17 Z" fill="#ffffff" />
-  //     <rect x="27" y="47" width="10" height="13" rx="0.5" fill="#e2e8f0" />
-      
-  //     {/* 专属细节：悬浮在防护服两侧的高阶粒子数据流 (与经典的 DNA 碱基学术色呼应) */}
-  //     <circle cx="21" cy="54" r="0.8" fill="#06b6d4" opacity="0.8" />
-  //     <circle cx="43" cy="55" r="0.6" fill="#f43f5e" opacity="0.8" />
-  //   </g>
-  // ),
 
 
   // ============================================

@@ -10,7 +10,9 @@
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
-    "tune:compatibility": "tsx scripts/compatibility-tuning.ts"
+    "tune:compatibility": "tsx scripts/compatibility-tuning.ts",
+    "export:analytics": "tsx scripts/export-analytics.ts",
+    "analyze:questions": "tsx scripts/question-analysis.ts"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",

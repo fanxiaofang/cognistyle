@@ -8,63 +8,6 @@ interface PatternBadgeIconProps {
 }
 
 const ICONS: Record<CompatibilityPairPattern, React.ReactNode> = {
-  // homogeneous: (
-  //   <g>
-  //     {/* Background cyber grid lines */}
-  //     <line x1="32" y1="12" x2="32" y2="52" stroke="#00f0ff" strokeWidth="1" strokeDasharray="3 3" opacity="0.3" />
-  //     <line x1="12" y1="32" x2="52" y2="32" stroke="#00f0ff" strokeWidth="1" strokeDasharray="3 3" opacity="0.15" />
-
-  //     {/* Brain connection wire / data bridge */}
-  //     <path d="M23 20 V16 H41 V20" fill="none" stroke="#00f0ff" strokeWidth="1.5" strokeDasharray="2 2" opacity="0.8" />
-  //     <polygon points="32,13 35,16 32,19 29,16" fill="#00f0ff" />
-  //     <circle cx="23" cy="20" r="1.5" fill="#00f0ff" />
-  //     <circle cx="41" cy="20" r="1.5" fill="#00f0ff" />
-
-  //     {/* Cyber scan lines or bars */}
-  //     <rect x="20" y="47" width="24" height="2" fill="#00f0ff" opacity="0.3" />
-  //     <rect x="24" y="51" width="16" height="1.5" fill="#00f0ff" opacity="0.2" />
-
-  //     {/* Twin Face A (Left) */}
-  //     <g>
-  //       {/* Hair: Cyan */}
-  //       <rect x="14" y="20" width="14" height="6" fill="#00f0ff" />
-  //       <rect x="14" y="26" width="4" height="8" fill="#00f0ff" />
-  //       {/* Face skin */}
-  //       <rect x="18" y="26" width="10" height="10" fill="#ffe2ca" />
-  //       {/* Eyes (looking forward/center) */}
-  //       <rect x="20" y="29" width="2" height="2" fill="#1e293b" />
-  //       <rect x="24" y="29" width="2" height="2" fill="#1e293b" />
-  //       {/* Blush */}
-  //       <rect x="19" y="32" width="2" height="1" fill="#ff007f" opacity="0.5" />
-  //       <rect x="25" y="32" width="2" height="1" fill="#ff007f" opacity="0.5" />
-  //       {/* Smile */}
-  //       <line x1="22" y1="34" x2="24" y2="34" stroke="#ff007f" strokeWidth="1" />
-  //       {/* Clothes */}
-  //       <path d="M14 38 L28 38 V44 H14 Z" fill="#005fbc" />
-  //       <line x1="16" y1="38" x2="26" y2="38" stroke="#00f0ff" strokeWidth="1" />
-  //     </g>
-
-  //     {/* Twin Face B (Right) */}
-  //     <g>
-  //       {/* Hair: Cyan */}
-  //       <rect x="36" y="20" width="14" height="6" fill="#00f0ff" />
-  //       <rect x="46" y="26" width="4" height="8" fill="#00f0ff" />
-  //       {/* Face skin */}
-  //       <rect x="36" y="26" width="10" height="10" fill="#ffe2ca" />
-  //       {/* Eyes (looking forward/center) */}
-  //       <rect x="38" y="29" width="2" height="2" fill="#1e293b" />
-  //       <rect x="42" y="29" width="2" height="2" fill="#1e293b" />
-  //       {/* Blush */}
-  //       <rect x="37" y="32" width="2" height="1" fill="#ff007f" opacity="0.5" />
-  //       <rect x="43" y="32" width="2" height="1" fill="#ff007f" opacity="0.5" />
-  //       {/* Smile */}
-  //       <line x1="40" y1="34" x2="42" y2="34" stroke="#ff007f" strokeWidth="1" />
-  //       {/* Clothes */}
-  //       <path d="M36 38 L50 38 V44 H36 Z" fill="#005fbc" />
-  //       <line x1="38" y1="38" x2="48" y2="38" stroke="#00f0ff" strokeWidth="1" />
-  //     </g>
-  //   </g>
-  // ),
   homogeneous: (
     <g>
       {/* 赛博网格底衬 */}
