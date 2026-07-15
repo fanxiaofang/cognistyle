@@ -7,7 +7,8 @@ import { getSnapshotKv, json } from './shared/api-utils.js';
 // 返回：{ records: [...], cursor: <base64>|null, count: number }
 
 const DEFAULT_PAGE_LIMIT = 100;
-const MAX_PAGE_LIMIT = 1000;
+// EdgeOne KV list 上限为 256，Cloudflare KV 为 1000，取较小值保证双平台兼容
+const MAX_PAGE_LIMIT = 256;
 
 function isAuthenticated(request, env) {
   const secret = env.ANALYTICS_EXPORT_SECRET;
@@ -66,8 +67,11 @@ export async function onRequest(context) {
     const listResult = await kv.list(listArgs);
 
     const records = [];
-    for (const key of listResult.keys || []) {
-      const raw = await kv.get(key.name);
+    // EdgeOne KV 的 ListKey 字段名为 `key`，Cloudflare KV 为 `name`，兼容两者
+    for (const k of listResult.keys || []) {
+      const keyName = k.key || k.name;
+      if (!keyName) continue;
+      const raw = await kv.get(keyName);
       if (!raw) continue;
       try {
         const parsed = JSON.parse(raw);
@@ -77,10 +81,12 @@ export async function onRequest(context) {
       }
     }
 
+    // EdgeOne KV 完成标记为 `complete`，Cloudflare KV 为 `list_complete`，兼容两者
+    const isComplete = listResult.complete ?? listResult.list_complete;
     return json(
       {
         records,
-        cursor: listResult.list_complete ? null : listResult.cursor,
+        cursor: isComplete ? null : listResult.cursor,
         count: records.length,
         prefix,
       },
