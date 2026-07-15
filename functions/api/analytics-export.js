@@ -52,14 +52,18 @@ export async function onRequest(context) {
   }
 
   const url = new URL(request.url);
-  const cursor = url.searchParams.get('cursor') || undefined;
+  const cursorRaw = url.searchParams.get('cursor');
   const limitRaw = parseInt(url.searchParams.get('limit') || String(DEFAULT_PAGE_LIMIT), 10);
   const limit = Math.min(Math.max(1, limitRaw), MAX_PAGE_LIMIT);
 
   try {
     // KV list 返回 { keys: [{ name, expiration, metadata }], list_complete, cursor }
+    // 注意：EdgeOne KV 的 cursor 字段严格要求 string，undefined 会触发类型校验错误
+    // 因此首屏查询（无 cursor）时不传该字段，仅在有游标时传入
     const prefix = KV_KEY_PREFIXES.ANALYTICS.SINGLE;
-    const listResult = await kv.list({ prefix, limit, cursor });
+    const listArgs = { prefix, limit };
+    if (cursorRaw) listArgs.cursor = cursorRaw;
+    const listResult = await kv.list(listArgs);
 
     const records = [];
     for (const key of listResult.keys || []) {
